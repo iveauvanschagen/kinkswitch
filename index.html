@@ -11,6 +11,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>KINK Switch</title>
 <style>
+@font-face{font-family:'Archivo Black';src:url(archivo-black.woff2) format('woff2');font-weight:400;font-display:swap}
 :root{color-scheme:dark;
   --bg:#07080a;--panel:#111318;--panel2:#171a21;--line:#262a33;
   --text:#f5f6f8;--muted:#8b919c;
@@ -30,10 +31,14 @@ svg{display:block}
 /* Bovenbalk */
 .top{grid-area:top;display:flex;align-items:center;justify-content:space-between;padding:2px 4px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.14em;font-size:14px;white-space:nowrap}
-@media (max-width:440px){.brand{font-size:12px;letter-spacing:.1em}.clock{font-size:24px}.silly{font-size:11px;padding:0 10px}}
+@media (max-width:440px){.top{gap:8px}.top .right{gap:8px}.brand{gap:8px}.brand .wm{font-size:13px!important}.brand svg{width:26px!important;height:26px!important}.silly{font-size:10px!important;padding:0 9px!important;min-height:34px}.clock{font-size:20px!important}.brand{font-size:12px;letter-spacing:.1em}.clock{font-size:24px}.silly{font-size:11px;padding:0 10px}}
 .top .right{display:flex;align-items:center;gap:12px}
 .silly{white-space:nowrap;min-height:40px;padding:0 12px;border-radius:99px;background:#2a1414;border:1px solid var(--hot);color:#ffb3ad;font-weight:900;font-size:12px;letter-spacing:.08em}
 .silly:active{background:var(--hot);color:#fff}
+.brand svg{width:34px;height:34px;flex:none}
+.brand .wm{font-family:'Archivo Black',system-ui,sans-serif;font-size:19px;letter-spacing:.01em;line-height:1}
+.brand .wm span{color:var(--kink)}
+.src .name{font-family:'Archivo Black',system-ui,sans-serif;font-weight:400!important}
 .brand i{width:10px;height:10px;border-radius:50%;background:var(--kink);box-shadow:0 0 12px var(--kink)}
 .clock{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em}
 
@@ -61,13 +66,25 @@ svg{display:block}
 .src:focus{outline:none}
 .src .ico{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:#22262e}
 .src .ico svg{width:30px;height:30px}
-.src .name{display:block;font-size:clamp(26px,7vw,40px);font-weight:950;letter-spacing:-.01em;line-height:1}
+.src .name{display:block;font-size:clamp(24px,6.4vw,36px);font-weight:950;letter-spacing:-.01em;line-height:1}
 .src .meta{display:block;font-size:14px;color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .src .np{display:block;margin-top:8px;min-width:0}
 .src .np em{display:block;font-style:normal;font-size:11px;font-weight:900;letter-spacing:.14em;opacity:.6}
 .src .np strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:clamp(24px,7.4vw,34px);font-weight:900;line-height:1.08;overflow:hidden;margin-top:2px;letter-spacing:-.01em}
 .src .np span{display:block;font-size:clamp(17px,5vw,22px);font-weight:700;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
 .gtag{display:inline-block;margin-left:8px;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:900;letter-spacing:.1em;vertical-align:2px;background:var(--hot);color:#fff}
+.tile{position:relative;display:grid;min-height:0}
+.tile>.src{min-height:0}
+.tile .src .tag{left:88px;right:auto;width:max-content;top:30px}
+.favbtn{position:absolute;top:16px;right:16px;min-height:48px;min-width:140px;padding:0 22px;border-radius:99px;font-weight:900;font-size:14px;
+  background:#22262e;color:var(--text);border:1px solid var(--line);z-index:2}
+.tile:has(.src.active) .favbtn{background:#0000002e;border-color:#0000001f}
+.tile:has(.src.kink.active) .favbtn{color:var(--kink-ink)}
+.tile:has(.src.spot.active) .favbtn{color:var(--spot-ink)}
+.favbtn.on,.tile:has(.src.active) .favbtn.on{background:var(--hot);border-color:var(--hot);color:#fff}
+.favbtn[hidden]{display:none}
+.src .np strong span{display:inline;font-size:inherit;font-weight:inherit;opacity:1;margin:0;white-space:normal}
+.src .np strong .gtag{font-size:11px;vertical-align:6px}
 .src .np .gtag{display:inline-block;opacity:1;font-size:11px}
 .src .np #kinkArtist{display:inline}
 .src .np .gtag:empty{display:none}
@@ -104,7 +121,8 @@ svg{display:block}
 @media (orientation:landscape) and (min-width:640px){
   .sources{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr)}
   .src .name{font-size:clamp(24px,3.6vw,40px)}
-  .src .np strong{font-size:clamp(22px,3.4vw,34px)}
+  .src .np strong{font-size:clamp(28px,4vw,52px)}
+  .src .np>span{font-size:clamp(18px,2vw,26px)}
   .app{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);grid-template-rows:auto auto 1fr auto;
     grid-template-areas:"top top" "sources banner" "sources controls" "foot foot"}
   .banner{flex-wrap:wrap;align-content:center}
@@ -151,7 +169,7 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 <body>
 <div class="app">
   <header class="top">
-    <div class="brand"><i></i>KINK SWITCH</div>
+    <div class="brand"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#171a21"/><g fill="none" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M120 196h220" stroke="#d9ff42"/><path d="M300 146l52 50-52 50" stroke="#d9ff42"/><path d="M392 316H172" stroke="#1ed760"/><path d="M212 266l-52 50 52 50" stroke="#1ed760"/></g></svg><div class="wm">KINK <span>SWITCH</span></div></div>
     <div class="right"><button class="silly" id="silly" aria-label="Don't be silly afspelen">DON'T BE SILLY</button><div class="clock" id="clock">--:--</div></div>
   </header>
 
@@ -162,16 +180,18 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
   </section>
 
   <section class="sources">
-    <button class="src kink active" id="kinkMode" aria-label="KINK live">
+    <div class="tile"><button class="src kink active" id="kinkMode" aria-label="KINK live">
       <span class="tag" id="state">UIT</span>
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1a10 10 0 0 1 0-14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/><circle cx="12" cy="12" r="2"/></svg></span>
-      <span style="min-width:0"><span class="name">KINK</span><span class="np"><em>NU OP KINK</em><strong id="kinkSong">Live radio</strong><span><span id="kinkArtist"></span><span class="gtag" id="kinkGenre"></span></span></span></span>
+      <span style="min-width:0"><span class="name">KINK</span><span class="np"><em>NU OP KINK</em><strong><span id="kinkArtist">Live radio</span><span class="gtag" id="kinkGenre"></span></strong><span id="kinkSong"></span></span></span>
     </button>
-    <button class="src spot" id="spotifyMode" aria-label="Spotify">
+    <button class="favbtn" id="kinkFav" hidden>+ Favoriet</button></div>
+    <div class="tile"><button class="src spot" id="spotifyMode" aria-label="Spotify">
       <span class="tag" id="spotTag">PLAYLIST</span>
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-      <span style="min-width:0"><span class="name">Spotify</span><span class="np"><em id="spotLabel">PLAYLIST</em><strong id="spotSong">Kies een playlist</strong><span id="spotArtist"></span></span></span>
+      <span style="min-width:0"><span class="name">Spotify</span><span class="np"><em id="spotLabel">PLAYLIST</em><strong id="spotArtist">Kies een playlist</strong><span id="spotSong"></span></span></span>
     </button>
+    <button class="favbtn" id="spotFav" hidden>+ Favoriet</button></div>
   </section>
 
   <section class="controls">
@@ -210,6 +230,13 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
     <label for="genres">Genres (met komma's)</label>
     <input id="genres" placeholder="metal, hard rock" autocomplete="off">
   </details>
+  <h3>NIET MIJN MUZIEK</h3>
+  <p>Draait KINK een van deze artiesten, dan schakelt de app meteen naar Spotify. Bij het volgende nummer gaat hij terug.</p>
+  <div><small style="color:var(--muted);font-weight:800">IVO'S SUGGESTIES</small></div>
+  <div class="chips" id="banSugChips"></div>
+  <div style="margin-top:14px"><small style="color:var(--muted);font-weight:800">MIJN LIJST</small></div>
+  <div class="chips" id="banChips"></div>
+  <div class="addrow"><input id="newBan" placeholder="Artiest toevoegen" autocomplete="off"><button class="btn" id="addBan">Toevoegen</button></div>
   <div class="actions">
     <button class="btn primary" id="saveSettings">Opslaan</button>
     <button class="btn" id="closeSettings">Sluiten</button>
@@ -290,11 +317,14 @@ function tick(){
     const fresh=metaFresh(now),d=delayMs();
     if(autoAway){
       if(mode!=='spotify')setAway(0);
-      else if(fresh&&!kinkNow.isBreak&&kinkNow.title&&now>=kinkNow.start+d)autoToKink('Weer muziek op KINK: '+kinkNow.title);
+      else if(fresh&&!kinkNow.isBreak&&kinkNow.title&&!isBanned(kinkNow.artist)&&now>=kinkNow.start+d)autoToKink('Weer muziek op KINK: '+(kinkNow.artist?kinkNow.artist+' - ':'')+kinkNow.title);
       else if(now-autoAway>MAX_AWAY)autoToKink('Terug naar KINK (na 10 minuten)');
     }else if(auto&&mode==='kink'&&!radio.paused&&fresh&&kinkNow.isBreak&&kinkNow.breakStart!==handledBreak
       &&now>=kinkNow.breakStart+d&&now-kinkNow.breakStart<5*60000){
       autoToSpotify(kinkNow.breakStart);
+    }else if(mode==='kink'&&!radio.paused&&fresh&&!kinkNow.isBreak&&kinkNow.title&&isBanned(kinkNow.artist)
+      &&banHandled!==kinkNow.artist+kinkNow.title&&now>=kinkNow.start+d){
+      banToSpotify(kinkNow.artist+kinkNow.title,kinkNow.artist);
     }
   }
   renderAd(now);
@@ -345,7 +375,7 @@ async function pollMeta(){
     }
     kinkNow={...last,isBreak:!!breakStart,breakStart,at:Date.now()};metaFails=0;
     showKink();
-  }catch(e){metaFails++;if(metaFails===1){$('kinkSong').textContent='Live radio';$('kinkArtist').textContent=''}}
+  }catch(e){metaFails++;if(metaFails===1){$('kinkArtist').textContent='Live radio';$('kinkSong').textContent='';renderFavBtns()}}
 }
 
 // Slim kijken: KINK geeft de lengte van elk item mee. Rond het verwachte einde kijken we elke 3 seconden,
@@ -388,6 +418,7 @@ async function startKink(fromAuto){
     setAway(0);
     // Zelf KINK gekozen tijdens een blok: dit blok niet meer automatisch overslaan
     if(kinkNow?.isBreak)setHandled(kinkNow.breakStart);
+    if(kinkNow?.title)banHandled=kinkNow.artist+kinkNow.title;
   }
   if(hasLogin()){try{await api('/me/player/pause','PUT')}catch(e){}}
   try{
@@ -513,15 +544,15 @@ async function next(){try{await api('/me/player/next','POST');setMode('spotify')
 /* ---------- Instellingen ---------- */
 function settings(){
   $('genres').value=genreList().join(', ');$('genreSwitch').checked=ls('ks_genreSwitch')!=='0';$('useGenre').checked=ls('ks_useGenre')==='1';
-  $('delay').value=delayMs()/1000;draftFavs=favList();renderChips();
+  $('delay').value=delayMs()/1000;draftFavs=favList();renderChips();draftBans=banList();renderBanChips();
   $('clientId').value=ls('ks_client')||'';
   $('wake').checked=ls('ks_wake')==='1';
   $('redirectUri').value=location.protocol==='file:'?'Niet beschikbaar bij een lokaal bestand':REDIRECT;
   $('modal').classList.add('show');
 }
 function saveFields(){
-  ls('ks_genres',$('genres').value.trim()||DEFAULT_GENRES);ls('ks_favArtists',draftFavs.join('|'));ls('ks_genreSwitch',$('genreSwitch').checked?'1':'0');ls('ks_useGenre',$('useGenre').checked?'1':'0');
-  ls('ks_delay',String($('delay').value===''?8:$('delay').value));lastGenreKey='';showKink();
+  ls('ks_genres',$('genres').value.trim()||DEFAULT_GENRES);ls('ks_favArtists',draftFavs.join('|'));ls('ks_banArtists',draftBans.join('|'));ls('ks_genreSwitch',$('genreSwitch').checked?'1':'0');ls('ks_useGenre',$('useGenre').checked?'1':'0');
+  ls('ks_delay',String($('delay').value===''?8:$('delay').value));lastGenreKey='';showKink();renderFavBtns();
   ls('ks_client',$('clientId').value.trim());
   ls('ks_wake',$('wake').checked?'1':'0');
   if($('wake').checked)keepAwake();else if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null}
@@ -548,8 +579,8 @@ let lastKinkSong='';
 function showKink(){
   if(!kinkNow)return;
   updateMediaInfo();
-  if(kinkNow.isBreak||!kinkNow.title){$('kinkSong').textContent=kinkNow.isBreak?'Reclame of nieuws':'Presentator of jingle';$('kinkArtist').textContent='';$('kinkGenre').textContent='';$('kinkMode').classList.remove('fav');lastGenreKey='';return}
-  $('kinkSong').textContent=kinkNow.title;$('kinkArtist').textContent=kinkNow.artist||'';
+  if(kinkNow.isBreak||!kinkNow.title){$('kinkArtist').textContent=kinkNow.isBreak?'Reclame of nieuws':'Presentator of jingle';$('kinkSong').textContent='';renderFavBtns();$('kinkGenre').textContent='';$('kinkMode').classList.remove('fav');lastGenreKey='';return}
+  $('kinkArtist').textContent=kinkNow.artist||kinkNow.title;$('kinkSong').textContent=kinkNow.artist?kinkNow.title:'';renderFavBtns();
   const key=kinkNow.artist+kinkNow.title;
   if(key!==lastGenreKey){lastGenreKey=key;checkGenre(kinkNow.artist,key)}
   // Nieuw nummer op KINK terwijl je naar Spotify luistert: tegel licht even op
@@ -559,6 +590,7 @@ function showKink(){
 /* ---------- Jouw artiesten ---------- */
 const SUGGESTIONS=['Foo Fighters','Turnstile','Rage Against The Machine','System of a Down','Muse'];
 let draftFavs=[];
+function saveFavs(list){ls('ks_favArtists',list.join('|'))}
 function favList(){
   const v=ls('ks_favArtists');
   if(v===null)return [...SUGGESTIONS]; // eerste keer: Ivo's suggesties staan aan
@@ -586,6 +618,56 @@ function addArtist(){
 }
 $('addArtist').onclick=addArtist;
 $('newArtist').onkeydown=e=>{if(e.key==='Enter')addArtist()};
+
+/* ---------- Favoriet met één tik ---------- */
+function toggleFav(artist){
+  if(!artist)return;
+  const list=favList(),n=norm(artist),has=list.some(f=>norm(f)===n);
+  saveFavs(has?list.filter(f=>norm(f)!==n):[...list,artist]);
+  msg(has?artist+' uit je favorieten gehaald':artist+' toegevoegd aan je favorieten');
+  lastGenreKey='';showKink();renderFavBtns();
+}
+function renderFavBtns(){
+  const kb=$('kinkFav'),sb=$('spotFav');
+  const ka=kinkNow&&!kinkNow.isBreak&&kinkNow.title&&kinkNow.artist?mainArtist(kinkNow.artist):'';
+  kb.hidden=!ka;if(ka){const on=isFav(ka);kb.textContent=on?'★ Favoriet':'+ Favoriet';kb.classList.toggle('on',on)}
+  const sa=mode==='spotify'&&spotNow?spotNow.main:'';
+  sb.hidden=!sa;if(sa){const on=isFav(sa);sb.textContent=on?'★ Favoriet':'+ Favoriet';sb.classList.toggle('on',on)}
+}
+$('kinkFav').onclick=e=>{e.stopPropagation();if(kinkNow?.artist)toggleFav(mainArtist(kinkNow.artist))};
+$('spotFav').onclick=e=>{e.stopPropagation();if(spotNow?.main)toggleFav(spotNow.main)};
+
+/* ---------- Niet mijn muziek: banlijst ---------- */
+const BAN_SUGGESTIONS=['The Killers'];
+let draftBans=[],banHandled='';
+function banList(){
+  const v=ls('ks_banArtists');
+  if(v===null)return [...BAN_SUGGESTIONS];
+  return v.split('|').map(x=>x.trim()).filter(Boolean);
+}
+function isBanned(artist){const a=' '+norm(artist)+' ';return banList().some(f=>{const n=norm(f);return n&&a.includes(' '+n+' ')})}
+function renderBanChips(){
+  const sug=$('banSugChips'),mine=$('banChips');sug.innerHTML='';mine.innerHTML='';
+  const has=n=>draftBans.some(f=>norm(f)===norm(n));
+  BAN_SUGGESTIONS.forEach(n=>sug.appendChild(chip(n,has(n),()=>{draftBans=has(n)?draftBans.filter(f=>norm(f)!==norm(n)):[...draftBans,n];renderBanChips()})));
+  draftBans.filter(n=>!BAN_SUGGESTIONS.some(x=>norm(x)===norm(n))).forEach(n=>mine.appendChild(chip(n,true,()=>{draftBans=draftBans.filter(f=>norm(f)!==norm(n));renderBanChips()},true)));
+  if(!mine.children.length)mine.innerHTML='<small style="color:var(--muted)">Voeg hieronder artiesten toe</small>';
+}
+function addBan(){
+  const n=$('newBan').value.trim();if(!n)return;
+  if(!draftBans.some(f=>norm(f)===norm(n)))draftBans.push(n);
+  $('newBan').value='';renderBanChips();
+}
+$('addBan').onclick=addBan;
+$('newBan').onkeydown=e=>{if(e.key==='Enter')addBan()};
+async function banToSpotify(key,artist){
+  banHandled=key;
+  if(!hasLogin())return;
+  busy=true;
+  try{await playList();setAway(Date.now());msg(artist+' op KINK: even naar Spotify.')}
+  catch(e){msg('Wisselen mislukt: '+e.message,true)}
+  busy=false;
+}
 
 /* ---------- Don't be silly ---------- */
 async function silly(){
@@ -648,15 +730,15 @@ async function pollSpotify(){
     const p=await api('/me/player');const it=p?.item;
     if(!it)return renderSpotIdle();
     $('spotLabel').textContent=p.is_playing?'NU OP SPOTIFY':'GEPAUZEERD';
-    $('spotSong').textContent=it.name;$('spotArtist').textContent=(it.artists||[]).map(a=>a.name).join(', ');
-    spotNow={title:it.name,artist:(it.artists||[]).map(a=>a.name).join(', ')};updateMediaInfo();
+    $('spotArtist').textContent=(it.artists||[]).map(a=>a.name).join(', ');$('spotSong').textContent=it.name;
+    spotNow={title:it.name,artist:(it.artists||[]).map(a=>a.name).join(', '),main:(it.artists||[])[0]?.name||''};updateMediaInfo();renderFavBtns();
   }catch(e){}
 }
 function renderSpotIdle(){
   if(mode==='spotify')return;
   $('spotLabel').textContent='PLAYLIST';
-  $('spotSong').textContent=ls('ks_playlistName')||(ls('ks_playlist')?'Je playlist':'Kies een playlist');
-  $('spotArtist').textContent='';
+  $('spotArtist').textContent=ls('ks_playlistName')||(ls('ks_playlist')?'Je playlist':'Kies een playlist');
+  $('spotSong').textContent='';spotNow=null;renderFavBtns();
 }
 
 /* ---------- Playlist kiezen ---------- */

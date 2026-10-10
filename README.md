@@ -1,53 +1,58 @@
 # KINK Switch
 
-Schakel in de auto met grote knoppen tussen KINK live en je eigen Spotify-playlist.
+**Never sit through another ad break again.**
 
-## Online zetten met GitHub Pages
+You love KINK. The DJs, the deep cuts, that one song you forgot you needed. What you don't love: the commercials, the news on the hour and the occasional band that makes you reach for the dial.
 
-1. Maak op github.com een nieuwe publieke repository, bijvoorbeeld `kinkswitch`.
-2. Kies "uploading an existing file" en sleep alle bestanden uit deze map erin. Klik op Commit changes.
-3. Ga naar Settings > Pages. Kies bij Source "Deploy from a branch", branch `main`, map `/ (root)`. Opslaan.
-4. Na een minuut staat de app op `https://iveauvanschagen.github.io/kinkswitch/`.
+KINK Switch fixes that. It listens to KINK for you, jumps to your own Spotify playlist the second the ads kick in and brings you straight back when the music returns. Big buttons, zero fiddling, built for the car.
 
-## Spotify koppelen
+Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 
-1. Open https://developer.spotify.com/dashboard en open je app (of maak er een).
-2. Zet bij Redirect URIs exact: `https://iveauvanschagen.github.io/kinkswitch/` (met de slash aan het eind).
-3. Vink bij "Which API/SDKs are you planning to use" Web API aan.
-4. Ga naar User Management en voeg het e-mailadres van je eigen Spotify-account toe.
-5. Open de app op je telefoon, tik Instellingen, vul Client ID en playlistlink in en tik Koppel Spotify.
+## Why you want this
 
-Spotify Premium is vereist. Open de Spotify-app op je telefoon één keer voordat je in KINK Switch op Spotify drukt.
+- **No more ads or news.** The app hears the break coming and switches for you.
+- **Never miss your bands.** When KINK plays one of your favourites, the app pulls you back, even if you were on Spotify.
+- **Skip what you can't stand.** Put a band on your skip list and the app is gone before the chorus.
+- **Safe in the car.** Huge tiles and buttons you can hit without looking twice. Everything fiddly lives in settings.
+- **Free and private.** No accounts, no tracking, no backend. It runs in your browser and talks only to KINK and Spotify.
 
-## Op je startscherm
+## How it works
 
-Open de app in Chrome op Android, tik op het menu met de drie puntjes en kies "Toevoegen aan startscherm" of "App installeren".
+1. **KINK tells us what's on.** KINK publishes live now playing data: artist, title, length and a marker when an ad break starts. The app reads it every 15 seconds, every 3 seconds near the end of a song and every 5 seconds during a break.
+2. **Spotify does the playing.** Using the Spotify Web API, the app tells your Spotify app (phone or computer) what to play, pause or skip. Your music keeps playing in Spotify itself.
+3. **The app decides when to switch.** An ad marker or a long item without a title (news, commercials) means a break: off to Spotify. A real song with a title means music is back: return to KINK. Short jingles and DJ talk are ignored.
 
-## Automatisch wisselen
+## Get started
 
-De app leest de now playing-gegevens van KINK: normaal elke 15 seconden, rond het einde van een nummer elke 3 seconden en tijdens een reclameblok elke 5 seconden. Meldt KINK reclame, of draait er een item zonder titel van 45 seconden of langer (nieuws, reclame), dan schakelt de app naar Spotify. Zodra KINK weer een nummer met titel draait, gaat hij terug. Korte jingles en de presentator tellen niet mee. Een vangnet zorgt dat hij na 10 minuten altijd teruggaat. De vertraging van de stream (standaard 8 seconden) stel je in onder "Spotify koppelen".
+1. **Put it online.** Upload these files to a public GitHub repository and enable GitHub Pages (branch `main`, folder `/ (root)`).
+2. **Create a Spotify app.** Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), create an app, tick Web API and add your exact Pages URL as Redirect URI, slash included: `https://iveauvanschagen.github.io/kinkswitch/`
+3. **Add yourself.** Under User Management, add the email address of your Spotify account. Spotify Premium is required (up to five users in Development Mode).
+4. **Connect.** Open the app, tap the gear, open "Spotify koppelen", paste your Client ID and tap Koppel Spotify.
+5. **Pick a playlist.** Tap Playlist and choose one, paste a Spotify link or share a playlist to KINK Switch straight from the Spotify app.
+6. **Install it.** In Chrome on Android, open the menu and choose "Add to Home screen" or "Install app".
 
-## Don't be silly
+Tip: open the Spotify app once before your first switch. The app can only control a Spotify player that is running.
 
-De knop bovenin speelt Wodan Boys - Don't be Silly af op Spotify.
+## Features
 
-## Playlist kiezen
+- **Auto switch.** Ads or news on KINK? Spotify. Music back? KINK. Hands free.
+- **Live now playing.** Artist big, song title below, on both tiles. Also shown in the page title and the Android media notification.
+- **Favourites.** Tap "+ Favoriet" on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
+- **Skip list.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song.
+- **Don't be silly.** The panic button. One tap and Wodan Boys - Don't be Silly blasts through Spotify.
+- **Playlist picker.** Your own playlists with covers, a paste button for any link or share directly from Spotify.
+- **Smart Spotify resume.** Switching back to Spotify continues your playlist where you left it.
+- **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
+- **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
+- **Share with friends.** Copy a setup link from settings so a friend only has to tap Connect.
+- **Genre matching (optional).** Look up each KINK artist's genre on Spotify and match it to yours. Off by default.
 
-Tik op Playlist en kies er een uit je eigen lijst. Een andere playlist kan ook: kopieer de link in de Spotify-app via Delen en tik op "Plak gekopieerde Spotify-link". Staat de app op je startscherm, dan kun je in Spotify ook op Delen tikken en KINK Switch kiezen.
+## Good to know
 
-## Iemand anders laten meedoen
+- **Keep it on screen.** In the background the browser slows the app down, so it can't keep an eye on KINK while Spotify plays. In the car holder with "Scherm aan houden" on, it works best.
+- **Data use.** The app itself uses about 1 to 2 MB per hour. The KINK stream is roughly 86 MB per hour; Spotify depends on your quality setting.
+- **Stream delay.** The app waits 8 seconds after a KINK marker so you don't lose the end of a song. You can tune this in settings.
 
-Voeg diegene toe onder User Management in het Spotify-dashboard (maximaal vijf personen, Premium vereist). Kopieer daarna bij het tandwiel, onder "Spotify koppelen", de koppellink en stuur die door. Openen en op Koppel Spotify tikken is genoeg.
+## Credits
 
-## Jouw artiesten
-
-Bij het tandwiel staan Ivo's suggesties als knoppen die je aan of uit tikt, plus je eigen lijst. Draait KINK een van die artiesten, dan licht de KINK-tegel rood op en gaat de app (als je dat aanzet) terug naar KINK. Zoeken op genre kan ook, maar staat standaard uit.
-
-
-## Titel en melding
-
-De titel van de pagina en de mediamelding op Android tonen het nummer en de artiest die nu spelen.
-
-## Goed om te weten
-
-Laat de app in beeld staan (in de houder, met Scherm aan houden). Op de achtergrond remt de browser de app af en kijkt hij niet mee terwijl Spotify speelt.
+Logo and wordmark set in Archivo Black (SIL Open Font License), included as `archivo-black.woff2`. Not affiliated with KINK or Spotify.
