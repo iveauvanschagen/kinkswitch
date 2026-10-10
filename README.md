@@ -4,15 +4,15 @@ Schakel in de auto met grote knoppen tussen KINK live en je eigen Spotify-playli
 
 ## Online zetten met GitHub Pages
 
-1. Maak op github.com een nieuwe publieke repository, bijvoorbeeld `kink-switch`.
+1. Maak op github.com een nieuwe publieke repository, bijvoorbeeld `kinkswitch`.
 2. Kies "uploading an existing file" en sleep alle bestanden uit deze map erin. Klik op Commit changes.
 3. Ga naar Settings > Pages. Kies bij Source "Deploy from a branch", branch `main`, map `/ (root)`. Opslaan.
-4. Na een minuut staat de app op `https://<jouw-gebruikersnaam>.github.io/kink-switch/`.
+4. Na een minuut staat de app op `https://iveauvanschagen.github.io/kinkswitch/`.
 
 ## Spotify koppelen
 
 1. Open https://developer.spotify.com/dashboard en open je app (of maak er een).
-2. Zet bij Redirect URIs exact: `https://<jouw-gebruikersnaam>.github.io/kink-switch/` (met de slash aan het eind).
+2. Zet bij Redirect URIs exact: `https://iveauvanschagen.github.io/kinkswitch/` (met de slash aan het eind).
 3. Vink bij "Which API/SDKs are you planning to use" Web API aan.
 4. Ga naar User Management en voeg het e-mailadres van je eigen Spotify-account toe.
 5. Open de app op je telefoon, tik Instellingen, vul Client ID en playlistlink in en tik Koppel Spotify.
@@ -22,3 +22,9 @@ Spotify Premium is vereist. Open de Spotify-app op je telefoon één keer voorda
 ## Op je startscherm
 
 Open de app in Chrome op Android, tik op het menu met de drie puntjes en kies "Toevoegen aan startscherm" of "App installeren".
+
+## Automatisch wisselen
+
+Rond :28 en :58 begint op KINK vaak reclame of nieuws. Staat Auto aan en speelt KINK, dan wisselt de app op die minuten zelf naar Spotify en na de ingestelde duur (standaard 5 minuten) weer terug naar KINK. Wisseltijden en duur pas je aan bij Instellingen. Kies je zelf een bron tijdens een blok, dan respecteert de app dat.
+
+Het werkt het betrouwbaarst met de app open op het scherm. Zet daarvoor "Scherm aan houden" aan.
