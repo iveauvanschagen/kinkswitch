@@ -25,9 +25,11 @@ Open de app in Chrome op Android, tik op het menu met de drie puntjes en kies "T
 
 ## Automatisch wisselen
 
-Rond :28 en :58 begint op KINK vaak reclame of nieuws. Staat Auto aan en speelt KINK, dan wisselt de app op die minuten zelf naar Spotify en na de ingestelde duur (standaard 5 minuten) weer terug naar KINK. Wisseltijden en duur pas je aan bij Instellingen. Kies je zelf een bron tijdens een blok, dan respecteert de app dat.
+De app leest elke 15 seconden de now playing-gegevens van KINK. Meldt KINK reclame, of draait er een item zonder titel van 45 seconden of langer (nieuws, reclame), dan schakelt de app naar Spotify. Zodra KINK weer een nummer met titel draait, gaat hij terug. Korte jingles en de presentator tellen niet mee. Een vangnet zorgt dat hij na 10 minuten altijd teruggaat. De vertraging van de stream (standaard 8 seconden) stel je in onder "Spotify koppelen".
 
-Het werkt het betrouwbaarst met de app open op het scherm. Zet daarvoor "Scherm aan houden" aan.
+## Don't be silly
+
+De knop bovenin speelt Wodan Boys - Don't be Silly af op Spotify.
 
 ## Playlist kiezen
 
@@ -36,3 +38,7 @@ Tik op Playlist en kies er een uit je eigen lijst. Een andere playlist kan ook: 
 ## Iemand anders laten meedoen
 
 Voeg diegene toe onder User Management in het Spotify-dashboard (maximaal vijf personen, Premium vereist). Kopieer daarna bij het tandwiel, onder "Spotify koppelen", de koppellink en stuur die door. Openen en op Koppel Spotify tikken is genoeg.
+
+## Jouw artiesten
+
+Bij het tandwiel staan Ivo's suggesties als knoppen die je aan of uit tikt, plus je eigen lijst. Draait KINK een van die artiesten, dan licht de KINK-tegel rood op en gaat de app (als je dat aanzet) terug naar KINK. Zoeken op genre kan ook, maar staat standaard uit.

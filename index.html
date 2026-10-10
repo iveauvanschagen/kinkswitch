@@ -29,7 +29,11 @@ svg{display:block}
 
 /* Bovenbalk */
 .top{grid-area:top;display:flex;align-items:center;justify-content:space-between;padding:2px 4px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.14em;font-size:14px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.14em;font-size:14px;white-space:nowrap}
+@media (max-width:440px){.brand{font-size:12px;letter-spacing:.1em}.clock{font-size:24px}.silly{font-size:11px;padding:0 10px}}
+.top .right{display:flex;align-items:center;gap:12px}
+.silly{white-space:nowrap;min-height:40px;padding:0 12px;border-radius:99px;background:#2a1414;border:1px solid var(--hot);color:#ffb3ad;font-weight:900;font-size:12px;letter-spacing:.08em}
+.silly:active{background:var(--hot);color:#fff}
 .brand i{width:10px;height:10px;border-radius:50%;background:var(--kink);box-shadow:0 0 12px var(--kink)}
 .clock{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em}
 
@@ -40,7 +44,8 @@ svg{display:block}
 .banner .txt{flex:1;min-width:0}
 .banner b{display:block;font-size:20px;font-weight:850;line-height:1.15}
 .banner small{display:block;color:var(--muted);font-size:14px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.count{font-size:34px;font-weight:900;font-variant-numeric:tabular-nums}
+.count{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
+.count:empty{display:none}
 .banner.soon{border-color:var(--warn);background:linear-gradient(90deg,#2a2109,var(--panel))}
 .banner.soon .dot{background:var(--warn);color:var(--warn);animation:pulse 1.6s infinite}
 .banner.now{border-color:var(--hot);background:linear-gradient(90deg,#2e100d,var(--panel))}
@@ -56,12 +61,19 @@ svg{display:block}
 .src:focus{outline:none}
 .src .ico{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:#22262e}
 .src .ico svg{width:30px;height:30px}
-.src .name{display:block;font-size:clamp(40px,12vw,64px);font-weight:950;letter-spacing:-.01em;line-height:1}
+.src .name{display:block;font-size:clamp(26px,7vw,40px);font-weight:950;letter-spacing:-.01em;line-height:1}
 .src .meta{display:block;font-size:14px;color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .src .np{display:block;margin-top:8px;min-width:0}
 .src .np em{display:block;font-style:normal;font-size:11px;font-weight:900;letter-spacing:.14em;opacity:.6}
-.src .np strong{display:block;font-size:clamp(16px,4.6vw,22px);font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.src .np span{display:block;font-size:14px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src .np strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:clamp(24px,7.4vw,34px);font-weight:900;line-height:1.08;overflow:hidden;margin-top:2px;letter-spacing:-.01em}
+.src .np span{display:block;font-size:clamp(17px,5vw,22px);font-weight:700;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
+.gtag{display:inline-block;margin-left:8px;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:900;letter-spacing:.1em;vertical-align:2px;background:var(--hot);color:#fff}
+.src .np .gtag{display:inline-block;opacity:1;font-size:11px}
+.src .np #kinkArtist{display:inline}
+.src .np .gtag:empty{display:none}
+.src.fav{border-color:var(--hot)!important;box-shadow:0 0 0 4px #ff5a4e33,0 10px 50px -12px #ff5a4e88}
+.src.fav .np em::after{content:" \00B7  JOUW MUZIEK";color:var(--hot);opacity:1}
+.src.kink.active.fav .np em::after{color:#7a0f08}
 .src.fresh:not(.active){border-color:var(--kink);animation:fresh 1.4s ease-in-out 4}
 @keyframes fresh{50%{box-shadow:0 0 0 6px #d9ff4233}}
 .src .tag{position:absolute;top:18px;right:18px;font-size:12px;font-weight:900;letter-spacing:.12em;padding:6px 10px;border-radius:99px;background:#22262e;color:var(--muted)}
@@ -91,7 +103,8 @@ svg{display:block}
 /* Liggend scherm (telefoonhouder): bronnen links, bediening rechts */
 @media (orientation:landscape) and (min-width:640px){
   .sources{grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr)}
-  .src .name{font-size:clamp(36px,6vw,64px)}
+  .src .name{font-size:clamp(24px,3.6vw,40px)}
+  .src .np strong{font-size:clamp(22px,3.4vw,34px)}
   .app{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);grid-template-rows:auto auto 1fr auto;
     grid-template-areas:"top top" "sources banner" "sources controls" "foot foot"}
   .banner{flex-wrap:wrap;align-content:center}
@@ -126,6 +139,12 @@ svg{display:block}
 .bigbtn{width:100%;min-height:64px;border-radius:18px;font-size:17px;font-weight:850;margin-top:10px}
 details{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
 summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
+.warn{border:1px solid var(--warn);background:#2a2109;color:#ffd789;border-radius:14px;padding:12px 14px;font-size:14px;font-weight:700;margin:8px 0 4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{min-height:44px;padding:0 16px;border-radius:99px;background:#22262e;border:1px solid var(--line);font-weight:800;font-size:15px}
+.chip.on{background:var(--kink);color:var(--kink-ink);border-color:var(--kink)}
+.chip .x{margin-left:8px;opacity:.6}
+.addrow{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
 .safety{color:var(--muted);font-size:12px;text-align:center;margin-top:14px}
 </style>
 </head>
@@ -133,20 +152,20 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 <div class="app">
   <header class="top">
     <div class="brand"><i></i>KINK SWITCH</div>
-    <div class="clock" id="clock">--:--</div>
+    <div class="right"><button class="silly" id="silly" aria-label="Don't be silly afspelen">DON'T BE SILLY</button><div class="clock" id="clock">--:--</div></div>
   </header>
 
   <section class="banner" id="banner" aria-live="polite">
     <span class="dot"></span>
-    <div class="txt"><b id="adTitle">Muziek</b><small id="nextLabel">Volgende wissel</small></div>
-    <div class="count" id="countdown">--:--</div>
+    <div class="txt"><b id="adTitle">Muziek</b><small id="nextLabel">Wacht op gegevens van KINK</small></div>
+    <div class="count" id="countdown"></div>
   </section>
 
   <section class="sources">
     <button class="src kink active" id="kinkMode" aria-label="KINK live">
       <span class="tag" id="state">UIT</span>
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1a10 10 0 0 1 0-14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/><circle cx="12" cy="12" r="2"/></svg></span>
-      <span style="min-width:0"><span class="name">KINK</span><span class="np"><em>NU OP KINK</em><strong id="kinkSong">Live radio</strong><span id="kinkArtist"></span></span></span>
+      <span style="min-width:0"><span class="name">KINK</span><span class="np"><em>NU OP KINK</em><strong id="kinkSong">Live radio</strong><span><span id="kinkArtist"></span><span class="gtag" id="kinkGenre"></span></span></span></span>
     </button>
     <button class="src spot" id="spotifyMode" aria-label="Spotify">
       <span class="tag" id="spotTag">PLAYLIST</span>
@@ -173,12 +192,24 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 
 <div class="modal" id="modal"><div class="modalbox">
   <h2>Instellingen</h2>
+  <div class="warn">Stel dit in als je stilstaat. Niet tijdens het rijden.</div>
   <h3>AUTOMATISCH WISSELEN</h3>
-  <label for="times">Wisseltijden (minuten na het hele uur, met komma's)</label>
-  <input id="times" placeholder="28,58" autocomplete="off" inputmode="numeric">
-  <label for="dur">Hoe lang op Spotify (minuten)</label>
-  <input id="dur" type="number" min="1" max="29" placeholder="5">
+  <p>Meldt KINK reclame of nieuws, dan schakelt de app naar Spotify. Draait KINK weer muziek, dan gaat hij terug.</p>
   <label class="check"><input id="wake" type="checkbox"> Scherm aan houden zolang de app open is</label>
+  <h3>JOUW ARTIESTEN</h3>
+  <p>Draait KINK een van deze artiesten, dan licht de KINK-tegel op. Tik om aan of uit te zetten.</p>
+  <div><small style="color:var(--muted);font-weight:800">IVO'S SUGGESTIES</small></div>
+  <div class="chips" id="sugChips"></div>
+  <div style="margin-top:14px"><small style="color:var(--muted);font-weight:800">MIJN LIJST</small></div>
+  <div class="chips" id="myChips"></div>
+  <div class="addrow"><input id="newArtist" placeholder="Artiest toevoegen" autocomplete="off"><button class="btn" id="addArtist">Toevoegen</button></div>
+  <label class="check" style="margin-top:14px"><input id="genreSwitch" type="checkbox"> Automatisch naar KINK als een van deze artiesten draait</label>
+  <details id="genreBox">
+    <summary>Ook op genre zoeken (standaard uit)</summary>
+    <label class="check"><input id="useGenre" type="checkbox"> Genre van de artiest opzoeken bij Spotify</label>
+    <label for="genres">Genres (met komma's)</label>
+    <input id="genres" placeholder="metal, hard rock" autocomplete="off">
+  </details>
   <div class="actions">
     <button class="btn primary" id="saveSettings">Opslaan</button>
     <button class="btn" id="closeSettings">Sluiten</button>
@@ -188,6 +219,8 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
     <p>Maak een app in het <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify Developer Dashboard</a>. Zet daar de Redirect URI hieronder exact zo neer, vink Web API aan en voeg het Spotify-account toe onder User Management. Spotify Premium is vereist.</p>
     <label for="redirectUri">Redirect URI (kopieer naar Spotify)</label>
     <div class="copyrow"><input id="redirectUri" readonly><button class="btn" id="copyRedirect">Kopieer</button></div>
+    <label for="delay">Vertraging van de stream in seconden (wanneer de app wisselt na een melding van KINK)</label>
+    <input id="delay" type="number" min="0" max="60" placeholder="8">
     <label for="clientId">Spotify Client ID</label>
     <input id="clientId" placeholder="32 tekens uit het dashboard" autocomplete="off" spellcheck="false">
     <div class="actions">
@@ -221,68 +254,47 @@ function fmt(s){s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padSt
 function hhmm(ms){return new Date(ms).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}
 function buzz(){if(navigator.vibrate)navigator.vibrate([250,120,250])}
 
-/* ---------- Klokschema: automatisch wisselen ---------- */
-// Instellingen
-function times(){
-  const t=(ls('ks_times')||'28,58').split(/[ ,;]+/).map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<60);
-  return t.length?[...new Set(t)].sort((a,b)=>a-b):[28,58];
-}
-function durMs(){return Math.max(1,Math.min(29,Number(ls('ks_dur'))||5))*60000}
+/* ---------- Automatisch wisselen op basis van de gegevens van KINK ---------- */
 let auto=ls('ks_auto')!=='0';
-// autoUntil: tijdstip waarop we automatisch terug naar KINK gaan (bewaard, zodat een herstart van de app het onthoudt)
-let autoUntil=Number(ls('ks_autoUntil'))||0;
-let lastSlot=Number(ls('ks_lastSlot'))||0;
+// autoAway: moment waarop we wegens reclame of nieuws naar Spotify gingen (0 = niet weg)
+let autoAway=Number(ls('ks_autoAway'))||0;
+// handledBreak: starttijd van het blok dat al is afgehandeld, zodat we niet twee keer wisselen
+let handledBreak=Number(ls('ks_handledBreak'))||0;
+const MAX_AWAY=10*60000; // vangnet: nooit langer dan 10 minuten weg
+function delayMs(){const v=ls('ks_delay');return Math.max(0,Math.min(60,v===null||v===''?8:Number(v)||0))*1000}
+function setAway(v){autoAway=v;ls('ks_autoAway',v?String(v):null)}
+function setHandled(v){handledBreak=v;ls('ks_handledBreak',String(v))}
+function metaFresh(now){return kinkNow&&now-kinkNow.at<60000}
 
-// Meest recente wisselmoment dat al voorbij is
-function prevSlot(now){
-  let best=0;
-  for(const off of [0,-1])for(const m of times()){
-    const d=new Date(now);d.setHours(d.getHours()+off,m,0,0);
-    if(d.getTime()<=now&&d.getTime()>best)best=d.getTime();
-  }
-  return best;
-}
-// Eerstvolgende wisselmoment
-function nextSlot(now){
-  for(const off of [0,1])for(const m of times()){
-    const d=new Date(now);d.setHours(d.getHours()+off,m,0,0);
-    if(d.getTime()>now)return d.getTime();
-  }
-  return now+3600000;
-}
-function setAutoUntil(v){autoUntil=v;ls('ks_autoUntil',v?String(v):null)}
-
-async function autoToSpotify(slot){
-  lastSlot=slot;ls('ks_lastSlot',String(slot));
+async function autoToSpotify(breakStart){
+  setHandled(breakStart);
   if(!hasLogin())return msg('Automatisch wisselen kan niet: Spotify is niet gekoppeld.',true);
   busy=true;
-  try{
-    await playList();
-    setAutoUntil(slot+durMs());
-    msg('Reclameblok: automatisch naar Spotify. Terug naar KINK om '+hhmm(autoUntil)+'.');buzz();
-  }catch(e){msg('Automatisch wisselen mislukt: '+e.message,true);buzz()}
+  try{await playList();setAway(Date.now());msg('Reclame of nieuws op KINK: even naar Spotify.');buzz()}
+  catch(e){msg('Automatisch wisselen mislukt: '+e.message,true);buzz()}
   busy=false;
 }
-async function autoToKink(){
-  setAutoUntil(0);
+async function autoToKink(why){
+  setAway(0);
   if(mode!=='spotify')return;
   busy=true;
   const ok=await startKink(true);
-  if(!ok){msg('Tijd om terug te gaan. Tik op KINK.',true);buzz()}
+  if(ok)msg(why);else{msg('Weer muziek op KINK. Tik op KINK.',true);buzz()}
   busy=false;
 }
 
-// Wordt elke seconde aangeroepen. Werkt op de wandklok, dus ook na een pauze van de browser
-// haalt hij direct in wat er gemist is.
 function tick(){
   const now=Date.now();
   $('clock').textContent=hhmm(now);
   if(!busy){
-    if(autoUntil&&now>=autoUntil)autoToKink();
-    else if(auto&&!autoUntil&&mode==='kink'&&!radio.paused){
-      const s=prevSlot(now);
-      // Alleen wisselen als we binnen het blok zitten en dit moment nog niet behandeld is
-      if(s&&s!==lastSlot&&now<s+durMs())autoToSpotify(s);
+    const fresh=metaFresh(now),d=delayMs();
+    if(autoAway){
+      if(mode!=='spotify')setAway(0);
+      else if(fresh&&!kinkNow.isBreak&&kinkNow.title&&now>=kinkNow.start+d)autoToKink('Weer muziek op KINK: '+kinkNow.title);
+      else if(now-autoAway>MAX_AWAY)autoToKink('Terug naar KINK (na 10 minuten)');
+    }else if(auto&&mode==='kink'&&!radio.paused&&fresh&&kinkNow.isBreak&&kinkNow.breakStart!==handledBreak
+      &&now>=kinkNow.breakStart+d&&now-kinkNow.breakStart<5*60000){
+      autoToSpotify(kinkNow.breakStart);
     }
   }
   renderAd(now);
@@ -295,25 +307,22 @@ function setPP(playing){
 }
 
 /* ---------- Reclamebanner ---------- */
-// Combineert het klokschema met (als de browser ze mag lezen) de now playing-gegevens van KINK
 function renderAd(now){
-  const b=$('banner');let cls='',title,label,count;
-  const s=prevSlot(now),n=nextSlot(now),inWin=now<s+durMs();
-  const metaFresh=kinkNow&&now-kinkNow.at<90000;
-  const metaBreak=metaFresh&&kinkNow.isBreak;
-  if(autoUntil){
-    cls='away';title='Reclameblok overgeslagen';label='Terug naar KINK om '+hhmm(autoUntil);count=fmt((autoUntil-now)/1000);
-  }else if(metaBreak){
-    cls='now';title='Nu reclame of nieuws';label='KINK meldt een blok sinds '+hhmm(kinkNow.start);count='LIVE';
-  }else if(inWin&&!(metaFresh&&!kinkNow.isBreak&&kinkNow.start>s)){
-    cls='now';title='Nu waarschijnlijk reclame';label='Blok verwacht tot '+hhmm(s+durMs());count=fmt((s+durMs()-now)/1000);
-  }else if(n-now<180000){
-    cls='soon';title='Zo reclame';label=(auto?'Naar Spotify om ':'Verwacht om ')+hhmm(n)+(auto&&!(mode==='kink'&&!radio.paused)?' (als KINK speelt)':'');count=fmt((n-now)/1000);
+  let cls='',title,label,count='';
+  const fresh=metaFresh(now);
+  if(autoAway){
+    cls='away';title='Reclame overgeslagen';label='Terug zodra KINK muziek draait';count=fmt((now-autoAway)/1000);
+  }else if(fresh&&kinkNow.isBreak){
+    cls='now';title='Nu reclame of nieuws';
+    label=!auto?'Automatisch wisselen staat uit':(mode==='kink'&&!radio.paused?'Wisselt zo naar Spotify':'Wisselt alleen als KINK speelt');
+    count=fmt((now-kinkNow.breakStart)/1000);
+  }else if(fresh){
+    title=mode==='spotify'?'Spotify speelt':'Muziek op KINK';
+    label=auto?'Reclame of nieuws? Dan naar Spotify':'Automatisch wisselen staat uit';
   }else{
-    title=mode==='spotify'?'Spotify speelt':'Muziek';
-    label=auto?'Volgende wissel om '+hhmm(n):'Volgend reclameblok rond '+hhmm(n);count=fmt((n-now)/1000);
+    cls='soon';title='Geen gegevens van KINK';label='Automatisch wisselen wacht op KINK';
   }
-  b.className='banner '+cls;$('adTitle').textContent=title;$('nextLabel').textContent=label;$('countdown').textContent=count;
+  $('banner').className='banner '+cls;$('adTitle').textContent=title;$('nextLabel').textContent=label;$('countdown').textContent=count;
 }
 
 /* ---------- Now playing van KINK (alleen tonen, nog geen automatisch wisselen) ---------- */
@@ -321,12 +330,20 @@ let kinkNow=null,metaFails=0;
 async function pollMeta(){
   if(document.visibilityState!=='visible'&&mode!=='kink')return;
   try{
-    const r=await fetch('https://np.tritondigital.com/public/nowplaying?mountName=KINK&numberToFetch=3&_='+Date.now(),{cache:'no-store'});
+    const r=await fetch('https://np.tritondigital.com/public/nowplaying?mountName=KINK&numberToFetch=8&_='+Date.now(),{cache:'no-store'});
     const x=new DOMParser().parseFromString(await r.text(),'text/xml');
     const items=[...x.querySelectorAll('nowplaying-info')].map(el=>{const p={};el.querySelectorAll('property').forEach(q=>p[q.getAttribute('name')]=q.textContent);
-      return {type:el.getAttribute('type'),start:+p.cue_time_start||0,title:p.cue_title||'',artist:p.track_artist_name||''}}).sort((a,b)=>b.start-a.start);
+      return {type:el.getAttribute('type'),start:+p.cue_time_start||0,dur:+p.cue_time_duration||0,title:p.cue_title||'',artist:p.track_artist_name||''}}).sort((a,b)=>b.start-a.start);
     const last=items[0];if(!last)return;
-    kinkNow={...last,isBreak:last.type==='ad'||!last.title,at:Date.now()};metaFails=0;
+    // Blokdetectie: loop terug vanaf het nieuwste item tot het laatste echte nummer.
+    // Een reclamemarkering, of een item zonder titel van 45 seconden of langer (nieuws, reclame), betekent een blok.
+    // Korte items zonder titel (jingles, presentator) tellen niet.
+    let breakStart=0;
+    for(const it of items){
+      if(it.type!=='ad'&&it.title)break;
+      if(it.type==='ad'||it.dur>=45000)breakStart=it.start;
+    }
+    kinkNow={...last,isBreak:!!breakStart,breakStart,at:Date.now()};metaFails=0;
     showKink();
   }catch(e){metaFails++;if(metaFails===1){$('kinkSong').textContent='Live radio';$('kinkArtist').textContent=''}}
 }
@@ -353,9 +370,9 @@ function setMode(m){
 // Geeft true terug als KINK echt speelt
 async function startKink(fromAuto){
   if(!fromAuto){
-    setAutoUntil(0);
-    // Zelf KINK gekozen tijdens een reclameblok: dit blok niet meer automatisch overslaan
-    const s=prevSlot(Date.now());if(Date.now()<s+durMs()){lastSlot=s;ls('ks_lastSlot',String(s))}
+    setAway(0);
+    // Zelf KINK gekozen tijdens een blok: dit blok niet meer automatisch overslaan
+    if(kinkNow?.isBreak)setHandled(kinkNow.breakStart);
   }
   if(hasLogin()){try{await api('/me/player/pause','PUT')}catch(e){}}
   try{
@@ -465,7 +482,7 @@ async function playList(){
 
 async function goSpotify(){
   if(!hasLogin())return settings();
-  setAutoUntil(0); // handmatig gekozen: niet automatisch terug
+  setAway(0); // handmatig gekozen: niet automatisch terug
   try{await playList();msg('Spotify speelt je playlist')}catch(e){msg(e.message,true)}
 }
 
@@ -480,16 +497,17 @@ async function next(){try{await api('/me/player/next','POST');setMode('spotify')
 
 /* ---------- Instellingen ---------- */
 function settings(){
+  $('genres').value=genreList().join(', ');$('genreSwitch').checked=ls('ks_genreSwitch')!=='0';$('useGenre').checked=ls('ks_useGenre')==='1';
+  $('delay').value=delayMs()/1000;draftFavs=favList();renderChips();
   $('clientId').value=ls('ks_client')||'';
-  $('times').value=times().join(',');
-  $('dur').value=durMs()/60000;
   $('wake').checked=ls('ks_wake')==='1';
   $('redirectUri').value=location.protocol==='file:'?'Niet beschikbaar bij een lokaal bestand':REDIRECT;
   $('modal').classList.add('show');
 }
 function saveFields(){
+  ls('ks_genres',$('genres').value.trim()||DEFAULT_GENRES);ls('ks_favArtists',draftFavs.join('|'));ls('ks_genreSwitch',$('genreSwitch').checked?'1':'0');ls('ks_useGenre',$('useGenre').checked?'1':'0');
+  ls('ks_delay',String($('delay').value===''?8:$('delay').value));lastGenreKey='';showKink();
   ls('ks_client',$('clientId').value.trim());
-  ls('ks_times',$('times').value.trim()||'28,58');ls('ks_dur',String($('dur').value||5));
   ls('ks_wake',$('wake').checked?'1':'0');
   if($('wake').checked)keepAwake();else if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null}
 }
@@ -499,13 +517,100 @@ function saveFields(){
 let lastKinkSong='';
 function showKink(){
   if(!kinkNow)return;
-  if(kinkNow.isBreak){$('kinkSong').textContent='Reclame, nieuws of jingle';$('kinkArtist').textContent='';return}
+  if(kinkNow.isBreak||!kinkNow.title){$('kinkSong').textContent=kinkNow.isBreak?'Reclame of nieuws':'Presentator of jingle';$('kinkArtist').textContent='';$('kinkGenre').textContent='';$('kinkMode').classList.remove('fav');lastGenreKey='';return}
   $('kinkSong').textContent=kinkNow.title;$('kinkArtist').textContent=kinkNow.artist||'';
   const key=kinkNow.artist+kinkNow.title;
+  if(key!==lastGenreKey){lastGenreKey=key;checkGenre(kinkNow.artist,key)}
   // Nieuw nummer op KINK terwijl je naar Spotify luistert: tegel licht even op
   if(lastKinkSong&&key!==lastKinkSong&&mode==='spotify'){$('kinkMode').classList.add('fresh');setTimeout(()=>$('kinkMode').classList.remove('fresh'),6000)}
   lastKinkSong=key;
 }
+/* ---------- Jouw artiesten ---------- */
+const SUGGESTIONS=['Foo Fighters','Turnstile','Rage Against The Machine','System of a Down','Muse'];
+let draftFavs=[];
+function favList(){
+  const v=ls('ks_favArtists');
+  if(v===null)return [...SUGGESTIONS]; // eerste keer: Ivo's suggesties staan aan
+  return v.split(v.includes('|')?'|':',').map(x=>x.trim()).filter(Boolean);
+}
+function norm(x){return (x||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
+// Hele woorden vergelijken, zodat "Muse" niet matcht op "Amusement"
+function isFav(artist){const a=' '+norm(artist)+' ';return favList().some(f=>{const n=norm(f);return n&&a.includes(' '+n+' ')})}
+function chip(label,on,onclick,removable){
+  const b=document.createElement('button');b.className='chip'+(on?' on':'');b.textContent=label;
+  if(removable){const x=document.createElement('span');x.className='x';x.textContent='×';b.appendChild(x)}
+  b.onclick=onclick;return b;
+}
+function renderChips(){
+  const sug=$('sugChips'),mine=$('myChips');sug.innerHTML='';mine.innerHTML='';
+  const has=n=>draftFavs.some(f=>norm(f)===norm(n));
+  SUGGESTIONS.forEach(n=>sug.appendChild(chip(n,has(n),()=>{draftFavs=has(n)?draftFavs.filter(f=>norm(f)!==norm(n)):[...draftFavs,n];renderChips()})));
+  draftFavs.filter(n=>!SUGGESTIONS.some(x=>norm(x)===norm(n))).forEach(n=>mine.appendChild(chip(n,true,()=>{draftFavs=draftFavs.filter(f=>norm(f)!==norm(n));renderChips()},true)));
+  if(!mine.children.length)mine.innerHTML='<small style="color:var(--muted)">Voeg hieronder je eigen artiesten toe</small>';
+}
+function addArtist(){
+  const n=$('newArtist').value.trim();if(!n)return;
+  if(!draftFavs.some(f=>norm(f)===norm(n)))draftFavs.push(n);
+  $('newArtist').value='';renderChips();
+}
+$('addArtist').onclick=addArtist;
+$('newArtist').onkeydown=e=>{if(e.key==='Enter')addArtist()};
+
+/* ---------- Don't be silly ---------- */
+async function silly(){
+  if(!hasLogin())return settings();
+  try{
+    let uri=ls('ks_sillyUri');
+    if(!uri){
+      const d=await api('/search?type=track&limit=5&q='+encodeURIComponent('Wodan Boys Don\'t be Silly'));
+      const t=(d?.tracks?.items||[]).find(x=>/wodan/i.test((x.artists||[]).map(a=>a.name).join(' ')))||d?.tracks?.items?.[0];
+      if(!t)throw Error('Nummer niet gevonden op Spotify');
+      uri=t.uri;ls('ks_sillyUri',uri);
+    }
+    const dev=await deviceId();
+    radio.pause();setAway(0);
+    await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{uris:[uri]});
+    setMode('spotify');setPP(true);msg("Don't be silly!");buzz();
+  }catch(e){msg(e.message,true)}
+}
+$('silly').onclick=silly;
+
+/* ---------- Genre-detectie ---------- */
+// Spotify kent per artiest een lijst genres. Die zoeken we op en vergelijken we met jouw lijst.
+const DEFAULT_GENRES='metal, hard rock, heavy, thrash, stoner, doom, sludge, nwobhm';
+let lastGenreKey='',switchedFor='';
+function genreList(){return (ls('ks_genres')||DEFAULT_GENRES).split(',').map(x=>x.trim().toLowerCase()).filter(Boolean)}
+function mainArtist(a){return (a||'').split(/\s+(?:&|feat\.?|ft\.?|featuring|x|vs\.?)\s+|,/i)[0].trim()}
+function genreCache(){try{return JSON.parse(ls('ks_gcache')||'{}')}catch(e){return {}}}
+async function artistGenres(name){
+  const k=name.toLowerCase(),c=genreCache();
+  if(c[k])return c[k].g;
+  const d=await api('/search?type=artist&limit=1&q='+encodeURIComponent(name));
+  const g=d?.artists?.items?.[0]?.genres||[];
+  c[k]={g,t:Date.now()};
+  const keys=Object.keys(c);if(keys.length>400)keys.sort((a,b)=>c[a].t-c[b].t).slice(0,100).forEach(x=>delete c[x]);
+  ls('ks_gcache',JSON.stringify(c));
+  return g;
+}
+async function checkGenre(artist,key){
+  const tile=$('kinkMode'),tag=$('kinkGenre');
+  tile.classList.remove('fav');tag.textContent='';
+  if(!artist)return;
+  const main=mainArtist(artist);
+  let hit=isFav(artist)?'FAVORIET':'';
+  let genres=[];
+  if(!hit&&ls('ks_useGenre')==='1'&&hasLogin()){try{genres=await artistGenres(main)}catch(e){}}
+  if(key!==lastGenreKey)return; // intussen alweer een ander nummer
+  if(!hit){const wanted=genreList();const g=genres.find(x=>wanted.some(w=>x.toLowerCase().includes(w)));if(g)hit=g.toUpperCase()}
+  if(!hit)return;
+  tag.textContent=hit;tile.classList.add('fav');buzz();
+  // Op Spotify en jouw muziek op KINK: terug naar KINK (één keer per nummer)
+  if(mode==='spotify'&&ls('ks_genreSwitch')!=='0'&&switchedFor!==key){
+    switchedFor=key;setAway(0);
+    if(await startKink(true))msg('Jouw muziek op KINK: '+artist+' - '+kinkNow.title);
+  }else msg('Jouw muziek op KINK: '+artist+' - '+kinkNow.title);
+}
+
 async function pollSpotify(){
   if(mode!=='spotify'||document.visibilityState!=='visible'||!hasLogin())return renderSpotIdle();
   try{
@@ -597,14 +702,14 @@ async function incoming(){
 $('openSettings').onclick=settings;
 $('closeSettings').onclick=()=>$('modal').classList.remove('show');
 $('copyRedirect').onclick=async()=>{try{await navigator.clipboard.writeText($('redirectUri').value);$('copyRedirect').textContent='Gekopieerd'}catch(e){$('redirectUri').select()}};
-$('saveSettings').onclick=()=>{saveFields();msg('Instellingen opgeslagen. Wisseltijden: '+times().map(m=>':'+String(m).padStart(2,'0')).join(' en ')+'.');$('modal').classList.remove('show');tick()};
+$('saveSettings').onclick=()=>{saveFields();msg('Instellingen opgeslagen');$('modal').classList.remove('show');tick()};
 $('connect').onclick=connect;
 $('logout').onclick=()=>{['ks_token','ks_expiry','ks_refresh','ks_verifier','ks_state'].forEach(k=>ls(k,null));token=null;msg('Spotify ontkoppeld');$('modal').classList.remove('show')};
 $('playPause').onclick=()=>mode==='spotify'?toggle():radio.paused?startKink():radio.pause();
 $('kinkMode').onclick=()=>startKink();
 $('spotifyMode').onclick=goSpotify;
 $('next').onclick=()=>mode==='spotify'?next().then(()=>setTimeout(pollSpotify,800)):goSpotify();
-$('autoBtn').onclick=()=>{auto=!auto;ls('ks_auto',auto?'1':'0');if(!auto)setAutoUntil(0);renderAuto();tick();msg(auto?'Automatisch wisselen staat aan':'Automatisch wisselen staat uit')};
+$('autoBtn').onclick=()=>{auto=!auto;ls('ks_auto',auto?'1':'0');if(!auto)setAway(0);renderAuto();tick();msg(auto?'Automatisch wisselen staat aan':'Automatisch wisselen staat uit')};
 radio.onplaying=()=>{setMode('kink');setPP(true)};
 radio.onpause=()=>{if(mode==='kink'){setPP(false);setMode('kink')}};
 
