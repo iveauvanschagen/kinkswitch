@@ -68,6 +68,11 @@ svg{display:block}
 .src .np strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:clamp(24px,7.4vw,34px);font-weight:900;line-height:1.08;overflow:hidden;margin-top:2px;letter-spacing:-.01em}
 .src .np span{display:block;font-size:clamp(17px,5vw,22px);font-weight:700;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
 .gtag{display:inline-block;margin-left:8px;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:900;letter-spacing:.1em;vertical-align:2px;background:var(--hot);color:#fff}
+.src .np .queue{font-size:clamp(14px,4vw,17px);font-weight:700;opacity:.85;margin-top:8px;white-space:normal}
+.src .np .queue:empty{display:none}
+.src .np .queue i{display:block;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src .np .queue b{font-size:11px;letter-spacing:.12em;opacity:.65;margin-right:6px}
+.src.spot:has(.queue:not(:empty)) .ico{display:none}
 .src .np .gtag{display:inline-block;opacity:1;font-size:11px}
 .src .np #kinkArtist{display:inline}
 .src .np .gtag:empty{display:none}
@@ -170,7 +175,7 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
     <button class="src spot" id="spotifyMode" aria-label="Spotify">
       <span class="tag" id="spotTag">PLAYLIST</span>
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-      <span style="min-width:0"><span class="name">Spotify</span><span class="np"><em id="spotLabel">PLAYLIST</em><strong id="spotSong">Kies een playlist</strong><span id="spotArtist"></span></span></span>
+      <span style="min-width:0"><span class="name">Spotify</span><span class="np"><em id="spotLabel">PLAYLIST</em><strong id="spotSong">Kies een playlist</strong><span id="spotArtist"></span><span class="queue" id="spotQueue"></span></span></span>
     </button>
   </section>
 
@@ -611,6 +616,20 @@ async function checkGenre(artist,key){
   }else msg('Jouw muziek op KINK: '+artist+' - '+kinkNow.title);
 }
 
+/* ---------- Wachtrij van Spotify ---------- */
+let queueFor='',queueNext=[];
+async function loadQueue(){
+  try{
+    const d=await api('/me/player/queue');
+    queueNext=(d?.queue||[]).slice(0,2).map(t=>({name:t.name,artist:(t.artists||[]).map(a=>a.name)[0]||t.show?.name||''}));
+  }catch(e){queueNext=[]}
+  renderQueue();
+}
+function renderQueue(){
+  const q=$('spotQueue');q.innerHTML='';
+  queueNext.forEach((t,i)=>{const r=document.createElement('i');const b=document.createElement('b');b.textContent=i?'DAARNA':'HIERNA';r.appendChild(b);r.appendChild(document.createTextNode(t.name+(t.artist?' - '+t.artist:'')));q.appendChild(r)});
+}
+
 async function pollSpotify(){
   if(mode!=='spotify'||document.visibilityState!=='visible'||!hasLogin())return renderSpotIdle();
   try{
@@ -618,6 +637,8 @@ async function pollSpotify(){
     if(!it)return renderSpotIdle();
     $('spotLabel').textContent=p.is_playing?'NU OP SPOTIFY':'GEPAUZEERD';
     $('spotSong').textContent=it.name;$('spotArtist').textContent=(it.artists||[]).map(a=>a.name).join(', ');
+    // Wachtrij alleen ophalen als er een ander nummer speelt (scheelt data)
+    if(it.id!==queueFor){queueFor=it.id;loadQueue()}
   }catch(e){}
 }
 function renderSpotIdle(){

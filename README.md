@@ -42,3 +42,7 @@ Voeg diegene toe onder User Management in het Spotify-dashboard (maximaal vijf p
 ## Jouw artiesten
 
 Bij het tandwiel staan Ivo's suggesties als knoppen die je aan of uit tikt, plus je eigen lijst. Draait KINK een van die artiesten, dan licht de KINK-tegel rood op en gaat de app (als je dat aanzet) terug naar KINK. Zoeken op genre kan ook, maar staat standaard uit.
+
+## Wachtrij
+
+Op de Spotify-tegel staan de volgende twee nummers (Hierna en Daarna). De wachtrij wordt alleen opgehaald als er een nieuw nummer begint, zodat het weinig data kost.
