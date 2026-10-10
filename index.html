@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0f12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>KINK Switch</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0f12;--card:#191c22;--line:#30343d;--green:#d9ff42;--text:#f4f5f7;--muted:#9da3ae;--warn:#ff8a5c}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:system-ui,sans-serif;color:var(--text)}
+body{display:flex;align-items:center;justify-content:center;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px))}
+.app{width:min(760px,100%);height:100%;display:grid;grid-template-rows:auto auto 1fr auto auto;gap:10px}
+header{display:flex;justify-content:space-between;padding:3px 4px}
+.logo{font-size:13px;font-weight:900;letter-spacing:.18em;color:var(--green)}
+.clock,.status,.help{color:var(--muted);font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{border:0;border-radius:15px;min-height:58px;padding:10px 12px;font:800 16px system-ui;cursor:pointer;color:var(--text);background:#2a2e36;display:flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+button.active{background:var(--green);color:#0d0f12}
+.big{min-height:66px;font-size:19px}
+.main{display:grid;grid-template-rows:auto auto auto 1fr;gap:9px;min-height:0}
+.now{display:flex;justify-content:space-between;align-items:center}
+.pill{font-size:12px;background:#292d35;border-radius:99px;padding:5px 9px;color:var(--muted)}
+.pill.live{background:var(--green);color:#0d0f12}
+#radio{width:100%;height:38px}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.controls button{min-height:66px;font-size:15px}
+.timerrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.timer{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums}
+.timerbox{display:flex;gap:6px;align-items:center}
+input{width:75px;background:#0e1014;color:white;border:1px solid var(--line);border-radius:10px;padding:10px;font:700 16px system-ui;text-align:center}
+.notice{display:none;border:1px solid var(--green);background:#242a18;border-radius:14px;padding:10px;font-size:14px}
+.notice.show{display:block}
+.notice .row{display:flex;gap:8px;margin-top:8px}
+.notice button{min-height:48px;flex:1}
+.bottom{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.status.err{color:var(--warn)}
+.settings{font-size:13px;min-height:44px;padding:8px 12px}
+.modal{display:none;position:fixed;inset:0;background:#000b;z-index:5;padding:18px;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modalbox{width:min(520px,100%);max-height:90dvh;overflow:auto;background:#191c22;border:1px solid var(--line);border-radius:20px;padding:20px}
+.modalbox h2{margin-top:0;font-size:20px}
+.modalbox label{display:block;font-size:13px;margin:12px 0 6px}
+.modalbox input{width:100%;text-align:left;font-weight:500}
+.modalbox p,.modalbox li{color:var(--muted);font-size:13px;line-height:1.45}
+.modalbox a{color:var(--green)}
+.copyrow{display:grid;grid-template-columns:1fr auto;gap:6px}
+.copyrow button{min-height:42px;font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.actions button{min-height:46px;font-size:14px}
+.help{text-align:center;font-size:11px}
+@media(max-height:650px){.app{gap:6px}.card{padding:8px}.controls button{min-height:52px}.mode button{min-height:50px}.main{gap:5px}.help{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header><div class="logo">KINK SWITCH</div><div class="clock" id="clock">--:--</div></header>
+
+  <section class="card mode">
+    <button id="kinkMode" class="active big">📻 KINK</button>
+    <button id="spotifyMode" class="big">🎵 Spotify</button>
+  </section>
+
+  <section class="card main">
+    <div class="now">
+      <div><strong id="source">KINK live</strong><div style="color:var(--muted);font-size:12px" id="sub">Radio</div></div>
+      <div class="pill" id="state">UIT</div>
+    </div>
+    <audio id="radio" controls preload="none" playsinline>
+      <source src="https://playerservices.streamtheworld.com/api/livestream-redirect/KINK.mp3" type="audio/mpeg">
+    </audio>
+    <div class="controls">
+      <button id="playPause">▶ Start</button>
+      <button id="switchKink">📻 Naar KINK</button>
+      <button id="next">⏭ Volgende</button>
+    </div>
+    <div class="timerrow">
+      <div><div class="timer" id="countdown">30:00</div><div style="font-size:12px;color:var(--muted)">Tot schakelmoment</div></div>
+      <div class="timerbox">
+        <input id="minutes" type="number" min="1" max="180" value="30" aria-label="Minuten">
+        <button id="timer" style="min-height:46px;font-size:13px">Start timer</button>
+      </div>
+    </div>
+    <div class="notice" id="notice">
+      <b style="color:var(--green)">Schakelmoment.</b> Reclame of nieuws kan begonnen zijn.
+      <div class="row"><button id="noticeSpotify">🎵 Naar Spotify</button><button id="dismiss">Later</button></div>
+    </div>
+  </section>
+
+  <section class="card bottom">
+    <div class="status" id="status">Spotify niet gekoppeld. Tik op Instellingen.</div>
+    <button class="settings" id="openSettings">⚙ Instellingen</button>
+  </section>
+  <div class="help">Bedien de app alleen als je veilig stilstaat.</div>
+</div>
+
+<div class="modal" id="modal"><div class="modalbox">
+  <h2>Spotify koppelen</h2>
+  <p>Maak een app in het <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify Developer Dashboard</a>. Zet daar de Redirect URI hieronder exact zo neer, vink Web API aan en voeg je eigen Spotify-account toe onder User Management.</p>
+  <label for="redirectUri">Redirect URI (kopieer naar Spotify)</label>
+  <div class="copyrow"><input id="redirectUri" readonly><button id="copyRedirect">Kopieer</button></div>
+  <label for="clientId">Spotify Client ID</label>
+  <input id="clientId" placeholder="32 tekens uit het dashboard" autocomplete="off" spellcheck="false">
+  <label for="playlist">Playlistlink</label>
+  <input id="playlist" placeholder="https://open.spotify.com/playlist/..." autocomplete="off">
+  <p>Open de Spotify-app op je telefoon minstens één keer voordat je hier op Spotify drukt. De Web API kan alleen een apparaat bedienen dat Spotify al heeft draaien. Spotify Premium is vereist.</p>
+  <div class="actions">
+    <button class="active" id="connect">Koppel Spotify</button>
+    <button id="saveSettings">Opslaan</button>
+    <button id="logout">Ontkoppel</button>
+    <button id="closeSettings">Sluiten</button>
+  </div>
+</div></div>
+
+<script>
+const $=id=>document.getElementById(id), radio=$('radio');
+const SCOPES='user-read-playback-state user-modify-playback-state';
+let timerId=null, deadline=null, remaining=1800, mode='kink', token=null, tokenExpiry=0;
+
+// Canonieke redirect: altijd de map-URL, zonder index.html, query of hash
+const REDIRECT = location.origin + location.pathname.replace(/index\.html$/,'');
+
+function msg(s,err){$('status').textContent=s;$('status').classList.toggle('err',!!err)}
+function fmt(s){s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+
+/* Timer */
+function update(){
+  if(deadline){
+    remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));
+    if(!remaining){deadline=null;clearInterval(timerId);timerId=null;$('timer').textContent='Start timer';$('notice').classList.add('show');if(navigator.vibrate)navigator.vibrate([300,150,300])}
+  }
+  $('countdown').textContent=fmt(remaining);
+}
+function startTimer(){
+  remaining=Math.max(1,Math.min(180,Number($('minutes').value)||30))*60;
+  localStorage.setItem('ks_minutes',String(remaining/60));
+  deadline=Date.now()+remaining*1000;
+  if(timerId)clearInterval(timerId);
+  timerId=setInterval(update,250);
+  $('notice').classList.remove('show');$('timer').textContent='Stop timer';update();
+}
+function stopTimer(){deadline=null;clearInterval(timerId);timerId=null;$('timer').textContent='Start timer';remaining=(Number($('minutes').value)||30)*60;update()}
+
+/* Mode */
+function setMode(m){
+  mode=m;
+  $('kinkMode').classList.toggle('active',m==='kink');
+  $('spotifyMode').classList.toggle('active',m==='spotify');
+  $('source').textContent=m==='kink'?'KINK live':'Spotify';
+  $('sub').textContent=m==='kink'?'Radio':'Afspelen op je Spotify-app';
+  const live=m==='kink'&&!radio.paused;
+  $('state').textContent=m==='kink'?(live?'LIVE':'PAUZE'):'SPOTIFY';
+  $('state').classList.toggle('live',live||m==='spotify');
+}
+
+async function startKink(){
+  if(hasLogin()){try{await api('/me/player/pause','PUT')}catch(e){}}
+  try{
+    radio.load(); // altijd vers inhaken op de livestream, niet op een oude buffer
+    await radio.play();
+    setMode('kink');$('playPause').textContent='⏸ Pauze';msg('KINK speelt live');
+  }catch(e){msg('KINK start niet. Tik nog een keer op Naar KINK.',true)}
+}
+
+/* PKCE helpers */
+function b64(a){return btoa(String.fromCharCode(...new Uint8Array(a))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function rand(n=64){const a=new Uint8Array(n);crypto.getRandomValues(a);return Array.from(a,x=>('0'+x.toString(16)).slice(-2)).join('')}
+
+async function connect(){
+  const id=$('clientId').value.trim();
+  if(!/^[0-9a-f]{32}$/i.test(id))return alert('De Client ID moet 32 tekens zijn (cijfers en a t/m f). Kopieer hem opnieuw uit het Spotify-dashboard.');
+  if(location.protocol!=='https:'&&location.hostname!=='127.0.0.1')return alert('Deze app moet op een HTTPS-adres staan, bijvoorbeeld GitHub Pages. Spotify accepteert geen lokaal bestand.');
+  localStorage.setItem('ks_playlist',$('playlist').value.trim());
+  const verifier=rand(32), challenge=b64(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier))), state=rand(16);
+  localStorage.setItem('ks_verifier',verifier);localStorage.setItem('ks_state',state);
+  localStorage.setItem('ks_client',id);localStorage.setItem('ks_redirect',REDIRECT);
+  const u=new URL('https://accounts.spotify.com/authorize');
+  u.search=new URLSearchParams({client_id:id,response_type:'code',redirect_uri:REDIRECT,scope:SCOPES,state,code_challenge_method:'S256',code_challenge:challenge,show_dialog:'true'}).toString();
+  location.href=u.toString();
+}
+
+function saveToken(d){
+  token=d.access_token;tokenExpiry=Date.now()+d.expires_in*1000;
+  localStorage.setItem('ks_token',token);localStorage.setItem('ks_expiry',String(tokenExpiry));
+  if(d.refresh_token)localStorage.setItem('ks_refresh',d.refresh_token);
+}
+function hasLogin(){return !!(localStorage.getItem('ks_refresh')||localStorage.getItem('ks_token'))}
+
+async function callback(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('error')){
+    history.replaceState({},document.title,location.pathname);
+    const e=q.get('error');
+    return msg(e==='access_denied'?'Koppelen geannuleerd in Spotify.':'Spotify weigerde: '+e+'. Staat je account onder User Management in het dashboard?',true);
+  }
+  const code=q.get('code');if(!code)return;
+  history.replaceState({},document.title,location.pathname);
+  if(q.get('state')!==localStorage.getItem('ks_state'))return msg('Koppelen mislukt: ongeldige state. Probeer opnieuw.',true);
+  try{
+    const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({client_id:localStorage.getItem('ks_client'),grant_type:'authorization_code',code,redirect_uri:localStorage.getItem('ks_redirect'),code_verifier:localStorage.getItem('ks_verifier')})});
+    const d=await r.json();if(!r.ok)throw Error(d.error_description||d.error);
+    saveToken(d);localStorage.removeItem('ks_verifier');localStorage.removeItem('ks_state');
+    msg('Spotify gekoppeld. Tik op Spotify om je playlist te starten.');
+  }catch(e){msg('Koppelen mislukt: '+e.message,true)}
+}
+
+async function getToken(){
+  if(token&&Date.now()<tokenExpiry-30000)return token;
+  token=localStorage.getItem('ks_token');tokenExpiry=+(localStorage.getItem('ks_expiry')||0);
+  if(token&&Date.now()<tokenExpiry-30000)return token;
+  const refresh=localStorage.getItem('ks_refresh'), id=localStorage.getItem('ks_client');
+  if(!refresh||!id)throw Error('Koppel eerst Spotify via Instellingen');
+  const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:id,grant_type:'refresh_token',refresh_token:refresh})});
+  const d=await r.json();
+  if(!r.ok){localStorage.removeItem('ks_refresh');throw Error('Spotify-login verlopen. Koppel opnieuw via Instellingen')}
+  saveToken(d);return token;
+}
+
+async function api(path,method='GET',body){
+  const t=await getToken();
+  const r=await fetch('https://api.spotify.com/v1'+path,{method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+  if(r.status===204||r.status===202)return null;
+  const txt=await r.text();let d=null;try{d=txt?JSON.parse(txt):null}catch(e){}
+  if(!r.ok){
+    const m=d?.error?.message||('Spotify fout '+r.status);
+    if(r.status===404)throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
+    if(r.status===403)throw Error('Spotify weigert (403). Premium nodig en je account moet onder User Management staan.');
+    throw Error(m);
+  }
+  return d;
+}
+
+// Zoek een apparaat om op af te spelen: actief apparaat, anders deze telefoon, anders het eerste
+async function deviceId(){
+  const d=await api('/me/player/devices');const list=d?.devices||[];
+  if(!list.length)throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
+  return (list.find(x=>x.is_active)||list.find(x=>x.type==='Smartphone')||list[0]).id;
+}
+
+function playlistUri(){
+  const s=($('playlist').value||localStorage.getItem('ks_playlist')||'').trim();
+  if(s.startsWith('spotify:playlist:'))return s;
+  try{const u=new URL(s),m=u.pathname.match(/playlist\/([A-Za-z0-9]+)/);if(m&&u.hostname.endsWith('spotify.com'))return 'spotify:playlist:'+m[1]}catch(e){}
+  return '';
+}
+
+async function playList(){
+  const context=playlistUri();
+  if(!context)throw Error('Vul een playlistlink in bij Instellingen');
+  radio.pause();
+  const dev=await deviceId();
+  await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{context_uri:context});
+  setMode('spotify');$('playPause').textContent='⏸ Pauze';msg('Spotify speelt je playlist');
+}
+
+async function goSpotify(){
+  if(!hasLogin())return settings();
+  try{await playList();$('notice').classList.remove('show')}catch(e){msg(e.message,true)}
+}
+
+async function toggle(){
+  try{
+    const d=await api('/me/player');
+    if(d?.is_playing){await api('/me/player/pause','PUT');$('playPause').textContent='▶ Afspelen';msg('Spotify gepauzeerd')}
+    else{await api('/me/player/play','PUT');$('playPause').textContent='⏸ Pauze';setMode('spotify');msg('Spotify speelt')}
+  }catch(e){msg(e.message,true)}
+}
+async function next(){try{await api('/me/player/next','POST');setMode('spotify');msg('Volgend nummer')}catch(e){msg(e.message,true)}}
+
+function settings(){
+  $('clientId').value=localStorage.getItem('ks_client')||'';
+  $('playlist').value=localStorage.getItem('ks_playlist')||'';
+  $('redirectUri').value=location.protocol==='file:'?'Niet beschikbaar bij een lokaal bestand':REDIRECT;
+  $('modal').classList.add('show');
+}
+
+/* Events */
+$('openSettings').onclick=settings;
+$('closeSettings').onclick=()=>$('modal').classList.remove('show');
+$('copyRedirect').onclick=async()=>{try{await navigator.clipboard.writeText($('redirectUri').value);$('copyRedirect').textContent='Gekopieerd'}catch(e){$('redirectUri').select()}};
+$('saveSettings').onclick=()=>{localStorage.setItem('ks_client',$('clientId').value.trim());localStorage.setItem('ks_playlist',$('playlist').value.trim());msg('Instellingen opgeslagen');$('modal').classList.remove('show')};
+$('connect').onclick=connect;
+$('logout').onclick=()=>{['ks_token','ks_expiry','ks_refresh','ks_verifier','ks_state'].forEach(k=>localStorage.removeItem(k));token=null;msg('Spotify ontkoppeld');$('modal').classList.remove('show')};
+$('playPause').onclick=()=>mode==='spotify'?toggle():radio.paused?startKink():radio.pause();
+$('switchKink').onclick=startKink;
+$('kinkMode').onclick=startKink;
+$('spotifyMode').onclick=goSpotify;
+$('noticeSpotify').onclick=goSpotify;
+$('dismiss').onclick=()=>$('notice').classList.remove('show');
+$('next').onclick=()=>mode==='spotify'?next():goSpotify();
+$('timer').onclick=()=>deadline?stopTimer():startTimer();
+radio.onplaying=()=>{setMode('kink');$('playPause').textContent='⏸ Pauze'};
+radio.onpause=()=>{if(mode==='kink'){$('playPause').textContent='▶ Start';setMode('kink')}};
+
+// Stuurwielknoppen en vergrendelscherm: "volgende" tijdens KINK schakelt naar Spotify
+if('mediaSession' in navigator){
+  navigator.mediaSession.metadata=new MediaMetadata({title:'KINK live',artist:'KINK Switch',artwork:[{src:'icon-512.png',sizes:'512x512',type:'image/png'}]});
+  navigator.mediaSession.setActionHandler('play',startKink);
+  navigator.mediaSession.setActionHandler('pause',()=>radio.pause());
+  navigator.mediaSession.setActionHandler('nexttrack',goSpotify);
+}
+
+/* Init */
+$('minutes').value=localStorage.getItem('ks_minutes')||30;remaining=(Number($('minutes').value)||30)*60;
+setInterval(()=>$('clock').textContent=new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}),1000);
+msg(hasLogin()?'Spotify gekoppeld':'Spotify niet gekoppeld. Tik op Instellingen.');
+callback();update();
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
