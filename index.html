@@ -348,6 +348,20 @@ async function pollMeta(){
   }catch(e){metaFails++;if(metaFails===1){$('kinkSong').textContent='Live radio';$('kinkArtist').textContent=''}}
 }
 
+// Slim kijken: KINK geeft de lengte van elk item mee. Rond het verwachte einde kijken we elke 3 seconden,
+// tijdens een reclameblok elke 5 seconden en verder elke 15 seconden.
+function nextMetaWait(){
+  if(!kinkNow)return 15000;
+  if(kinkNow.isBreak)return 5000;
+  if(kinkNow.dur){
+    const left=kinkNow.start+kinkNow.dur-Date.now();
+    if(left>-60000&&left<=4000)return 3000;
+    if(left>4000)return Math.max(3000,Math.min(15000,left-2000));
+  }
+  return 15000;
+}
+function scheduleMeta(wait){setTimeout(async()=>{try{await pollMeta()}catch(e){}scheduleMeta(nextMetaWait())},wait)}
+
 /* ---------- Scherm aan houden ---------- */
 async function keepAwake(){
   if(ls('ks_wake')!=='1'||!('wakeLock' in navigator)||document.visibilityState!=='visible')return;
@@ -365,6 +379,7 @@ function setMode(m){
   $('state').textContent=live?'LIVE':(m==='kink'?'PAUZE':'UIT');
   $('spotTag').textContent=m==='spotify'?'SPEELT':'PLAYLIST';
   if(m==='spotify'){$('kinkMode').classList.remove('fresh');setTimeout(pollSpotify,1500)}else renderSpotIdle();
+  updateMediaInfo();
 }
 
 // Geeft true terug als KINK echt speelt
@@ -513,10 +528,26 @@ function saveFields(){
 }
 
 
+/* ---------- Titel en Android-melding: wat speelt er nu ---------- */
+let spotNow=null;
+function updateMediaInfo(){
+  let title='KINK live',artist='KINK';
+  if(mode==='spotify'&&spotNow){title=spotNow.title;artist=spotNow.artist||'Spotify'}
+  else if(mode==='kink'&&kinkNow){
+    if(kinkNow.isBreak){title='Reclame of nieuws';artist='KINK'}
+    else if(kinkNow.title){title=kinkNow.title;artist=kinkNow.artist||'KINK'}
+  }
+  document.title=(title==='KINK live'?'KINK Switch':title+' - '+artist);
+  if('mediaSession' in navigator&&mode==='kink'){
+    try{navigator.mediaSession.metadata=new MediaMetadata({title,artist,album:'KINK live',artwork:[{src:'icon-512.png',sizes:'512x512',type:'image/png'}]})}catch(e){}
+  }
+}
+
 /* ---------- Liedjes tonen op beide tegels ---------- */
 let lastKinkSong='';
 function showKink(){
   if(!kinkNow)return;
+  updateMediaInfo();
   if(kinkNow.isBreak||!kinkNow.title){$('kinkSong').textContent=kinkNow.isBreak?'Reclame of nieuws':'Presentator of jingle';$('kinkArtist').textContent='';$('kinkGenre').textContent='';$('kinkMode').classList.remove('fav');lastGenreKey='';return}
   $('kinkSong').textContent=kinkNow.title;$('kinkArtist').textContent=kinkNow.artist||'';
   const key=kinkNow.artist+kinkNow.title;
@@ -618,6 +649,7 @@ async function pollSpotify(){
     if(!it)return renderSpotIdle();
     $('spotLabel').textContent=p.is_playing?'NU OP SPOTIFY':'GEPAUZEERD';
     $('spotSong').textContent=it.name;$('spotArtist').textContent=(it.artists||[]).map(a=>a.name).join(', ');
+    spotNow={title:it.name,artist:(it.artists||[]).map(a=>a.name).join(', ')};updateMediaInfo();
   }catch(e){}
 }
 function renderSpotIdle(){
@@ -722,7 +754,7 @@ if('mediaSession' in navigator){
 }
 
 /* ---------- Init ---------- */
-renderAuto();setPP(false);setMode('kink');pollMeta();setInterval(pollMeta,15000);
+renderAuto();setPP(false);setMode('kink');scheduleMeta(0);
 msg(hasLogin()?'Spotify gekoppeld':'Spotify niet gekoppeld. Tik op het tandwiel.');
 callback();incoming();tick();keepAwake();renderSpotIdle();setInterval(pollSpotify,10000);
 setInterval(tick,1000);

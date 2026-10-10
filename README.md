@@ -25,7 +25,7 @@ Open de app in Chrome op Android, tik op het menu met de drie puntjes en kies "T
 
 ## Automatisch wisselen
 
-De app leest elke 15 seconden de now playing-gegevens van KINK. Meldt KINK reclame, of draait er een item zonder titel van 45 seconden of langer (nieuws, reclame), dan schakelt de app naar Spotify. Zodra KINK weer een nummer met titel draait, gaat hij terug. Korte jingles en de presentator tellen niet mee. Een vangnet zorgt dat hij na 10 minuten altijd teruggaat. De vertraging van de stream (standaard 8 seconden) stel je in onder "Spotify koppelen".
+De app leest de now playing-gegevens van KINK: normaal elke 15 seconden, rond het einde van een nummer elke 3 seconden en tijdens een reclameblok elke 5 seconden. Meldt KINK reclame, of draait er een item zonder titel van 45 seconden of langer (nieuws, reclame), dan schakelt de app naar Spotify. Zodra KINK weer een nummer met titel draait, gaat hij terug. Korte jingles en de presentator tellen niet mee. Een vangnet zorgt dat hij na 10 minuten altijd teruggaat. De vertraging van de stream (standaard 8 seconden) stel je in onder "Spotify koppelen".
 
 ## Don't be silly
 
@@ -42,3 +42,12 @@ Voeg diegene toe onder User Management in het Spotify-dashboard (maximaal vijf p
 ## Jouw artiesten
 
 Bij het tandwiel staan Ivo's suggesties als knoppen die je aan of uit tikt, plus je eigen lijst. Draait KINK een van die artiesten, dan licht de KINK-tegel rood op en gaat de app (als je dat aanzet) terug naar KINK. Zoeken op genre kan ook, maar staat standaard uit.
+
+
+## Titel en melding
+
+De titel van de pagina en de mediamelding op Android tonen het nummer en de artiest die nu spelen.
+
+## Goed om te weten
+
+Laat de app in beeld staan (in de houder, met Scherm aan houden). Op de achtergrond remt de browser de app af en kijkt hij niet mee terwijl Spotify speelt.
