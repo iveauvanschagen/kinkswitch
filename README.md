@@ -28,3 +28,11 @@ Open de app in Chrome op Android, tik op het menu met de drie puntjes en kies "T
 Rond :28 en :58 begint op KINK vaak reclame of nieuws. Staat Auto aan en speelt KINK, dan wisselt de app op die minuten zelf naar Spotify en na de ingestelde duur (standaard 5 minuten) weer terug naar KINK. Wisseltijden en duur pas je aan bij Instellingen. Kies je zelf een bron tijdens een blok, dan respecteert de app dat.
 
 Het werkt het betrouwbaarst met de app open op het scherm. Zet daarvoor "Scherm aan houden" aan.
+
+## Playlist kiezen
+
+Tik op Playlist en kies er een uit je eigen lijst. Een andere playlist kan ook: kopieer de link in de Spotify-app via Delen en tik op "Plak gekopieerde Spotify-link". Staat de app op je startscherm, dan kun je in Spotify ook op Delen tikken en KINK Switch kiezen.
+
+## Iemand anders laten meedoen
+
+Voeg diegene toe onder User Management in het Spotify-dashboard (maximaal vijf personen, Premium vereist). Kopieer daarna bij het tandwiel, onder "Spotify koppelen", de koppellink en stuur die door. Openen en op Koppel Spotify tikken is genoeg.
