@@ -555,10 +555,26 @@ function toUri(s){
 }
 
 // Speelt de playlist. Stond hij al eerder op, dan gaat hij verder waar hij was in plaats van opnieuw te beginnen.
+// Aantal nummers in een playlist. Eerst uit wat we bij het kiezen al wisten, anders opvragen.
 async function playlistTotal(uri){
+  if(ls('ks_playlist')===uri&&Number(ls('ks_playlistTotal'))>0)return Number(ls('ks_playlistTotal'));
   const id=uri.split(':').pop();
-  const d=await api('/playlists/'+id+'?fields=items(total),tracks(total)').catch(()=>api('/playlists/'+id+'?fields=tracks(total)'));
-  return d?.items?.total??d?.tracks?.total??0;
+  for(const f of ['items.total','tracks.total']){
+    try{const d=await api('/playlists/'+id+'?fields='+f);const t=d?.items?.total??d?.tracks?.total??0;if(t>0){ls('ks_playlistTotal',String(t));return t}}catch(e){}
+  }
+  return 0;
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Spotify zet shuffle uit zodra een nieuwe playlist start. Daarom pas na het starten aanzetten,
+// even wachten tot de speler de nieuwe playlist heeft geladen en controleren of het gelukt is.
+async function ensureShuffle(dev){
+  for(let i=0;i<4;i++){
+    await sleep(i===0?900:1300);
+    try{await api('/me/player/shuffle?state=true&device_id='+encodeURIComponent(dev),'PUT')}catch(e){}
+    await sleep(400);
+    try{const p=await api('/me/player');if(p?.shuffle_state)return true}catch(e){}
+  }
+  return false;
 }
 async function playList(){
   const context=playlistUri();
@@ -568,20 +584,24 @@ async function playList(){
   try{const p=await api('/me/player');resume=p?.context?.uri===context}catch(e){}
   radio.pause();
   const shuffle=ls('ks_shuffle')!=='0';
-  let body=resume?undefined:{context_uri:context};
+  let body=resume?undefined:{context_uri:context},randomStart=false;
   // Nieuw gestart met shuffle: begin op een willekeurig nummer in plaats van altijd het eerste
-  if(body&&shuffle){try{const t=await playlistTotal(context);if(t>1)body.offset={position:Math.floor(Math.random()*t)}}catch(e){}}
-  if(shuffle){try{await api('/me/player/shuffle?state=true&device_id='+encodeURIComponent(dev),'PUT')}catch(e){}}
+  if(body&&shuffle){const t=await playlistTotal(context);if(t>1){body.offset={position:Math.floor(Math.random()*t)};randomStart=true}}
   try{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}
-  catch(e){if(body?.offset){delete body.offset;await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}else throw e}
-  if(shuffle){try{await api('/me/player/shuffle?state=true&device_id='+encodeURIComponent(dev),'PUT')}catch(e){}}
+  catch(e){if(body?.offset){delete body.offset;randomStart=false;await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}else throw e}
   setMode('spotify');setPP(true);
+  if(shuffle){
+    const ok=await ensureShuffle(dev);
+    // Lengte van de playlist onbekend? Dan na het aanzetten van shuffle één keer doorspringen naar een willekeurig nummer.
+    if(ok&&body&&!randomStart){try{await api('/me/player/next?device_id='+encodeURIComponent(dev),'POST')}catch(e){}}
+    if(!ok)msg('Shuffle aanzetten lukte niet. Zet het eventueel aan in de Spotify-app.',true);
+  }
 }
 
 async function goSpotify(){
   if(!hasLogin())return settings();
   setAway(0); // handmatig gekozen: niet automatisch terug
-  try{await playList();msg('Spotify speelt je playlist')}catch(e){msg(e.message,true)}
+  try{msg('Spotify start...');await playList();if(!$('status').classList.contains('err'))msg('Spotify speelt je playlist'+(ls('ks_shuffle')!=='0'?' op shuffle':''))}catch(e){msg(e.message,true)}
 }
 
 async function toggle(){
@@ -890,8 +910,8 @@ function renderSpotIdle(){
 }
 
 /* ---------- Playlist kiezen ---------- */
-function setPlaylist(uri,name){
-  ls('ks_playlist',uri);ls('ks_playlistName',name||'Je playlist');renderSpotIdle();
+function setPlaylist(uri,name,total){
+  ls('ks_playlist',uri);ls('ks_playlistName',name||'Je playlist');ls('ks_playlistTotal',total>0?String(total):null);renderSpotIdle();
   $('plModal').classList.remove('show');
   msg('Playlist gekozen: '+(name||'je playlist'));
   if(mode==='spotify')goSpotify();
@@ -929,7 +949,7 @@ async function openPicker(){
       const n=mine.items?.total??mine.tracks?.total;
       b.innerHTML='<span class="cov">'+LOGO_SVG+'</span><span style="min-width:0"><b></b><small></small></span>'+(mine.uri===cur?'<span class="ok">GEKOZEN</span>':'<span></span>');
       b.querySelector('b').textContent=mine.name;b.querySelector('small').textContent=(n!=null?n+(n===1?' nummer, ':' nummers, '):'')+'gevangen met KINK Switch';
-      b.onclick=()=>setPlaylist(mine.uri,mine.name);box.appendChild(b);
+      b.onclick=()=>setPlaylist(mine.uri,mine.name,mine.items?.total??mine.tracks?.total);box.appendChild(b);
       const h2=document.createElement('div');h2.className='pin dim';h2.textContent='JOUW PLAYLISTS';box.appendChild(h2);
     }
     all.filter(p=>p&&p!==mine).forEach(pl=>{
@@ -937,7 +957,7 @@ async function openPicker(){
       const img=pl.images?.[pl.images.length>1?1:0]?.url||pl.images?.[0]?.url;
       b.innerHTML=(img?'<img alt="" src="'+img+'">':'<span class="ph"></span>')+'<span style="min-width:0"><b></b><small></small></span>'+(pl.uri===cur?'<span class="ok">GEKOZEN</span>':'<span></span>');
       b.querySelector('b').textContent=pl.name;b.querySelector('small').textContent=pl.owner?.display_name||'';
-      b.onclick=()=>setPlaylist(pl.uri,pl.name);box.appendChild(b);
+      b.onclick=()=>setPlaylist(pl.uri,pl.name,pl.items?.total??pl.tracks?.total);box.appendChild(b);
     });
   }catch(e){
     if(/403|401|scope|Insufficient/i.test(e.message)){
