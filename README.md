@@ -28,7 +28,7 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 1. **Put it online.** Upload these files to a public GitHub repository and enable GitHub Pages (branch `main`, folder `/ (root)`).
 2. **Create a Spotify app.** Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), create an app, tick Web API and add your exact Pages URL as Redirect URI, slash included: `https://iveauvanschagen.github.io/kinkswitch/`
 3. **Add yourself.** Under User Management, add the email address of your Spotify account. Spotify Premium is required (up to five users in Development Mode).
-4. **Connect.** Open the app, tap the gear, open "Spotify koppelen", paste your Client ID and tap Koppel Spotify.
+4. **Connect.** Open the app, tap the gear, go to the Spotify tab, paste your Client ID under "Geavanceerd" and tap Koppel Spotify.
 5. **Pick a playlist.** Tap Playlist and choose one, paste a Spotify link or share a playlist to KINK Switch straight from the Spotify app.
 6. **Install it.** In Chrome on Android, open the menu and choose "Add to Home screen" or "Install app".
 
@@ -40,22 +40,24 @@ Tip: open the Spotify app once before your first switch. The app can only contro
 
 - **Auto switch.** Ads or news on KINK? Spotify. Music back? KINK. Hands free.
 - **Live now playing.** Artist big, song title below, on both tiles. Also shown in the page title and the Android media notification.
-- **Favourites.** Tap the heart on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
+- **Must hear.** Tap the heart on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
 - **KINK Catch.** Tap the add icon on the KINK tile and the song lands in your private KINK Catch playlist on Spotify (created for you the first time). Changed your mind? Undo right from the confirmation.
 - **Missed on KINK.** Heard something great while driving? Open Playlist, switch to "Gemist op KINK" and add any of the last songs KINK played.
-- **Skip list.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song.
+- **Must skip.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song.
 - **Don't be silly.** The panic button. One tap and Wodan Boys - Don't be Silly blasts through Spotify.
 - **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
 - **Smart Spotify resume.** Switching back to Spotify continues your playlist where you left it.
 - **Always shuffle.** Your playlist starts on shuffle at a random song, every time. Turn it off in settings if you like order.
 - **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
 - **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
+- **Background watching.** On your computer the app keeps switching even when it's a tab in the background. On by default on computers, off on phones.
+- **Clean settings.** Three tabs (Algemeen, Artiesten, Spotify), switches instead of checkboxes and every change is saved instantly, with a confirmation.
 - **Share with friends.** Copy a setup link from settings so a friend only has to tap Connect.
-- **Genre matching (optional).** Look up each KINK artist's genre on Spotify and match it to yours. Off by default.
 
 ## Good to know
 
-- **Keep it on screen.** In the background the browser slows the app down, so it can't keep an eye on KINK while Spotify plays. In the car holder with "Scherm aan houden" on, it works best.
+- **On your phone, keep it on screen.** Phones pause pages in the background, so in the car keep the app open in the holder with "Scherm aan houden" on.
+- **On your computer, use Chrome.** With "Ook op de achtergrond meekijken" on, the app keeps working as a background tab. Add the site to "Always keep these sites active" under Settings, Performance, so Chrome never unloads it.
 - **Data use.** The app itself uses about 1 to 2 MB per hour. The KINK stream is roughly 86 MB per hour; Spotify depends on your quality setting.
 - **Stream delay.** The app waits 8 seconds after a KINK marker so you don't lose the end of a song. You can tune this in settings.
 
