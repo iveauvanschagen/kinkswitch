@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d0f12">
+<title>Studio Brussel test</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0f12;--card:#171a21;--line:#2a2e37;--ok:#1ed760;--bad:#ff5a4e;--warn:#ffb020;--text:#f5f6f8;--muted:#8b919c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,sans-serif;padding:16px;max-width:760px;margin:0 auto}
+h1{font-size:20px;margin:4px 0}
+p{color:var(--muted);margin:4px 0 14px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row b{font-weight:700}
+.st{font-weight:900;font-size:13px;letter-spacing:.06em;white-space:nowrap}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.wait{color:var(--warn)}
+.now{font-size:22px;font-weight:900;margin-top:4px}
+.now small{display:block;font-size:15px;font-weight:600;color:var(--muted);margin-top:2px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+button{border:0;border-radius:8px;min-height:48px;padding:0 16px;font:800 15px system-ui;background:#262a33;color:var(--text)}
+button.go{background:#d9ff42;color:#0b0d06}
+#log{font:12px ui-monospace,Menlo,monospace;white-space:pre-wrap;max-height:45vh;overflow:auto;color:#c9ced6}
+</style>
+</head>
+<body>
+<h1>Studio Brussel test</h1>
+<p>Test of de stream speelt en of we kunnen zien welk nummer er draait. Tik op Start, laat het een uur lopen en stuur daarna de log via Kopieer log.</p>
+
+<div class="card">
+  <div class="row"><b>Stream (MP3, https)</b><span class="st wait" id="s_mp3">NOG NIET GETEST</span></div>
+  <div class="row"><b>Stream (AAC, https)</b><span class="st wait" id="s_aac">NOG NIET GETEST</span></div>
+  <div class="row"><b>Nummer uit de stream zelf</b><span class="st wait" id="s_icy">NOG NIET GETEST</span></div>
+  <div class="row"><b>VRT playlist-bron (onair)</b><span class="st wait" id="s_onair">NOG NIET GETEST</span></div>
+  <div class="row"><b>VRT playlist-bron (now-on-air)</b><span class="st wait" id="s_noa">NOG NIET GETEST</span></div>
+</div>
+
+<div class="card"><div style="color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.1em">NU OP STUDIO BRUSSEL</div><div class="now" id="now">-<small id="nowSrc"></small></div></div>
+
+<div class="btns">
+  <button class="go" id="start">Start test</button>
+  <button id="stop">Stop</button>
+  <button id="copy">Kopieer log</button>
+  <button id="clear">Wis log</button>
+</div>
+<audio id="a" controls preload="none" style="width:100%"></audio>
+<div class="card" style="margin-top:10px"><div id="log"></div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const MP3='https://icecast.vrtcdn.be/stubru-high.mp3';
+const AAC='https://icecast.vrtcdn.be/stubru.aac';
+const SOURCES={
+  onair:['https://services.vrt.be/playlist/onair?channel_code=41','application/vnd.playlist.vrt.be.noa_1.0+json'],
+  noa:['https://services.vrt.be/epg/playlists/now-on-air','application/json']
+};
+let lines=[],running=false,timers=[],icyAbort=null,lastTitle={};
+try{lines=JSON.parse(localStorage.getItem('sb_log')||'[]')}catch(e){}
+function t(){return new Date().toLocaleTimeString('nl-NL')}
+function log(s){lines.push(t()+'  '+s);if(lines.length>3000)lines=lines.slice(-3000);try{localStorage.setItem('sb_log',JSON.stringify(lines))}catch(e){}$('log').textContent=lines.slice().reverse().join('\n')}
+function st(id,cls,txt){const e=$(id);e.className='st '+cls;e.textContent=txt}
+function now(title,src){$('now').firstChild.textContent=title||'-';$('nowSrc').textContent=src||''}
+log('Pagina geopend. '+navigator.userAgent);
+
+/* 1. Stream testen: speelt hij via https? */
+function testStream(url,id){
+  return new Promise(res=>{
+    const a=new Audio();a.preload='auto';a.muted=true;let done=false;
+    const fin=(ok,why)=>{if(done)return;done=true;st(id,ok?'ok':'bad',ok?'WERKT':'MISLUKT');log((ok?'OK   ':'FOUT ')+url+(why?' ('+why+')':''));a.pause();a.removeAttribute('src');a.load();res(ok)};
+    a.oncanplay=()=>fin(true);a.onplaying=()=>fin(true);
+    a.onerror=()=>fin(false,'mediafout '+(a.error&&a.error.code));
+    setTimeout(()=>fin(false,'geen geluid binnen 12 s'),12000);
+    a.src=url;a.play().catch(e=>{});
+  });
+}
+
+/* 2. Nummer uit de stream zelf (ICY-metadata, zoals in Winamp) */
+async function icy(){
+  try{
+    icyAbort=new AbortController();
+    const r=await fetch(MP3,{headers:{'Icy-MetaData':'1'},signal:icyAbort.signal,cache:'no-store'});
+    const mi=parseInt(r.headers.get('icy-metaint')||'0');
+    log('ICY: status '+r.status+', icy-metaint='+(mi||'niet zichtbaar'));
+    if(!mi){st('s_icy','bad','NIET BESCHIKBAAR');return}
+    st('s_icy','wait','LUISTERT...');
+    const rd=r.body.getReader();let buf=new Uint8Array(0),need=mi,mode='audio',metaLen=0;
+    while(running){
+      const {value,done}=await rd.read();if(done)break;
+      let b=new Uint8Array(buf.length+value.length);b.set(buf);b.set(value,buf.length);buf=b;
+      while(true){
+        if(mode==='audio'){if(buf.length<need)break;buf=buf.slice(need);mode='len'}
+        if(mode==='len'){if(buf.length<1)break;metaLen=buf[0]*16;buf=buf.slice(1);mode=metaLen?'meta':'audio';need=mi;if(!metaLen)continue}
+        if(mode==='meta'){if(buf.length<metaLen)break;
+          const txt=new TextDecoder('utf-8').decode(buf.slice(0,metaLen)).replace(/\0+$/,'');buf=buf.slice(metaLen);mode='audio';need=mi;
+          const m=txt.match(/StreamTitle='(.*?)';/);const title=m?m[1]:txt;
+          if(title!==lastTitle.icy){lastTitle.icy=title;log('ICY: '+(title||'(leeg)'));st('s_icy',title?'ok':'wait',title?'WERKT':'LEEG');if(title)now(title,'uit de stream')}
+        }
+      }
+    }
+  }catch(e){if(running){log('ICY fout: '+e.message+' (waarschijnlijk CORS)');st('s_icy','bad','GEBLOKKEERD')}}
+}
+
+/* 3. VRT playlist-bronnen pollen */
+function pick(o){
+  // Zoek in een onbekende JSON-structuur naar artiest en titel
+  let artist='',title='';
+  (function walk(x,d){if(!x||d>8||(artist&&title))return;
+    if(Array.isArray(x)){x.forEach(y=>walk(y,d+1));return}
+    if(typeof x==='object'&&typeof x.key==='string'&&typeof x.value==='string'){const kl=x.key.toLowerCase();if(!artist&&/artist|performer/.test(kl))artist=x.value;else if(!title&&/^(title|songtitle|tracktitle|titel)$/.test(kl))title=x.value;return}
+    if(typeof x==='object'){for(const [k,v] of Object.entries(x)){
+      const kl=k.toLowerCase();
+      if(typeof v==='string'&&v){if(!artist&&/artist|performer|artiest/.test(kl))artist=v;else if(!title&&/^(title|songtitle|tracktitle|name|titel)$/.test(kl))title=v}
+      else walk(v,d+1)}}})(o,0);
+  return (artist||title)?(artist+(artist&&title?' - ':'')+title):'';
+}
+async function poll(key){
+  const [url,accept]=SOURCES[key],id='s_'+key;
+  try{
+    const r=await fetch(url+(url.includes('?')?'&':'?')+'_='+Date.now(),{headers:{Accept:accept},cache:'no-store'});
+    const txt=await r.text();
+    if(!lastTitle['raw_'+key]){lastTitle['raw_'+key]=1;log(key+': status '+r.status+', eerste 400 tekens: '+txt.slice(0,400).replace(/\s+/g,' '))}
+    if(!r.ok){st(id,'bad','FOUT '+r.status);return}
+    let found='';try{found=pick(JSON.parse(txt))}catch(e){found='(geen JSON)'}
+    if(found!==lastTitle[key]){lastTitle[key]=found;log(key+': '+(found||'geen nummer (praten, nieuws of reclame?)'));if(found&&found!=='(geen JSON)')now(found,'via VRT '+key)}
+    st(id,found&&found!=='(geen JSON)'?'ok':'wait',found&&found!=='(geen JSON)'?'WERKT':'BEREIKBAAR, GEEN NUMMER');
+  }catch(e){
+    if(!lastTitle['err_'+key]){lastTitle['err_'+key]=1;log(key+' fout: '+e.message+' (waarschijnlijk CORS of bron bestaat niet meer)')}
+    st(id,'bad','GEBLOKKEERD');
+  }
+}
+
+$('start').onclick=async()=>{
+  if(running)return;running=true;log('Test gestart');
+  st('s_mp3','wait','TESTEN...');st('s_aac','wait','TESTEN...');
+  await testStream(MP3,'s_mp3');await testStream(AAC,'s_aac');
+  // Laat de MP3-stream hoorbaar spelen, zodat je kunt vergelijken met wat je hoort
+  $('a').src=MP3;$('a').play().catch(()=>{});
+  icy();
+  for(const k of Object.keys(SOURCES)){poll(k);timers.push(setInterval(()=>poll(k),15000))}
+};
+$('stop').onclick=()=>{running=false;timers.forEach(clearInterval);timers=[];if(icyAbort)icyAbort.abort();$('a').pause();log('Test gestopt')};
+$('copy').onclick=async()=>{const txt=lines.join('\n');try{await navigator.clipboard.writeText(txt);$('copy').textContent='Gekopieerd'}catch(e){prompt('Kopieer de log',txt)}};
+$('clear').onclick=()=>{lines=[];lastTitle={};try{localStorage.removeItem('sb_log')}catch(e){}$('log').textContent=''};
+$('log').textContent=lines.slice().reverse().join('\n');
+</script>
+</body>
+</html>
