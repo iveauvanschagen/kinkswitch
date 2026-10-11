@@ -35,10 +35,14 @@ button.go{background:#d9ff42;color:#0b0d06}
   <div class="row"><b>Nummer uit de stream zelf</b><span class="st wait" id="s_icy">NOG NIET GETEST</span></div>
   <div class="row"><b>VRT playlist-bron (onair)</b><span class="st wait" id="s_onair">NOG NIET GETEST</span></div>
   <div class="row"><b>VRT playlist-bron (now-on-air)</b><span class="st wait" id="s_noa">NOG NIET GETEST</span></div>
+  <div class="row"><b>Via je Worker: nummer uit de stream</b><span class="st wait" id="s_wicy">NOG NIET GETEST</span></div>
+  <div class="row"><b>Via je Worker: VRT playlist-bron</b><span class="st wait" id="s_wonair">NOG NIET GETEST</span></div>
 </div>
 
 <div class="card"><div style="color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.1em">NU OP STUDIO BRUSSEL</div><div class="now" id="now">-<small id="nowSrc"></small></div></div>
 
+<div class="card"><div style="color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.1em;margin-bottom:6px">ADRES VAN JE CLOUDFLARE WORKER</div>
+<input id="wurl" placeholder="https://kink-switch-relay.jouwnaam.workers.dev" autocomplete="off" spellcheck="false" style="width:100%;min-height:46px;border-radius:8px;border:1px solid var(--line);background:#0b0d10;color:var(--text);padding:0 12px;font:15px system-ui"></div>
 <div class="btns">
   <button class="go" id="start">Start test</button>
   <button id="stop">Stop</button>
@@ -131,7 +135,28 @@ async function poll(key){
   }
 }
 
+/* 4. Via de eigen Cloudflare Worker */
+let wFirst=true;
+async function pollWorker(){
+  const base=$('wurl').value.trim().replace(/\/+$/,'');if(!base)return;
+  try{
+    const r=await fetch(base+'/?station=stubru'+(wFirst?'&debug=1':'')+'&_='+Date.now(),{cache:'no-store'});
+    const d=await r.json();
+    if(wFirst){wFirst=false;log('Worker: eerste antwoord '+JSON.stringify(d).slice(0,900))}
+    const icyT=d.icy&&d.icy.title||'';const on=d.onair&&(d.onair.artist||d.onair.title)?((d.onair.artist||'')+' - '+(d.onair.title||'')):'';
+    if(icyT!==lastTitle.wicy){lastTitle.wicy=icyT;log('Worker stream: '+(icyT||'(leeg)'))}
+    if(on!==lastTitle.wonair){lastTitle.wonair=on;log('Worker VRT-bron: '+(on||'(geen nummer)'))}
+    st('s_wicy',icyT?'ok':(d.icy?'wait':'bad'),icyT?'WERKT':(d.icy?'LEEG':'GEEN GEGEVENS'));
+    st('s_wonair',on?'ok':(d.onair?'wait':'bad'),on?'WERKT':(d.onair?'GEEN NUMMER':'GEEN GEGEVENS'));
+    if(on)now(on,'via Worker, VRT-bron');else if(icyT)now(icyT,'via Worker, stream');
+  }catch(e){if(!lastTitle.werr){lastTitle.werr=1;log('Worker fout: '+e.message)}st('s_wicy','bad','NIET BEREIKBAAR');st('s_wonair','bad','NIET BEREIKBAAR')}
+}
+try{$('wurl').value=localStorage.getItem('sb_worker')||''}catch(e){}
+$('wurl').onchange=()=>{try{localStorage.setItem('sb_worker',$('wurl').value.trim())}catch(e){}};
+
 $('start').onclick=async()=>{
+  try{localStorage.setItem('sb_worker',$('wurl').value.trim())}catch(e){}
+  wFirst=true;pollWorker();timers.push(setInterval(pollWorker,15000));
   if(running)return;running=true;log('Test gestart');
   st('s_mp3','wait','TESTEN...');st('s_aac','wait','TESTEN...');
   await testStream(MP3,'s_mp3');await testStream(AAC,'s_aac');
