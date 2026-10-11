@@ -34,7 +34,7 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 
 The first time you save a song to KINK Catch, the app asks Spotify once for permission to edit your playlists. Nothing to change in the dashboard.
 
-Tip: open the Spotify app once before your first switch. The app can only control a Spotify player that is running.
+Tip: the app can only control a Spotify player that is running. If none is found, KINK Switch asks you to open Spotify with one tap.
 
 ## Features
 
@@ -48,6 +48,7 @@ Tip: open the Spotify app once before your first switch. The app can only contro
 - **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
 - **Smart Spotify resume.** Switching back to Spotify continues your playlist where you left it.
 - **Always shuffle.** Your playlist starts on shuffle at a random song, every time. Turn it off in settings if you like order.
+- **Spotify check.** On start, when you come back to the app and every minute, the app checks that Spotify is reachable. If not, a pop-up offers one tap to open the Spotify app (or the web player on a computer) and closes itself once Spotify is found. KINK keeps playing meanwhile.
 - **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
 - **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
 - **Background watching.** On your computer the app keeps switching even when it's a tab in the background. On by default on computers, off on phones.
