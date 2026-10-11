@@ -83,6 +83,36 @@ svg{display:block}
 .tile:has(.src.spot.active) .favbtn{color:var(--spot-ink)}
 .favbtn.on,.tile:has(.src.active) .favbtn.on{background:var(--hot);border-color:var(--hot);color:#fff}
 .favbtn[hidden]{display:none}
+.acts{position:absolute;top:22px;right:22px;display:flex;gap:10px;z-index:2}
+.ibtn{width:64px;height:54px;border-radius:10px;display:grid;place-items:center;background:#22262e;border:1px solid var(--line);color:var(--text)}
+.ibtn[hidden]{display:none}
+.ibtn svg{width:28px;height:28px}
+.tile:has(.src.active) .ibtn{background:#0000002e;border-color:#0000001f}
+.tile:has(.src.kink.active) .ibtn{color:var(--kink-ink)}
+.tile:has(.src.spot.active) .ibtn{color:var(--spot-ink)}
+.ibtn.on,.tile:has(.src.active) .ibtn.on{background:var(--hot);border-color:var(--hot);color:#fff}
+.ibtn.on svg path{fill:currentColor}
+.ibtn.done,.tile:has(.src.active) .ibtn.done{background:#0b0d10;border-color:#0b0d10;color:var(--kink)}
+.ibtn.busy{opacity:.5}
+.toast{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(560px,calc(100% - 24px));display:flex;align-items:center;gap:12px;
+  background:#f5f6f8;color:#0b0d10;border-radius:10px;padding:12px 12px 12px 16px;font-weight:800;font-size:15px;box-shadow:0 12px 40px #000a;z-index:6}
+.toast[hidden]{display:none}
+.toast span{flex:1;min-width:0}.toast small{display:block;font-weight:600;color:#4a505b;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast button{min-height:44px;padding:0 14px;border-radius:8px;background:#0b0d10;color:#fff;font-weight:800;font-size:14px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#0b0d10;padding:6px;border-radius:10px;margin:6px 0 12px}
+.tabs button{background:transparent;min-height:48px;border-radius:8px;font-weight:850;font-size:15px;color:var(--muted)}
+.tabs button.on{background:#22262e;color:var(--text)}
+.pin{font-size:11px;font-weight:900;letter-spacing:.1em;color:var(--kink);margin:14px 0 2px}
+.pin.dim{color:var(--muted)}
+.pl.mine{border-color:var(--kink)}
+.pl .cov{width:56px;height:56px;border-radius:8px;display:grid;place-items:center;background:#1b1f27}
+.pl .cov svg{width:34px;height:34px}
+.miss{display:grid;grid-template-columns:52px 1fr 56px;gap:12px;align-items:center;padding:8px;border-radius:10px;background:#0b0d10;border:1px solid var(--line);margin-top:8px}
+.miss time{font-weight:800;color:var(--muted);font-size:14px}
+.miss b{display:block;font-size:16px}.miss small{color:var(--muted);font-size:14px}
+.miss .ibtn{width:56px;height:48px}
+.miss .ibtn.done{color:var(--kink);background:#22262e;border-color:var(--line)}
+
 .src .np strong span{display:inline;font-size:inherit;font-weight:inherit;opacity:1;margin:0;white-space:normal}
 .src .np strong .gtag{font-size:11px;vertical-align:6px}
 .src .np .gtag{display:inline-block;opacity:1;font-size:11px}
@@ -185,13 +215,13 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1a10 10 0 0 1 0-14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/><circle cx="12" cy="12" r="2"/></svg></span>
       <span style="min-width:0"><span class="name">KINK</span><span class="np"><em>NU OP KINK</em><strong><span id="kinkArtist">Live radio</span><span class="gtag" id="kinkGenre"></span></strong><span id="kinkSong"></span></span></span>
     </button>
-    <button class="favbtn" id="kinkFav" hidden>+ Favoriet</button></div>
+    <div class="acts"><button class="ibtn" id="kinkAdd" aria-label="Toevoegen aan KINK Catch" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h12M3 12h12M3 18h7"/><path d="M18 13v8M14 17h8"/></svg></button><button class="ibtn" id="kinkFav" aria-label="Favoriet" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9.4C1.4 7.6 3.6 4.5 7 4.5c2.1 0 3.8 1.2 5 3 1.2-1.8 2.9-3 5-3 3.4 0 5.6 3.1 4.3 6.6-1.8 4.8-9.3 9.4-9.3 9.4z"/></svg></button></div></div>
     <div class="tile"><button class="src spot" id="spotifyMode" aria-label="Spotify">
       <span class="tag" id="spotTag">PLAYLIST</span>
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
       <span style="min-width:0"><span class="name">Spotify</span><span class="np"><em id="spotLabel">PLAYLIST</em><strong id="spotArtist">Kies een playlist</strong><span id="spotSong"></span></span></span>
     </button>
-    <button class="favbtn" id="spotFav" hidden>+ Favoriet</button></div>
+    <div class="acts"><button class="ibtn" id="spotFav" aria-label="Favoriet" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9.4C1.4 7.6 3.6 4.5 7 4.5c2.1 0 3.8 1.2 5 3 1.2-1.8 2.9-3 5-3 3.4 0 5.6 3.1 4.3 6.6-1.8 4.8-9.3 9.4-9.3 9.4z"/></svg></button></div></div>
   </section>
 
   <section class="controls">
@@ -210,12 +240,15 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
   </audio>
 </div>
 
+<div class="toast" id="toast" hidden><span id="toastTxt"></span><button id="toastUndo">Ongedaan maken</button></div>
+
 <div class="modal" id="modal"><div class="modalbox">
   <h2>Instellingen</h2>
   <div class="warn">Stel dit in als je stilstaat. Niet tijdens het rijden.</div>
   <h3>AUTOMATISCH WISSELEN</h3>
   <p>Meldt KINK reclame of nieuws, dan schakelt de app naar Spotify. Draait KINK weer muziek, dan gaat hij terug.</p>
   <label class="check"><input id="wake" type="checkbox"> Scherm aan houden zolang de app open is</label>
+  <label class="check"><input id="shuffle" type="checkbox"> Spotify altijd op shuffle</label>
   <h3>JOUW ARTIESTEN</h3>
   <p>Draait KINK een van deze artiesten, dan licht de KINK-tegel op. Tik om aan of uit te zetten.</p>
   <div><small style="color:var(--muted);font-weight:800">IVO'S SUGGESTIES</small></div>
@@ -260,16 +293,23 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 </div></div>
 
 <div class="modal" id="plModal"><div class="modalbox">
-  <h2>Kies een playlist</h2>
-  <button class="btn primary bigbtn" id="pastePl">Plak gekopieerde Spotify-link</button>
-  <p>Tip: in de Spotify-app kun je ook bij een playlist op Delen tikken en KINK Switch kiezen (als de app op je startscherm staat).</p>
-  <div id="plList"></div>
+  <h2>Playlist</h2>
+  <div class="tabs"><button class="on" id="tabPlay">Afspelen</button><button id="tabMiss">Gemist op KINK</button></div>
+  <div id="paneMiss" hidden>
+    <p>De laatste nummers op KINK. Tik op het icoon om er een toe te voegen aan KINK Catch.</p>
+    <div id="missList"></div>
+  </div>
+  <div id="panePlay">
+    <button class="btn primary bigbtn" id="pastePl">Plak gekopieerde Spotify-link</button>
+    <p>Tip: in de Spotify-app kun je ook bij een playlist op Delen tikken en KINK Switch kiezen (als de app op je startscherm staat).</p>
+    <div id="plList"></div>
+  </div>
   <button class="btn bigbtn" id="closePl">Sluiten</button>
 </div></div>
 
 <script>
 const $=id=>document.getElementById(id), radio=$('radio');
-const SCOPES='user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative';
+const SCOPES='user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
 let mode='kink', token=null, tokenExpiry=0, wakeLock=null, busy=false;
 
 // Canonieke redirect: altijd de map-URL, zonder index.html, query of hash
@@ -515,6 +555,11 @@ function toUri(s){
 }
 
 // Speelt de playlist. Stond hij al eerder op, dan gaat hij verder waar hij was in plaats van opnieuw te beginnen.
+async function playlistTotal(uri){
+  const id=uri.split(':').pop();
+  const d=await api('/playlists/'+id+'?fields=items(total),tracks(total)').catch(()=>api('/playlists/'+id+'?fields=tracks(total)'));
+  return d?.items?.total??d?.tracks?.total??0;
+}
 async function playList(){
   const context=playlistUri();
   if(!context){openPicker();throw Error('Kies eerst een playlist')}
@@ -522,7 +567,14 @@ async function playList(){
   let resume=false;
   try{const p=await api('/me/player');resume=p?.context?.uri===context}catch(e){}
   radio.pause();
-  await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',resume?undefined:{context_uri:context});
+  const shuffle=ls('ks_shuffle')!=='0';
+  let body=resume?undefined:{context_uri:context};
+  // Nieuw gestart met shuffle: begin op een willekeurig nummer in plaats van altijd het eerste
+  if(body&&shuffle){try{const t=await playlistTotal(context);if(t>1)body.offset={position:Math.floor(Math.random()*t)}}catch(e){}}
+  if(shuffle){try{await api('/me/player/shuffle?state=true&device_id='+encodeURIComponent(dev),'PUT')}catch(e){}}
+  try{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}
+  catch(e){if(body?.offset){delete body.offset;await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}else throw e}
+  if(shuffle){try{await api('/me/player/shuffle?state=true&device_id='+encodeURIComponent(dev),'PUT')}catch(e){}}
   setMode('spotify');setPP(true);
 }
 
@@ -547,6 +599,7 @@ function settings(){
   $('delay').value=delayMs()/1000;draftFavs=favList();renderChips();draftBans=banList();renderBanChips();
   $('clientId').value=ls('ks_client')||'';
   $('wake').checked=ls('ks_wake')==='1';
+  $('shuffle').checked=ls('ks_shuffle')!=='0';
   $('redirectUri').value=location.protocol==='file:'?'Niet beschikbaar bij een lokaal bestand':REDIRECT;
   $('modal').classList.add('show');
 }
@@ -555,6 +608,7 @@ function saveFields(){
   ls('ks_delay',String($('delay').value===''?8:$('delay').value));lastGenreKey='';showKink();renderFavBtns();
   ls('ks_client',$('clientId').value.trim());
   ls('ks_wake',$('wake').checked?'1':'0');
+  ls('ks_shuffle',$('shuffle').checked?'1':'0');
   if($('wake').checked)keepAwake();else if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null}
 }
 
@@ -630,12 +684,106 @@ function toggleFav(artist){
 function renderFavBtns(){
   const kb=$('kinkFav'),sb=$('spotFav');
   const ka=kinkNow&&!kinkNow.isBreak&&kinkNow.title&&kinkNow.artist?mainArtist(kinkNow.artist):'';
-  kb.hidden=!ka;if(ka){const on=isFav(ka);kb.textContent=on?'★ Favoriet':'+ Favoriet';kb.classList.toggle('on',on)}
+  kb.hidden=!ka;if(ka)kb.classList.toggle('on',isFav(ka));
   const sa=mode==='spotify'&&spotNow?spotNow.main:'';
-  sb.hidden=!sa;if(sa){const on=isFav(sa);sb.textContent=on?'★ Favoriet':'+ Favoriet';sb.classList.toggle('on',on)}
+  sb.hidden=!sa;if(sa)sb.classList.toggle('on',isFav(sa));
+  const ab=$('kinkAdd'),ok=kinkNow&&!kinkNow.isBreak&&kinkNow.title;
+  ab.hidden=!ok;if(ok){const done=isCaught(kinkNow.artist,kinkNow.title);ab.classList.toggle('done',done);ab.innerHTML=done?ICON_CHECK:ICON_ADD}
 }
 $('kinkFav').onclick=e=>{e.stopPropagation();if(kinkNow?.artist)toggleFav(mainArtist(kinkNow.artist))};
 $('spotFav').onclick=e=>{e.stopPropagation();if(spotNow?.main)toggleFav(spotNow.main)};
+
+/* ---------- KINK Catch: nummers van KINK bewaren in een eigen Spotify-playlist ---------- */
+const CATCH_NAME='KINK Catch';
+const ICON_ADD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h12M3 12h12M3 18h7"/><path d="M18 13v8M14 17h8"/></svg>';
+const ICON_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+const LOGO_SVG='<svg viewBox="0 0 512 512"><g fill="none" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"><path d="M120 196h220" stroke="#d9ff42"/><path d="M300 146l52 50-52 50" stroke="#d9ff42"/><path d="M392 316H172" stroke="#1ed760"/><path d="M212 266l-52 50 52 50" stroke="#1ed760"/></g></svg>';
+function caughtMap(){try{return JSON.parse(ls('ks_caught')||'{}')}catch(e){return {}}}
+function songKey(artist,title){return norm(artist)+'|'+norm(title)}
+function isCaught(artist,title){return !!caughtMap()[songKey(artist,title)]}
+function setCaught(artist,title,uri){const m=caughtMap(),k=songKey(artist,title);if(uri)m[k]=uri;else delete m[k];ls('ks_caught',JSON.stringify(m))}
+function needsModifyScope(){const sc=ls('ks_scope')||'';return !sc.includes('playlist-modify-private')}
+async function catchPlaylistId(){
+  let id=ls('ks_catchId');
+  if(id)return id;
+  // Bestaat hij al (bijvoorbeeld op een ander apparaat aangemaakt)? Dan die gebruiken.
+  let url='/me/playlists?limit=50';
+  for(let i=0;i<4&&url;i++){const d=await api(url);const f=(d?.items||[]).find(p=>p&&p.name===CATCH_NAME);if(f){ls('ks_catchId',f.id);return f.id}url=d?.next?d.next.replace('https://api.spotify.com/v1',''):null}
+  const c=await api('/me/playlists','POST',{name:CATCH_NAME,public:false,description:'Gevangen op KINK met KINK Switch'});
+  ls('ks_catchId',c.id);return c.id;
+}
+async function findTrack(artist,title){
+  const d=await api('/search?type=track&limit=5&q='+encodeURIComponent('track:'+title+' artist:'+mainArtist(artist)));
+  const items=d?.tracks?.items||[];
+  const a=norm(mainArtist(artist));
+  return items.find(t=>(t.artists||[]).some(x=>norm(x.name)===a))||items[0]||null;
+}
+let toastTimer=null;
+function toast(text,sub,undo,label){
+  $('toastUndo').textContent=label||'Ongedaan maken';
+  $('toastTxt').innerHTML='';$('toastTxt').append(text);
+  if(sub){const s=document.createElement('small');s.textContent=sub;$('toastTxt').appendChild(s)}
+  $('toastUndo').hidden=!undo;$('toastUndo').onclick=async()=>{$('toast').hidden=true;if(undo)await undo()};
+  $('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,6000);
+}
+async function catchSong(artist,title,btn){
+  if(!hasLogin())return settings();
+  if(needsModifyScope()){
+    return toast('Eén keer toestemming nodig','Tik op Koppel om playlists te mogen aanpassen',async()=>{$('clientId').value=ls('ks_client')||'';connect()},'Koppel');
+  }
+  if(isCaught(artist,title))return toast('Staat al in '+CATCH_NAME,artist+' - '+title);
+  btn?.classList.add('busy');
+  try{
+    const t=await findTrack(artist,title);
+    if(!t)throw Error('Nummer niet gevonden op Spotify');
+    let id=await catchPlaylistId();
+    try{await api('/playlists/'+id+'/items','POST',{uris:[t.uri]})}
+    catch(e){ls('ks_catchId',null);id=await catchPlaylistId();await api('/playlists/'+id+'/items','POST',{uris:[t.uri]})}
+    setCaught(artist,title,t.uri);renderFavBtns();renderMiss();
+    const found=(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name;
+    toast('Toegevoegd aan '+CATCH_NAME,found,async()=>{
+      try{await api('/playlists/'+id+'/items','DELETE',{items:[{uri:t.uri}]})}
+      catch(e){try{await api('/playlists/'+id+'/items','DELETE',{tracks:[{uri:t.uri}]})}catch(e2){}}
+      setCaught(artist,title,null);renderFavBtns();renderMiss();msg('Weer verwijderd uit '+CATCH_NAME);
+    });
+  }catch(e){msg('Toevoegen mislukt: '+e.message,true)}
+  btn?.classList.remove('busy');
+}
+$('kinkAdd').onclick=e=>{e.stopPropagation();if(kinkNow?.title)catchSong(kinkNow.artist,kinkNow.title,$('kinkAdd'))};
+
+/* ---------- Gemist op KINK ---------- */
+let missItems=[];
+async function loadMiss(){
+  $('missList').innerHTML='<p>Laden...</p>';
+  try{
+    const r=await fetch('https://np.tritondigital.com/public/nowplaying?mountName=KINK&numberToFetch=10&_='+Date.now(),{cache:'no-store'});
+    const x=new DOMParser().parseFromString(await r.text(),'text/xml');
+    missItems=[...x.querySelectorAll('nowplaying-info')].map(el=>{const p={};el.querySelectorAll('property').forEach(q=>p[q.getAttribute('name')]=q.textContent);
+      return {type:el.getAttribute('type'),start:+p.cue_time_start||0,title:p.cue_title||'',artist:p.track_artist_name||''}})
+      .filter(i=>i.type!=='ad'&&i.title&&i.artist).sort((a,b)=>b.start-a.start);
+  }catch(e){missItems=[]}
+  renderMiss();
+}
+function renderMiss(){
+  const box=$('missList');if(!box)return;
+  if(!missItems.length){box.innerHTML='<p>Nog geen nummers gevonden. Probeer het zo nog eens.</p>';return}
+  box.innerHTML='';
+  missItems.forEach(it=>{
+    const row=document.createElement('div');row.className='miss';
+    const done=isCaught(it.artist,it.title);
+    row.innerHTML='<time></time><span style="min-width:0"><b></b><small></small></span><button class="ibtn'+(done?' done':'')+'" aria-label="Toevoegen aan KINK Catch">'+(done?ICON_CHECK:ICON_ADD)+'</button>';
+    row.querySelector('time').textContent=hhmm(it.start);row.querySelector('b').textContent=it.artist;row.querySelector('small').textContent=it.title;
+    const b=row.querySelector('button');b.onclick=()=>catchSong(it.artist,it.title,b);
+    box.appendChild(row);
+  });
+}
+function showTab(t){
+  $('tabPlay').classList.toggle('on',t==='play');$('tabMiss').classList.toggle('on',t==='miss');
+  $('panePlay').hidden=t!=='play';$('paneMiss').hidden=t!=='miss';
+  if(t==='miss')loadMiss();
+}
+$('tabPlay').onclick=()=>showTab('play');
+$('tabMiss').onclick=()=>showTab('miss');
 
 /* ---------- Niet mijn muziek: banlijst ---------- */
 const BAN_SUGGESTIONS=['The Killers'];
@@ -758,7 +906,7 @@ async function setFromLink(text){
   setPlaylist(uri,hasLogin()?await nameOf(uri):'');return true;
 }
 async function openPicker(){
-  $('plModal').classList.add('show');
+  $('plModal').classList.add('show');$('toast').hidden=true;showTab('play');
   const box=$('plList');
   if(!hasLogin()){box.innerHTML='<p>Koppel eerst Spotify via het tandwiel.</p>';return}
   const sc=ls('ks_scope');
@@ -772,7 +920,19 @@ async function openPicker(){
     for(let i=0;i<4&&url;i++){const d=await api(url);all=all.concat(d?.items||[]);url=d?.next?d.next.replace('https://api.spotify.com/v1',''):null}
     if(!all.length){box.innerHTML='<p>Geen playlists gevonden. Gebruik de knop Plak hierboven.</p>';return}
     const cur=ls('ks_playlist');box.innerHTML='';
-    all.filter(Boolean).forEach(pl=>{
+    const catchId=ls('ks_catchId');
+    const mine=all.filter(Boolean).find(p=>p.id===catchId||p.name===CATCH_NAME);
+    if(mine){
+      if(!catchId)ls('ks_catchId',mine.id);
+      const h=document.createElement('div');h.className='pin';h.textContent='JOUW KINK-PLAYLIST';box.appendChild(h);
+      const b=document.createElement('button');b.className='pl mine'+(mine.uri===cur?' cur':'');
+      const n=mine.items?.total??mine.tracks?.total;
+      b.innerHTML='<span class="cov">'+LOGO_SVG+'</span><span style="min-width:0"><b></b><small></small></span>'+(mine.uri===cur?'<span class="ok">GEKOZEN</span>':'<span></span>');
+      b.querySelector('b').textContent=mine.name;b.querySelector('small').textContent=(n!=null?n+(n===1?' nummer, ':' nummers, '):'')+'gevangen met KINK Switch';
+      b.onclick=()=>setPlaylist(mine.uri,mine.name);box.appendChild(b);
+      const h2=document.createElement('div');h2.className='pin dim';h2.textContent='JOUW PLAYLISTS';box.appendChild(h2);
+    }
+    all.filter(p=>p&&p!==mine).forEach(pl=>{
       const b=document.createElement('button');b.className='pl'+(pl.uri===cur?' cur':'');
       const img=pl.images?.[pl.images.length>1?1:0]?.url||pl.images?.[0]?.url;
       b.innerHTML=(img?'<img alt="" src="'+img+'">':'<span class="ph"></span>')+'<span style="min-width:0"><b></b><small></small></span>'+(pl.uri===cur?'<span class="ok">GEKOZEN</span>':'<span></span>');

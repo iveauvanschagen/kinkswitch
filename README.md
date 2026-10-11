@@ -12,6 +12,7 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 
 - **No more ads or news.** The app hears the break coming and switches for you.
 - **Never miss your bands.** When KINK plays one of your favourites, the app pulls you back, even if you were on Spotify.
+- **Catch the gems.** Hear something brilliant on KINK? One tap saves it to your own KINK Catch playlist on Spotify.
 - **Skip what you can't stand.** Put a band on your skip list and the app is gone before the chorus.
 - **Safe in the car.** Huge tiles and buttons you can hit without looking twice. Everything fiddly lives in settings.
 - **Free and private.** No accounts, no tracking, no backend. It runs in your browser and talks only to KINK and Spotify.
@@ -31,17 +32,22 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 5. **Pick a playlist.** Tap Playlist and choose one, paste a Spotify link or share a playlist to KINK Switch straight from the Spotify app.
 6. **Install it.** In Chrome on Android, open the menu and choose "Add to Home screen" or "Install app".
 
+The first time you save a song to KINK Catch, the app asks Spotify once for permission to edit your playlists. Nothing to change in the dashboard.
+
 Tip: open the Spotify app once before your first switch. The app can only control a Spotify player that is running.
 
 ## Features
 
 - **Auto switch.** Ads or news on KINK? Spotify. Music back? KINK. Hands free.
 - **Live now playing.** Artist big, song title below, on both tiles. Also shown in the page title and the Android media notification.
-- **Favourites.** Tap "+ Favoriet" on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
+- **Favourites.** Tap the heart on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
+- **KINK Catch.** Tap the add icon on the KINK tile and the song lands in your private KINK Catch playlist on Spotify (created for you the first time). Changed your mind? Undo right from the confirmation.
+- **Missed on KINK.** Heard something great while driving? Open Playlist, switch to "Gemist op KINK" and add any of the last songs KINK played.
 - **Skip list.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song.
 - **Don't be silly.** The panic button. One tap and Wodan Boys - Don't be Silly blasts through Spotify.
-- **Playlist picker.** Your own playlists with covers, a paste button for any link or share directly from Spotify.
+- **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
 - **Smart Spotify resume.** Switching back to Spotify continues your playlist where you left it.
+- **Always shuffle.** Your playlist starts on shuffle at a random song, every time. Turn it off in settings if you like order.
 - **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
 - **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
 - **Share with friends.** Copy a setup link from settings so a friend only has to tap Connect.
