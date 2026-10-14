@@ -1,5 +1,5 @@
 // Bewaart alleen de app zelf offline. De radiostream en Spotify gaan altijd live over het netwerk.
-const CACHE='kink-switch-v15';
+const CACHE='kink-switch-v16';
 const FILES=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable-512.png','archivo-black.woff2'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))));self.clients.claim()});

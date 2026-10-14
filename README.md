@@ -34,7 +34,7 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 
 The first time you save a song to KINK Catch, the app asks Spotify once for permission to edit your playlists. Nothing to change in the dashboard.
 
-Tip: the app can only control a Spotify player that is running. If none is found, KINK Switch asks you to open Spotify with one tap.
+Tip: the app can only control a Spotify player that is running. If none is found, the Spotify tile asks you to open Spotify with one tap.
 
 ## Features
 
@@ -48,7 +48,9 @@ Tip: the app can only control a Spotify player that is running. If none is found
 - **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
 - **Smart Spotify resume.** Switching back to Spotify continues your playlist where you left it.
 - **Always shuffle.** Your playlist starts on shuffle at a random song, every time. Turn it off in settings if you like order.
-- **Spotify check.** On start, when you come back to the app and every minute, the app checks that Spotify is reachable. If not, a pop-up offers one tap to open the Spotify app (or the web player on a computer) and closes itself once Spotify is found. KINK keeps playing meanwhile.
+- **Spotify check.** The app keeps an eye on Spotify. Not running or login expired? The Spotify tile turns red and tells you what to do: one tap opens Spotify (or reconnects) and the tile clears itself once Spotify is back. KINK keeps playing meanwhile.
+- **Plays where you tap.** Tap on your phone and Spotify plays on your phone, tap on your laptop and it plays there. You can pick a fixed device in settings too. Several copies of the app (phone and laptop) never fight over your music: only the copy that started the playback switches it.
+- **Stays connected.** The Spotify login is refreshed in time and safely across tabs, so you're not asked to reconnect.
 - **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
 - **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
 - **Background watching.** On your computer the app keeps switching even when it's a tab in the background. On by default on computers, off on phones.
@@ -60,7 +62,7 @@ Tip: the app can only control a Spotify player that is running. If none is found
 - **On your phone, keep it on screen.** Phones pause pages in the background, so in the car keep the app open in the holder with "Scherm aan houden" on.
 - **On your computer, use Chrome.** With "Ook op de achtergrond meekijken" on, the app keeps working as a background tab. Add the site to "Always keep these sites active" under Settings, Performance, so Chrome never unloads it.
 - **Data use.** The app itself uses about 1 to 2 MB per hour. The KINK stream is roughly 86 MB per hour; Spotify depends on your quality setting.
-- **Stream delay.** The app waits 8 seconds after a KINK marker so you don't lose the end of a song. You can tune this in settings.
+- **Stream delay.** The app waits 20 seconds after a KINK marker, because the stream you hear runs behind KINK's data. That way you don't lose the end of a song. You can tune this in settings.
 
 ## Credits
 

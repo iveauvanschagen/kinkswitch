@@ -230,19 +230,19 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 .grp details summary{padding:14px 16px;font-weight:800;color:var(--muted);cursor:pointer}
 .grp details .inner{padding:0 16px 14px}
 .grp details .inner p{margin:0 0 8px}
+.devopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 16px;border-top:1px solid #1d2128;background:transparent;font-size:15px}
+.devopt .rad{width:22px;height:22px;border-radius:50%;border:2px solid #4a505b;flex:none;display:grid;place-items:center}
+.devopt.on .rad{border-color:var(--spot)}.devopt.on .rad::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--spot)}
+.devopt b{display:block;font-weight:800}.devopt small{display:block;color:var(--muted);font-size:13px}
 .set .sfoot{padding:12px 20px 18px;border-top:1px solid #1d2128;display:flex;gap:10px;align-items:center}
 .set .sfoot small{flex:1;color:var(--muted);font-size:13px;transition:color .2s}
 .set .sfoot small.saved{color:var(--spot);font-weight:800}
 .set .sfoot .close{min-height:50px;padding:0 28px;border-radius:10px;background:#262a33;font-weight:900;font-size:16px}
-.spbox{text-align:center;max-width:440px}
-.spbox h2{margin:6px 0 6px}
-.spbox p{margin:0 0 6px}
-.spico{width:64px;height:64px;border-radius:14px;margin:4px auto 10px;display:grid;place-items:center;font-size:30px;font-weight:900;background:#2a1414;color:var(--hot)}
-.spico.ok{background:#0b2414;color:var(--spot)}
-.spbtns{display:grid;gap:0;margin-top:6px}
-.spbtns .bigbtn{margin-top:10px}
-.bigbtn.ghost{background:transparent;color:var(--muted)}
-.spwait{color:var(--muted);font-size:13px;margin-top:12px!important}
+.src.spot.issue{border-color:var(--hot)!important;background:linear-gradient(150deg,#2e1210,var(--panel2) 70%)!important;color:var(--text)!important}
+.src.spot.issue .tag{background:var(--hot);color:#fff}
+.src.spot.issue .np em{color:#ff9a92;opacity:1}
+.src.spot.blink{animation:spblink .5s ease-in-out 6}
+@keyframes spblink{50%{border-color:var(--hot);box-shadow:0 0 0 6px #ff5a4e44}}
 .safety{color:var(--muted);font-size:12px;text-align:center;margin-top:14px}
 </style>
 </head>
@@ -327,7 +327,12 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
         <div class="status2"><span class="ok" id="spIcon"></span><div style="flex:1;min-width:0"><b id="spState"></b><small id="spSub"></small></div></div>
         <div class="btnrow"><button class="btn primary" id="connect">Koppel Spotify</button><button class="btn" id="logout">Ontkoppelen</button></div>
       </div>
-      <div class="grp"><h4>Afspelen</h4>
+      <div class="grp"><h4>Afspelen op</h4>
+        <div class="sub">Standaard speelt Spotify op het apparaat waar je op tikt: je telefoon of je computer.</div>
+        <div id="devList"></div>
+        <div class="btnrow"><button class="btn" id="devRefresh">Vernieuw lijst</button></div>
+      </div>
+      <div class="grp"><h4>Shuffle</h4>
         <div class="line"><div class="tx"><b>Altijd op shuffle</b><small>Je playlist start op een willekeurig nummer en blijft shuffelen.</small></div><button class="sw" role="switch" id="swShuffle" aria-label="Altijd op shuffle"></button></div>
       </div>
       <div class="grp"><h4>Delen</h4>
@@ -343,19 +348,6 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
     </div>
   </div>
   <div class="sfoot"><small id="savedNote">Wijzigingen worden direct bewaard</small><button class="close" id="closeSettings">Sluiten</button></div>
-</div></div>
-
-<div class="modal" id="spModal"><div class="modalbox spbox">
-  <div class="spico" id="spPopIco">!</div>
-  <h2 id="spPopTitle">Spotify staat niet aan</h2>
-  <p id="spPopText"></p>
-  <div class="spbtns">
-    <button class="btn primary bigbtn" id="spOpenApp">Open Spotify-app</button>
-    <button class="btn bigbtn" id="spOpenWeb">Open webspeler</button>
-    <button class="btn bigbtn" id="spLogin" hidden>Koppel opnieuw</button>
-    <button class="btn bigbtn ghost" id="spLater">Later</button>
-  </div>
-  <p class="spwait" id="spWait" hidden>Even kijken of Spotify er al is...</p>
 </div></div>
 
 <div class="modal" id="plModal"><div class="modalbox">
@@ -394,7 +386,9 @@ let autoAway=Number(ls('ks_autoAway'))||0;
 // handledBreak: starttijd van het blok dat al is afgehandeld, zodat we niet twee keer wisselen
 let handledBreak=Number(ls('ks_handledBreak'))||0;
 const MAX_AWAY=10*60000; // vangnet: nooit langer dan 10 minuten weg
-function delayMs(){const v=ls('ks_delay');return Math.max(0,Math.min(60,v===null||v===''?8:Number(v)||0))*1000}
+// Wachttijd na een melding van KINK. Standaard 20 s; wie nog op de oude standaard 8 s stond, gaat mee naar 20 s.
+(function migrateDelay(){const old=ls('ks_delay');if(ls('ks_delay2')===null&&old!==null&&old!==''&&old!=='8')ls('ks_delay2',old)})();
+function delayMs(){const v=ls('ks_delay2');return Math.max(0,Math.min(60,v===null||v===''?20:Number(v)||0))*1000}
 function setAway(v){autoAway=v;ls('ks_autoAway',v?String(v):null)}
 function setHandled(v){handledBreak=v;ls('ks_handledBreak',String(v))}
 function metaFresh(now){return kinkNow&&now-kinkNow.at<60000}
@@ -411,6 +405,8 @@ async function autoToKink(why){
   setAway(0);
   if(mode!=='spotify')return;
   busy=true;
+  // Speelt Spotify ergens anders (ander apparaat of andere kopie van de app)? Dan niets doen.
+  if(!(await ownsSpotify())){setMode('kink');busy=false;return}
   const ok=await startKink(true);
   if(ok)msg(why);else{msg('Weer muziek op KINK. Tik op KINK.',true);buzz()}
   busy=false;
@@ -420,6 +416,8 @@ function tick(){
   const now=Date.now();
   metaDue();
   if(document.visibilityState==='visible'&&now-lastSpCheck>60000)checkSpotify();
+  // Sleutel op tijd vernieuwen, vijf minuten voor hij verloopt
+  if(hasLogin()&&!authBroken&&!refreshing&&tokenExpiry&&tokenExpiry-now<5*60000&&now-lastSpCheck>15000){lastSpCheck=now;getToken().catch(()=>{})}
   $('clock').textContent=hhmm(now);
   if(!busy){
     const fresh=metaFresh(now),d=delayMs();
@@ -522,6 +520,7 @@ function setMode(m){
   $('spotifyMode').classList.toggle('active',m==='spotify');
   $('state').textContent=live?'LIVE':(m==='kink'?'PAUZE':'UIT');
   $('spotTag').textContent=m==='spotify'?'SPEELT':'PLAYLIST';
+  if(spIssue){renderSpIssue();updateMediaInfo();return}
   if(m==='spotify'){$('kinkMode').classList.remove('fresh');setTimeout(pollSpotify,1500)}else renderSpotIdle();
   updateMediaInfo();
 }
@@ -543,69 +542,61 @@ async function startKink(fromAuto){
   }catch(e){msg('KINK start niet. Tik nog een keer op Naar KINK.',true);return false}
 }
 
-/* ---------- Spotify bereikbaar? Controle met pop-up ---------- */
+/* ---------- Spotify bereikbaar? Waarschuwing in de Spotify-tegel ---------- */
 const IS_PHONE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
-let spLaterUntil=0,spWatchUntil=0,lastSpCheck=0,spChecking=false,spPopKind='';
-function showSpPopup(kind){
-  if(Date.now()<spLaterUntil&&!spWatchUntil)return;
-  spPopKind=kind;
-  const login=kind==='login';
-  $('spPopIco').className='spico';$('spPopIco').textContent='!';
-  $('spPopTitle').textContent=login?'Koppeling met Spotify verlopen':'Spotify staat niet aan';
-  $('spPopText').textContent=login?'Koppel opnieuw, dan kan de app weer wisselen. KINK speelt gewoon door.'
-    :(IS_PHONE?'Open de Spotify-app even, dan kan KINK Switch erop afspelen. KINK speelt gewoon door.'
-              :'Open de Spotify-app of de webspeler. Klik in de webspeler één keer ergens, dan mag hij geluid maken. KINK speelt gewoon door.');
-  $('spOpenApp').hidden=login;$('spOpenWeb').hidden=login||IS_PHONE;$('spLogin').hidden=!login;
-  $('spWait').hidden=!spWatchUntil;
-  $('spModal').classList.add('show');
+let spIssue='',spWatchUntil=0,lastSpCheck=0,spChecking=false;
+function renderSpIssue(){
+  const t=$('spotifyMode');t.classList.toggle('issue',!!spIssue);
+  if(!spIssue)return;
+  $('spotTag').textContent='LET OP';
+  $('spotLabel').textContent=spIssue==='login'?'KOPPELING VERLOPEN':'SPOTIFY STAAT NIET AAN';
+  $('spotArtist').textContent=spIssue==='login'?'Tik om opnieuw te koppelen':(spWatchUntil?'Even kijken...':'Tik om Spotify te openen');
+  $('spotSong').textContent='KINK speelt gewoon door';
+  $('spotFav').hidden=true;
 }
-function hideSpPopup(found){
-  if(!$('spModal').classList.contains('show'))return;
-  if(found){
-    $('spPopIco').className='spico ok';$('spPopIco').textContent='✓';
-    $('spPopTitle').textContent='Spotify gevonden';$('spPopText').textContent='Alles klaar. De app kan weer wisselen.';
-    ['spOpenApp','spOpenWeb','spLogin'].forEach(id=>$(id).hidden=true);$('spWait').hidden=true;
-    setTimeout(()=>$('spModal').classList.remove('show'),1400);
-  }else $('spModal').classList.remove('show');
-  spWatchUntil=0;
+function setSpIssue(kind){
+  if(kind!==spIssue)msg(kind==='login'?'Koppeling met Spotify verlopen. Tik op de Spotify-tegel om opnieuw te koppelen.':'Spotify staat niet aan. Tik op de Spotify-tegel om hem te openen.',true);
+  spIssue=kind;renderSpIssue();
 }
+function clearSpIssue(found){
+  if(!spIssue)return;
+  spIssue='';spWatchUntil=0;$('spotifyMode').classList.remove('issue');
+  setMode(mode);if(found)msg('Spotify gevonden. De app kan weer wisselen.');
+}
+function blinkSpotify(){const t=$('spotifyMode');t.classList.remove('blink');void t.offsetWidth;t.classList.add('blink');setTimeout(()=>t.classList.remove('blink'),3200)}
 // Controleert koppeling en of er een Spotify-speler is. Stil als alles goed is.
 async function checkSpotify(){
   if(spChecking||!hasLogin())return;
   spChecking=true;lastSpCheck=Date.now();
   try{
-    try{await getToken()}catch(e){showSpPopup('login');return}
-    const d=await api('/me/player/devices');
-    if((d?.devices||[]).length){hideSpPopup(spPopKind==='nodevice');spPopKind=''}
-    else showSpPopup('nodevice');
+    try{await getToken()}catch(e){if(authBroken)setSpIssue('login');return}
+    const list=await spDevices();
+    if(list.length)clearSpIssue(spIssue==='nodevice');else if(spIssue!=='login')setSpIssue('nodevice');
   }catch(e){}
   finally{spChecking=false}
 }
-// Na een tik op "Open": 30 seconden lang elke 3 seconden kijken
+// Na een tik: 30 seconden lang elke 3 seconden kijken of Spotify er al is
 function watchSpotify(){
-  spWatchUntil=Date.now()+30000;$('spWait').hidden=false;
+  spWatchUntil=Date.now()+30000;renderSpIssue();
   const loop=async()=>{
-    if(!spWatchUntil)return;
-    if(Date.now()>spWatchUntil){spWatchUntil=0;$('spWait').textContent='Nog niet gevonden. Probeer het opnieuw of tik op Later.';return}
+    if(!spWatchUntil||!spIssue)return;
+    if(Date.now()>spWatchUntil){spWatchUntil=0;renderSpIssue();msg('Spotify nog niet gevonden. Tik nog een keer op de Spotify-tegel.',true);return}
     lastSpCheck=0;await checkSpotify();if(spWatchUntil)setTimeout(loop,3000);
   };
-  $('spWait').textContent='Even kijken of Spotify er al is...';setTimeout(loop,2500);
+  setTimeout(loop,2500);
 }
 function handleSpError(e){
   const m=String(e&&e.message||e);
-  spLaterUntil=0; // bij een mislukte wissel altijd laten zien
-  if(/Geen Spotify-apparaat/.test(m))showSpPopup('nodevice');
-  else if(/verlopen|Koppel eerst/.test(m))showSpPopup('login');
+  if(/Geen Spotify-apparaat/.test(m)){setSpIssue('nodevice');blinkSpotify()}
+  else if(authBroken||/verlopen|Koppel eerst/.test(m)){setSpIssue('login');blinkSpotify()}
 }
-$('spOpenApp').onclick=()=>{
+function fixSpotify(){
+  if(spIssue==='login'){$('clientId').value=ls('ks_client')||'';connect();return}
   watchSpotify();
-  if(/Android/i.test(navigator.userAgent))location.href='intent://open#Intent;scheme=spotify;package=com.spotify.music;S.browser_fallback_url='+encodeURIComponent('https://open.spotify.com')+';end';
-  else location.href='spotify:';
-};
-$('spOpenWeb').onclick=()=>{watchSpotify();window.open('https://open.spotify.com','_blank')};
-$('spLogin').onclick=()=>{$('spModal').classList.remove('show');$('clientId').value=ls('ks_client')||'';connect()};
-// Later: de rest van deze sessie geen controle-pop-ups meer, alleen nog als een wissel echt mislukt
-$('spLater').onclick=()=>{spLaterUntil=Infinity;hideSpPopup(false)};
+  if(IS_PHONE&&/Android/i.test(navigator.userAgent))location.href='intent://open#Intent;scheme=spotify;package=com.spotify.music;S.browser_fallback_url='+encodeURIComponent('https://open.spotify.com')+';end';
+  else if(IS_PHONE)location.href='spotify:';
+  else window.open('https://open.spotify.com','_blank');
+}
 
 /* ---------- Spotify OAuth (PKCE) ---------- */
 function b64(a){return btoa(String.fromCharCode(...new Uint8Array(a))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
@@ -650,16 +641,40 @@ async function callback(){
   }catch(e){msg('Koppelen mislukt: '+e.message,true)}
 }
 
+// Spotify-toegangssleutels zijn een uur geldig. De vernieuwingssleutel is maar één keer bruikbaar,
+// dus er mag er maar één tegelijk vernieuwen: binnen dit tabblad (refreshing) en over tabbladen heen (Web Locks).
+let refreshing=null,authBroken=false;
+function freshStored(){const t=ls('ks_token'),e=+(ls('ks_expiry')||0);return t&&Date.now()<e-60000?{t,e}:null}
 async function getToken(){
-  if(token&&Date.now()<tokenExpiry-30000)return token;
-  token=ls('ks_token');tokenExpiry=+(ls('ks_expiry')||0);
-  if(token&&Date.now()<tokenExpiry-30000)return token;
-  const refresh=ls('ks_refresh'), id=ls('ks_client');
-  if(!refresh||!id)throw Error('Koppel eerst Spotify via Instellingen');
-  const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:id,grant_type:'refresh_token',refresh_token:refresh})});
-  const d=await r.json();
-  if(!r.ok){ls('ks_refresh',null);throw Error('Spotify-login verlopen. Koppel opnieuw via Instellingen')}
-  saveToken(d);return token;
+  if(token&&Date.now()<tokenExpiry-60000)return token;
+  const f=freshStored();if(f){token=f.t;tokenExpiry=f.e;return token}
+  if(!refreshing)refreshing=doRefresh().finally(()=>{refreshing=null});
+  return refreshing;
+}
+async function doRefresh(){
+  const run=async()=>{
+    // Misschien heeft een ander tabblad net vernieuwd
+    const f=freshStored();if(f){token=f.t;tokenExpiry=f.e;authBroken=false;return token}
+    const refresh=ls('ks_refresh'),id=ls('ks_client');
+    if(!refresh||!id)throw Error('Koppel eerst Spotify via Instellingen');
+    let r,d={};
+    try{
+      r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:id,grant_type:'refresh_token',refresh_token:refresh})});
+      d=await r.json().catch(()=>({}));
+    }catch(e){throw Error('Geen verbinding met Spotify. De app probeert het zo opnieuw.')}
+    if(!r.ok){
+      if(d.error==='invalid_grant'){
+        // Is de sleutel intussen door een ander tabblad vervangen? Dan die gebruiken.
+        const f2=freshStored();if(f2&&ls('ks_refresh')!==refresh){token=f2.t;tokenExpiry=f2.e;return token}
+        authBroken=true;setSpIssue('login');
+        throw Error('Spotify-login verlopen. Tik op de Spotify-tegel om opnieuw te koppelen.');
+      }
+      throw Error('Spotify is even niet bereikbaar. De app probeert het zo opnieuw.');
+    }
+    saveToken(d);authBroken=false;if(spIssue==='login')clearSpIssue(true);
+    return token;
+  };
+  return (navigator.locks&&navigator.locks.request)?navigator.locks.request('kink-switch-token',run):run();
 }
 
 async function api(path,method='GET',body){
@@ -675,11 +690,26 @@ async function api(path,method='GET',body){
   return d;
 }
 
-// Zoek een apparaat om op af te spelen: actief apparaat, anders deze telefoon, anders het eerste
+// Kies het Spotify-apparaat: je eigen keuze uit de instellingen, anders een apparaat van hetzelfde soort
+// als waar je nu op tikt (telefoon of computer), anders het actieve, anders het eerste.
+async function spDevices(){const d=await api('/me/player/devices');return d?.devices||[]}
 async function deviceId(){
-  const d=await api('/me/player/devices');const list=d?.devices||[];
+  const list=await spDevices();
   if(!list.length)throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
-  return (list.find(x=>x.is_active)||list.find(x=>x.type==='Smartphone')||list[0]).id;
+  const pick=ls('ks_device');
+  let dev=pick&&list.find(x=>x.id===pick);
+  if(!dev){
+    const kind=IS_PHONE?['Smartphone','Tablet']:['Computer'];
+    const same=list.filter(x=>kind.includes(x.type));
+    const last=ls('ks_myDevice');
+    dev=same.find(x=>x.id===last)||same.find(x=>x.is_active)||same[0]||list.find(x=>x.is_active)||list[0];
+  }
+  ls('ks_myDevice',dev.id);
+  return dev.id;
+}
+// Speelt Spotify nu op het apparaat dat deze kopie van de app zelf heeft gekozen?
+async function ownsSpotify(){
+  try{const p=await api('/me/player');return !!(p&&p.is_playing&&p.device&&p.device.id===ls('ks_myDevice'))}catch(e){return false}
 }
 
 function playlistUri(){
@@ -761,13 +791,29 @@ function saved(what){
   clearTimeout(savedTimer);savedTimer=setTimeout(()=>{n.textContent='Wijzigingen worden direct bewaard';n.classList.remove('saved')},2200);
 }
 function settingsTab(t){
+  if(t==='Sp')renderDevices();
   [['Alg','stAlg'],['Art','stArt'],['Sp','stSp']].forEach(([k,b])=>{$(b).classList.toggle('on',k===t);$('pane'+k).hidden=k!==t});
   document.querySelector('.set .sbody').scrollTop=0;
 }
+async function renderDevices(){
+  const box=$('devList');if(!box)return;
+  if(!hasLogin()){box.innerHTML='<div class="sub">Koppel eerst Spotify.</div>';return}
+  box.innerHTML='<div class="sub">Apparaten laden...</div>';
+  let list=[];try{list=await spDevices()}catch(e){}
+  const cur=ls('ks_device')||'';box.innerHTML='';
+  const kinds={Smartphone:'Telefoon',Computer:'Computer',Tablet:'Tablet',Speaker:'Speaker',TV:'TV',CastAudio:'Cast',AVR:'Versterker',Automobile:'Auto'};
+  const opt=(id,title,sub)=>{const b=document.createElement('button');b.className='devopt'+(cur===id?' on':'');
+    b.innerHTML='<span class="rad"></span><span style="min-width:0"><b></b><small></small></span>';b.querySelector('b').textContent=title;b.querySelector('small').textContent=sub;
+    b.onclick=()=>{ls('ks_device',id||null);saved('afspelen op '+(id?title:'dit apparaat'));renderDevices()};box.appendChild(b)};
+  opt('','Automatisch (dit apparaat)',IS_PHONE?'De Spotify-app op deze telefoon':'Spotify op deze computer');
+  list.forEach(d=>opt(d.id,d.name,(kinds[d.type]||d.type)+(d.is_active?', speelt nu':'')));
+  if(cur&&!list.some(d=>d.id===cur)){const n=document.createElement('div');n.className='sub';n.textContent='Je gekozen apparaat is nu niet bereikbaar. De app kiest dan automatisch.';box.appendChild(n)}
+  if(!list.length){const n=document.createElement('div');n.className='sub';n.textContent='Geen Spotify-apparaten gevonden. Open Spotify en tik op Vernieuw lijst.';box.appendChild(n)}
+}
 function renderSpAccount(){
-  const on=hasLogin();
+  const on=hasLogin()&&!authBroken;
   $('spIcon').className='ok '+(on?'yes':'no');$('spIcon').textContent=on?'✓':'!';
-  $('spState').textContent=on?'Gekoppeld met Spotify':'Niet gekoppeld';
+  $('spState').textContent=on?'Gekoppeld met Spotify':(authBroken?'Koppeling verlopen':'Niet gekoppeld');
   $('spSub').textContent=on?'Speelt af via je Spotify-app':(ls('ks_client')?'Tik op Koppel Spotify':'Vul eerst je Client ID in onder Geavanceerd');
   $('connect').textContent=on?'Opnieuw koppelen':'Koppel Spotify';$('connect').classList.toggle('primary',!on);$('logout').hidden=!on;
   if(!ls('ks_client'))$('adv').open=true;
@@ -986,7 +1032,17 @@ async function silly(){
     }
     const dev=await deviceId();
     radio.pause();setAway(0);
-    await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{uris:[uri]});
+    try{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{uris:[uri]})}
+    catch(e){
+      if(/apparaat|verlopen/i.test(e.message))throw e;
+      // Opgeslagen nummer werkt niet meer? Opnieuw opzoeken en nog een keer proberen.
+      ls('ks_sillyUri',null);
+      const d=await api('/search?type=track&limit=5&q='+encodeURIComponent('Wodan Boys Don\'t be Silly'));
+      const t=(d?.tracks?.items||[]).find(x=>/wodan/i.test((x.artists||[]).map(a=>a.name).join(' ')))||d?.tracks?.items?.[0];
+      if(!t)throw Error('Nummer niet gevonden op Spotify');
+      ls('ks_sillyUri',t.uri);
+      await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{uris:[t.uri]});
+    }
     setMode('spotify');setPP(true);msg("Don't be silly!");buzz();
   }catch(e){msg(e.message,true);handleSpError(e)}
 }
@@ -1002,12 +1058,16 @@ function checkFav(artist,key){
   tile.classList.add('fav');buzz();
   // Op Spotify en jouw muziek op KINK: terug naar KINK (één keer per nummer)
   if(mode==='spotify'&&switchedFor!==key){
-    switchedFor=key;setAway(0);
-    startKink(true).then(ok=>{if(ok)msg('Jouw muziek op KINK: '+artist+' - '+kinkNow.title)});
+    switchedFor=key;
+    ownsSpotify().then(own=>{
+      if(!own){setMode('kink');return}
+      setAway(0);startKink(true).then(ok=>{if(ok)msg('Jouw muziek op KINK: '+artist+' - '+kinkNow.title)});
+    });
   }else msg('Jouw muziek op KINK: '+artist+' - '+kinkNow.title);
 }
 
 async function pollSpotify(){
+  if(spIssue)return renderSpIssue();
   if(mode!=='spotify'||document.visibilityState!=='visible'||!hasLogin())return renderSpotIdle();
   try{
     const p=await api('/me/player');const it=p?.item;
@@ -1018,6 +1078,7 @@ async function pollSpotify(){
   }catch(e){}
 }
 function renderSpotIdle(){
+  if(spIssue)return renderSpIssue();
   if(mode==='spotify')return;
   $('spotLabel').textContent='PLAYLIST';
   $('spotArtist').textContent=ls('ks_playlistName')||(ls('ks_playlist')?'Je playlist':'Kies een playlist');
@@ -1110,12 +1171,13 @@ async function incoming(){
 /* ---------- Events ---------- */
 $('openSettings').onclick=()=>settings();
 $('closeSettings').onclick=()=>{$('modal').classList.remove('show');tick()};
+$('devRefresh').onclick=()=>renderDevices();
 $('stAlg').onclick=()=>settingsTab('Alg');$('stArt').onclick=()=>settingsTab('Art');$('stSp').onclick=()=>settingsTab('Sp');
 $('swAuto').onclick=()=>{auto=!auto;ls('ks_auto',auto?'1':'0');if(!auto)setAway(0);setSw('swAuto',auto);renderAuto();saved('wisselen bij reclame '+(auto?'aan':'uit'))};
 $('swWake').onclick=()=>{const on=ls('ks_wake')!=='1';ls('ks_wake',on?'1':'0');setSw('swWake',on);if(on)keepAwake();else if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null}saved('scherm aan houden '+(on?'aan':'uit'))};
 $('swBg').onclick=()=>{const on=!bgOn();ls('ks_bg',on?'1':'0');setSw('swBg',on);saved('op de achtergrond meekijken '+(on?'aan':'uit'))};
 $('swShuffle').onclick=()=>{const on=ls('ks_shuffle')==='0';ls('ks_shuffle',on?'1':'0');setSw('swShuffle',on);saved('shuffle '+(on?'aan':'uit'))};
-$('delay').onchange=()=>{const v=Math.max(0,Math.min(60,Math.round(Number($('delay').value)||0)));$('delay').value=v;ls('ks_delay',String(v));saved('vertraging '+v+' seconden')};
+$('delay').onchange=()=>{const v=Math.max(0,Math.min(60,Math.round(Number($('delay').value)||0)));$('delay').value=v;ls('ks_delay2',String(v));saved('vertraging '+v+' seconden')};
 $('clientId').onchange=()=>{ls('ks_client',$('clientId').value.trim());renderSpAccount();saved('Client ID')};
 $('addHear').onclick=()=>addTo('hear');$('newHear').onkeydown=e=>{if(e.key==='Enter')addTo('hear')};
 $('addSkip').onclick=()=>addTo('skip');$('newSkip').onkeydown=e=>{if(e.key==='Enter')addTo('skip')};
@@ -1124,7 +1186,7 @@ $('connect').onclick=connect;
 $('logout').onclick=()=>{['ks_token','ks_expiry','ks_refresh','ks_verifier','ks_state','ks_scope'].forEach(k=>ls(k,null));token=null;msg('Spotify ontkoppeld');renderSpAccount();saved('Spotify ontkoppeld')};
 $('playPause').onclick=()=>mode==='spotify'?toggle():radio.paused?startKink():radio.pause();
 $('kinkMode').onclick=()=>startKink();
-$('spotifyMode').onclick=goSpotify;
+$('spotifyMode').onclick=()=>spIssue?fixSpotify():goSpotify();
 $('next').onclick=()=>mode==='spotify'?next().then(()=>setTimeout(pollSpotify,800)):goSpotify();
 $('autoBtn').onclick=()=>{auto=!auto;ls('ks_auto',auto?'1':'0');if(!auto)setAway(0);renderAuto();setSw('swAuto',auto);tick();msg(auto?'Automatisch wisselen staat aan':'Automatisch wisselen staat uit')};
 radio.onplaying=()=>{setMode('kink');setPP(true)};
