@@ -57,6 +57,10 @@ Tip: the app can only control a Spotify player that is running. If none is found
 - **Clean settings.** Three tabs (Algemeen, Artiesten, Spotify), switches instead of checkboxes and every change is saved instantly, with a confirmation.
 - **Share with friends.** Copy a setup link from settings so a friend only has to tap Connect.
 
+## Something not working?
+
+Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add `#diagnose` to the URL). You'll see the current state of the app and a log of the last 600 events: every Spotify call with its status code, token refreshes, device choices and every switch decision. Tap **Er ging net iets mis** right after a problem to mark the moment, add a **Notitie** if you like, then **Kopieer log** or **Delen** and send it over. Tokens and keys are never logged.
+
 ## Good to know
 
 - **On your phone, keep it on screen.** Phones pause pages in the background, so in the car keep the app open in the holder with "Scherm aan houden" on.

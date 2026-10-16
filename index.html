@@ -234,6 +234,22 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 .devopt .rad{width:22px;height:22px;border-radius:50%;border:2px solid #4a505b;flex:none;display:grid;place-items:center}
 .devopt.on .rad{border-color:var(--spot)}.devopt.on .rad::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--spot)}
 .devopt b{display:block;font-weight:800}.devopt small{display:block;color:var(--muted);font-size:13px}
+.dbg{width:min(900px,100%)!important;max-height:94dvh;display:flex;flex-direction:column;gap:10px}
+.dhead{display:flex;align-items:center;justify-content:space-between;gap:10px}.dhead h2{margin:0}
+.dsum{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:4px}
+.dsum div{background:#0b0d10;border:1px solid #23272f;border-radius:8px;padding:5px 8px;font-size:12px;line-height:1.3;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.dbg .btn{min-height:42px;padding:0 12px;font-size:13px}
+.dbg{overflow:auto!important}.dlog{min-height:320px}
+.dsum b{display:block;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:2px}
+.dsum .bad{color:var(--hot);font-weight:800}.dsum .good{color:var(--spot);font-weight:800}
+.dbtns{display:flex;flex-wrap:wrap;gap:8px}
+.dfil{display:flex;gap:4px;background:#0b0d10;padding:4px;border-radius:10px}
+.dfil button{flex:1;background:transparent;min-height:40px;border-radius:8px;font-weight:800;font-size:14px;color:var(--muted)}
+.dfil button.on{background:#262a33;color:var(--text)}
+.dlog{flex:1;min-height:200px;overflow:auto;background:#07080a;border:1px solid #23272f;border-radius:8px;padding:8px;font:12px/1.45 ui-monospace,Menlo,monospace}
+.dlog div{padding:2px 0;border-bottom:1px solid #12151a;word-break:break-word}
+.dlog .err{color:#ff8a80}.dlog .warn{color:#ffd166}.dlog .ok{color:#7ee2a8}.dlog .note{color:#9ecbff;font-weight:700}
+.dlog time{color:#6b717c;margin-right:6px}
 .set .sfoot{padding:12px 20px 18px;border-top:1px solid #1d2128;display:flex;gap:10px;align-items:center}
 .set .sfoot small{flex:1;color:var(--muted);font-size:13px;transition:color .2s}
 .set .sfoot small.saved{color:var(--spot);font-weight:800}
@@ -305,6 +321,10 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
         <div class="line"><div class="tx"><b>Scherm aan houden</b><small>Handig in de houder: het scherm gaat niet uit zolang de app open is.</small></div><button class="sw" role="switch" id="swWake" aria-label="Scherm aan houden"></button></div>
         <div class="line"><div class="tx"><b>Ook op de achtergrond meekijken</b><small>Voor je computer: de app blijft wisselen als hij een tabblad op de achtergrond is.</small></div><button class="sw" role="switch" id="swBg" aria-label="Ook op de achtergrond meekijken"></button></div>
       </div>
+      <div class="grp"><h4>Diagnose</h4>
+        <div class="line"><div class="tx"><b>Foutcodes in de statusregel</b><small>Toont onderin de technische code bij een fout, bijvoorbeeld [404] of [AUTH 400].</small></div><button class="sw" role="switch" id="swTech" aria-label="Foutcodes in de statusregel"></button></div>
+        <div class="line"><div class="tx"><b>Diagnose en log</b><small>Alles wat er misging, om te delen met Claude.</small></div><button class="btn" id="openDbg">Open</button></div>
+      </div>
       <div class="grp"><h4>Vertraging</h4>
         <div class="line"><div class="tx"><b>Wacht na een melding van KINK</b><small>In seconden. Zodat je het eind van een nummer niet mist.</small></div><input class="numin" id="delay" type="number" min="0" max="60" inputmode="numeric"></div>
       </div>
@@ -350,6 +370,21 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
   <div class="sfoot"><small id="savedNote">Wijzigingen worden direct bewaard</small><button class="close" id="closeSettings">Sluiten</button></div>
 </div></div>
 
+<div class="modal" id="dbgModal"><div class="modalbox dbg">
+  <div class="dhead"><h2>Diagnose</h2><button class="btn" id="dbgClose">Sluiten</button></div>
+  <div class="dsum" id="dbgSum"></div>
+  <div class="dbtns">
+    <button class="btn primary" id="dbgRun">Test Spotify nu</button>
+    <button class="btn" id="dbgMark">Er ging net iets mis</button>
+    <button class="btn" id="dbgNote">Notitie</button>
+    <button class="btn" id="dbgCopy">Kopieer log</button>
+    <button class="btn" id="dbgShare">Delen</button>
+    <button class="btn" id="dbgClear">Wis log</button>
+  </div>
+  <div class="dfil" id="dbgFil"><button class="on" data-f="all">Alles</button><button data-f="err">Fouten</button><button data-f="spotify">Spotify</button><button data-f="switch">Wisselen</button></div>
+  <div class="dlog" id="dbgLog"></div>
+</div></div>
+
 <div class="modal" id="plModal"><div class="modalbox">
   <h2>Playlist</h2>
   <div class="tabs"><button class="on" id="tabPlay">Afspelen</button><button id="tabMiss">Gemist op KINK</button></div>
@@ -374,7 +409,27 @@ let mode='kink', token=null, tokenExpiry=0, wakeLock=null, busy=false;
 const REDIRECT = location.origin + location.pathname.replace(/index\.html$/,'');
 
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
-function msg(s,err){$('status').textContent=s;$('status').classList.toggle('err',!!err)}
+/* ---------- Diagnose-log ---------- */
+// Bewaart de laatste 600 gebeurtenissen op dit apparaat (nooit sleutels of tokens), zodat je ze kunt delen.
+const APP_VERSION='v17';
+const TAB_ID=Math.random().toString(36).slice(2,6);
+let logBuf=[],logTimer=null,lastErr=null;
+try{logBuf=JSON.parse(localStorage.getItem('ks_log')||'[]')}catch(e){logBuf=[]}
+function LOG(cat,lvl,text,data){
+  const e={t:Date.now(),c:cat,l:lvl,m:String(text).slice(0,300),tab:TAB_ID};
+  if(data!==undefined){try{e.d=JSON.stringify(data).slice(0,600)}catch(x){}}
+  logBuf.push(e);if(logBuf.length>600)logBuf=logBuf.slice(-600);
+  clearTimeout(logTimer);logTimer=setTimeout(()=>{try{localStorage.setItem('ks_log',JSON.stringify(logBuf))}catch(x){}},400);
+  if(typeof renderLog==='function'&&document.getElementById('dbgModal')?.classList.contains('show'))renderLog();
+}
+window.addEventListener('error',e=>LOG('js','err',e.message+' @'+(e.lineno||'?')));
+window.addEventListener('unhandledrejection',e=>LOG('js','err','Promise: '+(e.reason&&e.reason.message||e.reason)));
+function msg(s,err){
+  let t=s;
+  if(err&&lastErr&&Date.now()-lastErr.t<8000&&localStorage.getItem('ks_techmsg')==='1')t+=' ['+lastErr.code+']';
+  $('status').textContent=t;$('status').classList.toggle('err',!!err);
+  LOG('ui',err?'err':'info',s);
+}
 function fmt(s){s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function hhmm(ms){return new Date(ms).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}
 function buzz(){if(navigator.vibrate)navigator.vibrate([250,120,250])}
@@ -395,6 +450,7 @@ function metaFresh(now){return kinkNow&&now-kinkNow.at<60000}
 
 async function autoToSpotify(breakStart){
   setHandled(breakStart);
+  LOG('switch','info','Reclame/nieuws op KINK: naar Spotify');
   if(!hasLogin())return msg('Automatisch wisselen kan niet: Spotify is niet gekoppeld.',true);
   busy=true;
   try{await playList();setAway(Date.now());msg('Reclame of nieuws op KINK: even naar Spotify.');buzz()}
@@ -402,11 +458,12 @@ async function autoToSpotify(breakStart){
   busy=false;
 }
 async function autoToKink(why){
+  LOG('switch','info','Terug naar KINK: '+why);
   setAway(0);
   if(mode!=='spotify')return;
   busy=true;
   // Speelt Spotify ergens anders (ander apparaat of andere kopie van de app)? Dan niets doen.
-  if(!(await ownsSpotify())){setMode('kink');busy=false;return}
+  if(!(await ownsSpotify())){LOG('switch','warn','Spotify speelt elders, deze kopie doet niets');setMode('kink');busy=false;return}
   const ok=await startKink(true);
   if(ok)msg(why);else{msg('Weer muziek op KINK. Tik op KINK.',true);buzz()}
   busy=false;
@@ -479,9 +536,11 @@ async function pollMeta(){
       if(it.type!=='ad'&&it.title)break;
       if(it.type==='ad'||it.dur>=45000)breakStart=it.start;
     }
+    const sig=(last.type)+'|'+(last.artist||'')+'|'+(last.title||'')+'|'+breakStart;
+    if(sig!==(window.__lastSig||'')){window.__lastSig=sig;LOG('kink','info',breakStart?'Blok (reclame/nieuws) sinds '+hhmm(breakStart):(last.title?'Nummer: '+(last.artist?last.artist+' - ':'')+last.title:'Jingle of presentator'))}
     kinkNow={...last,isBreak:!!breakStart,breakStart,at:Date.now()};metaFails=0;
     showKink();
-  }catch(e){metaFails++;if(metaFails===1){$('kinkArtist').textContent='Live radio';$('kinkSong').textContent='';renderFavBtns()}}
+  }catch(e){metaFails++;if(metaFails===1||metaFails%20===0)LOG('kink','err','KINK-gegevens ophalen mislukt ('+metaFails+'x): '+e.message);if(metaFails===1){$('kinkArtist').textContent='Live radio';$('kinkSong').textContent='';renderFavBtns()}}
 }
 
 // Slim kijken: KINK geeft de lengte van elk item mee. Rond het verwachte einde kijken we elke 3 seconden,
@@ -509,7 +568,8 @@ async function keepAwake(){
   if(ls('ks_wake')!=='1'||!('wakeLock' in navigator)||document.visibilityState!=='visible')return;
   try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
 }
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){keepAwake();lastSpCheck=0;tick()}});
+document.addEventListener('visibilitychange',()=>{
+  LOG('app','info','Zichtbaarheid: '+document.visibilityState);if(document.visibilityState==='visible'){keepAwake();lastSpCheck=0;tick()}});
 
 /* ---------- Bronnen ---------- */
 function setMode(m){
@@ -527,6 +587,7 @@ function setMode(m){
 
 // Geeft true terug als KINK echt speelt
 async function startKink(fromAuto){
+  LOG('switch','info','KINK starten'+(fromAuto?' (automatisch)':''));
   if(!fromAuto){
     setAway(0);
     // Zelf KINK gekozen tijdens een blok: dit blok niet meer automatisch overslaan
@@ -536,10 +597,11 @@ async function startKink(fromAuto){
   if(hasLogin()){try{await api('/me/player/pause','PUT')}catch(e){}}
   try{
     radio.load(); // altijd vers inhaken op de livestream, niet op een oude buffer
+    LOG('kink','info','Stream laden');
     await radio.play();
     setMode('kink');setPP(true);msg(fromAuto?'Automatisch terug naar KINK':'KINK speelt live');
     return true;
-  }catch(e){msg('KINK start niet. Tik nog een keer op Naar KINK.',true);return false}
+  }catch(e){LOG('kink','err','Stream start niet: '+e.message);msg('KINK start niet. Tik nog een keer op KINK.',true);return false}
 }
 
 /* ---------- Spotify bereikbaar? Waarschuwing in de Spotify-tegel ---------- */
@@ -555,12 +617,13 @@ function renderSpIssue(){
   $('spotFav').hidden=true;
 }
 function setSpIssue(kind){
+  if(kind!==spIssue)LOG('spotify','err','Waarschuwing: '+kind);
   if(kind!==spIssue)msg(kind==='login'?'Koppeling met Spotify verlopen. Tik op de Spotify-tegel om opnieuw te koppelen.':'Spotify staat niet aan. Tik op de Spotify-tegel om hem te openen.',true);
   spIssue=kind;renderSpIssue();
 }
 function clearSpIssue(found){
   if(!spIssue)return;
-  spIssue='';spWatchUntil=0;$('spotifyMode').classList.remove('issue');
+  spIssue='';spWatchUntil=0;$('spotifyMode').classList.remove('issue');LOG('spotify','ok','Waarschuwing opgeheven');
   setMode(mode);if(found)msg('Spotify gevonden. De app kan weer wisselen.');
 }
 function blinkSpotify(){const t=$('spotifyMode');t.classList.remove('blink');void t.offsetWidth;t.classList.add('blink');setTimeout(()=>t.classList.remove('blink'),3200)}
@@ -656,13 +719,15 @@ async function doRefresh(){
     // Misschien heeft een ander tabblad net vernieuwd
     const f=freshStored();if(f){token=f.t;tokenExpiry=f.e;authBroken=false;return token}
     const refresh=ls('ks_refresh'),id=ls('ks_client');
-    if(!refresh||!id)throw Error('Koppel eerst Spotify via Instellingen');
+    if(!refresh||!id){LOG('auth','err','Geen vernieuwingssleutel of Client ID');throw Error('Koppel eerst Spotify via Instellingen')}
+    LOG('auth','info','Sleutel vernieuwen (tab '+TAB_ID+')');
     let r,d={};
     try{
       r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:id,grant_type:'refresh_token',refresh_token:refresh})});
       d=await r.json().catch(()=>({}));
-    }catch(e){throw Error('Geen verbinding met Spotify. De app probeert het zo opnieuw.')}
+    }catch(e){LOG('auth','err','Vernieuwen: netwerkfout '+e.message);lastErr={t:Date.now(),code:'AUTH NET'};throw Error('Geen verbinding met Spotify. De app probeert het zo opnieuw.')}
     if(!r.ok){
+      LOG('auth','err','Vernieuwen geweigerd: '+r.status+' '+(d.error||'')+' '+(d.error_description||''));lastErr={t:Date.now(),code:'AUTH '+r.status+' '+(d.error||'')};
       if(d.error==='invalid_grant'){
         // Is de sleutel intussen door een ander tabblad vervangen? Dan die gebruiken.
         const f2=freshStored();if(f2&&ls('ks_refresh')!==refresh){token=f2.t;tokenExpiry=f2.e;return token}
@@ -671,28 +736,47 @@ async function doRefresh(){
       }
       throw Error('Spotify is even niet bereikbaar. De app probeert het zo opnieuw.');
     }
-    saveToken(d);authBroken=false;if(spIssue==='login')clearSpIssue(true);
+    saveToken(d);authBroken=false;LOG('auth','ok','Sleutel vernieuwd, geldig tot '+new Date(tokenExpiry).toLocaleTimeString('nl-NL')+(d.refresh_token?' (nieuwe vernieuwingssleutel)':''));if(spIssue==='login')clearSpIssue(true);
     return token;
   };
   return (navigator.locks&&navigator.locks.request)?navigator.locks.request('kink-switch-token',run):run();
 }
 
-async function api(path,method='GET',body){
+async function api(path,method='GET',body,retried){
+  const t0=Date.now();
   const t=await getToken();
-  const r=await fetch('https://api.spotify.com/v1'+path,{method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
-  if(r.status===204||r.status===202)return null;
+  let r;
+  try{r=await fetch('https://api.spotify.com/v1'+path,{method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})})}
+  catch(e){LOG('api','err',method+' '+path.split('?')[0]+' netwerkfout: '+e.message);lastErr={t:Date.now(),code:'NET'};throw Error('Geen verbinding met Spotify.')}
+  const ms=Date.now()-t0,p=path.replace(/access_token=[^&]+/,'');
+  if(r.status===204||r.status===202){LOG('api','ok',method+' '+p+' '+r.status+' ('+ms+' ms)');return null}
   const txt=await r.text();let d=null;try{d=txt?JSON.parse(txt):null}catch(e){}
   if(!r.ok){
-    if(r.status===404)throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
-    if(r.status===403)throw Error('Spotify weigert (403). Premium nodig en je account moet onder User Management staan.');
-    throw Error(d?.error?.message||('Spotify fout '+r.status));
+    const reason=d?.error?.reason||'',m=d?.error?.message||'';
+    LOG('api','err',method+' '+p+' '+r.status+' ('+ms+' ms) '+m+(reason?' / '+reason:''));
+    lastErr={t:Date.now(),code:r.status+(reason?' '+reason:'')};
+    // Sleutel geweigerd terwijl hij nog geldig leek? Eén keer vernieuwen en opnieuw proberen.
+    if(r.status===401&&!retried){token=null;ls('ks_expiry','0');LOG('auth','warn','401 ontvangen, sleutel wordt vernieuwd');return api(path,method,body,true)}
+    if(r.status===404&&/device|player|active/i.test(m+' '+reason+' '+path))throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
+    if(r.status===403)throw Error('Spotify weigert (403'+(reason?' '+reason:'')+'). '+(m||''));
+    throw Error((m||'Spotify fout')+' ('+r.status+')');
   }
+  LOG('api','ok',method+' '+p+' '+r.status+' ('+ms+' ms)');
   return d;
+}
+
+// Wekt een Spotify-apparaat dat niet actief is: eerst de weergave erheen overzetten, dan pas afspelen.
+async function wakeDevice(id){
+  const dev=lastDevList.find(x=>x.id===id);
+  if(!dev||dev.is_active)return;
+  LOG('device','info','Apparaat '+dev.name+' is niet actief, weergave wordt overgezet');
+  try{await api('/me/player','PUT',{device_ids:[id],play:false});await sleep(700)}catch(e){LOG('device','warn','Overzetten mislukt: '+e.message)}
 }
 
 // Kies het Spotify-apparaat: je eigen keuze uit de instellingen, anders een apparaat van hetzelfde soort
 // als waar je nu op tikt (telefoon of computer), anders het actieve, anders het eerste.
-async function spDevices(){const d=await api('/me/player/devices');return d?.devices||[]}
+let lastDevList=[];
+async function spDevices(){const d=await api('/me/player/devices');lastDevList=d?.devices||[];LOG('device','info','Apparaten: '+(lastDevList.map(x=>x.name+' ('+x.type+(x.is_active?', actief':'')+(x.is_restricted?', beperkt':'')+')').join(', ')||'geen'));return lastDevList}
 async function deviceId(){
   const list=await spDevices();
   if(!list.length)throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
@@ -705,6 +789,7 @@ async function deviceId(){
     dev=same.find(x=>x.id===last)||same.find(x=>x.is_active)||same[0]||list.find(x=>x.is_active)||list[0];
   }
   ls('ks_myDevice',dev.id);
+  LOG('device','info','Gekozen: '+dev.name+' ('+dev.type+')'+(pick?' via instelling':' automatisch'));
   return dev.id;
 }
 // Speelt Spotify nu op het apparaat dat deze kopie van de app zelf heeft gekozen?
@@ -755,6 +840,7 @@ async function playList(){
   let body=resume?undefined:{context_uri:context},randomStart=false;
   // Nieuw gestart met shuffle: begin op een willekeurig nummer in plaats van altijd het eerste
   if(body&&shuffle){const t=await playlistTotal(context);if(t>1){body.offset={position:Math.floor(Math.random()*t)};randomStart=true}}
+  await wakeDevice(dev);
   try{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}
   catch(e){if(body?.offset){delete body.offset;randomStart=false;await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}else throw e}
   setMode('spotify');setPP(true);
@@ -767,6 +853,7 @@ async function playList(){
 }
 
 async function goSpotify(){
+  LOG('switch','info','Spotify-tegel ingedrukt');
   if(!hasLogin())return settings('Sp');
   setAway(0); // handmatig gekozen: niet automatisch terug
   try{msg('Spotify start...');await playList();if(!$('status').classList.contains('err'))msg('Spotify speelt je playlist'+(ls('ks_shuffle')!=='0'?' op shuffle':''))}catch(e){msg(e.message,true);handleSpError(e)}
@@ -820,7 +907,7 @@ function renderSpAccount(){
 }
 function settings(tab){
   if(typeof tab!=='string')tab='Alg';
-  setSw('swAuto',auto);setSw('swWake',ls('ks_wake')==='1');setSw('swBg',bgOn());setSw('swShuffle',ls('ks_shuffle')!=='0');
+  setSw('swTech',ls('ks_techmsg')==='1');setSw('swAuto',auto);setSw('swWake',ls('ks_wake')==='1');setSw('swBg',bgOn());setSw('swShuffle',ls('ks_shuffle')!=='0');
   $('delay').value=delayMs()/1000;
   $('clientId').value=ls('ks_client')||'';
   $('redirectUri').value=location.protocol==='file:'?'Niet beschikbaar bij een lokaal bestand':REDIRECT;
@@ -1012,6 +1099,7 @@ function saveBans(list){ls('ks_banArtists',list.join('|'))}
 function isBanned(artist){const a=' '+norm(artist)+' ';return banList().some(f=>{const n=norm(f);return n&&a.includes(' '+n+' ')})}
 async function banToSpotify(key,artist){
   banHandled=key;
+  LOG('switch','info','Must skip op KINK ('+artist+'): naar Spotify');
   if(!hasLogin())return;
   busy=true;
   try{await playList();setAway(Date.now());msg(artist+' op KINK: even naar Spotify.')}
@@ -1020,31 +1108,63 @@ async function banToSpotify(key,artist){
 }
 
 /* ---------- Don't be silly ---------- */
+// Zoekt "Don't be Silly" van Wodan Boys. Alleen een afspeelbare versie van de juiste artiest telt.
+async function findSilly(){
+  const tries=['track:"Don\'t be Silly" artist:"Wodan Boys"',"Wodan Boys Don't be Silly",'Wodan Boys'];
+  for(const q of tries){
+    let d;
+    try{d=await api('/search?type=track&limit=10&market=from_token&q='+encodeURIComponent(q))}
+    catch(e){d=await api('/search?type=track&limit=10&q='+encodeURIComponent(q))}
+    const items=d?.tracks?.items||[];
+    LOG('silly','info','Zoeken "'+q+'": '+(items.map(t=>(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name+(t.is_playable===false?' (niet afspeelbaar)':'')).slice(0,5).join(' | ')||'niets gevonden'));
+    const wodan=items.filter(t=>(t.artists||[]).some(a=>/wodan/i.test(a.name))&&t.is_playable!==false);
+    const hit=wodan.find(t=>/silly/i.test(t.name))||(q==='Wodan Boys'?null:null);
+    if(hit)return hit;
+  }
+  return null;
+}
 async function silly(){
+  LOG('silly','info',"Don't be silly ingedrukt");
   if(!hasLogin())return settings('Sp');
+  msg("Don't be silly zoeken...");
   try{
-    let uri=ls('ks_sillyUri');
+    let uri=ls('ks_sillyUri'),name=ls('ks_sillyName')||'';
+    // Oude, mogelijk verkeerde keuze uit eerdere versies niet blind vertrouwen
+    if(uri&&!name){ls('ks_sillyUri',null);uri=null}
     if(!uri){
-      const d=await api('/search?type=track&limit=5&q='+encodeURIComponent('Wodan Boys Don\'t be Silly'));
-      const t=(d?.tracks?.items||[]).find(x=>/wodan/i.test((x.artists||[]).map(a=>a.name).join(' ')))||d?.tracks?.items?.[0];
-      if(!t)throw Error('Nummer niet gevonden op Spotify');
-      uri=t.uri;ls('ks_sillyUri',uri);
+      const t=await findSilly();
+      if(!t)throw Error("Don't be Silly van Wodan Boys niet gevonden op Spotify (zie Diagnose).");
+      uri=t.uri;name=(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name;ls('ks_sillyUri',uri);ls('ks_sillyName',name);
     }
+    LOG('silly','info','Nummer: '+name+' ('+uri+')');
     const dev=await deviceId();
     radio.pause();setAway(0);
-    try{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{uris:[uri]})}
+    await wakeDevice(dev);
+    const play=async u=>{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{uris:[u],position_ms:0})};
+    try{await play(uri)}
     catch(e){
       if(/apparaat|verlopen/i.test(e.message))throw e;
-      // Opgeslagen nummer werkt niet meer? Opnieuw opzoeken en nog een keer proberen.
-      ls('ks_sillyUri',null);
-      const d=await api('/search?type=track&limit=5&q='+encodeURIComponent('Wodan Boys Don\'t be Silly'));
-      const t=(d?.tracks?.items||[]).find(x=>/wodan/i.test((x.artists||[]).map(a=>a.name).join(' ')))||d?.tracks?.items?.[0];
-      if(!t)throw Error('Nummer niet gevonden op Spotify');
-      ls('ks_sillyUri',t.uri);
-      await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{uris:[t.uri]});
+      LOG('silly','warn','Afspelen mislukt, opnieuw zoeken: '+e.message);
+      ls('ks_sillyUri',null);ls('ks_sillyName',null);
+      const t=await findSilly();if(!t)throw e;
+      uri=t.uri;ls('ks_sillyUri',uri);ls('ks_sillyName',(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name);
+      await play(uri);
     }
-    setMode('spotify');setPP(true);msg("Don't be silly!");buzz();
-  }catch(e){msg(e.message,true);handleSpError(e)}
+    setMode('spotify');setPP(true);
+    // Controleren of Spotify het echt speelt; anders één keer opnieuw, met het apparaat expliciet geactiveerd
+    await sleep(1600);
+    let p=null;try{p=await api('/me/player')}catch(e){}
+    LOG('silly','info','Na afspelen: '+(p?((p.is_playing?'speelt':'staat stil')+': '+(p.item?.name||'?')+' op '+(p.device?.name||'?')):'geen speler actief'));
+    if(!p||p.item?.uri!==uri||!p.is_playing){
+      LOG('silly','warn','Niet het juiste nummer of niet aan het spelen, tweede poging');
+      try{await api('/me/player','PUT',{device_ids:[dev],play:true});await sleep(800)}catch(e){}
+      await play(uri);await sleep(1600);
+      try{p=await api('/me/player')}catch(e){p=null}
+      LOG('silly','info','Na tweede poging: '+(p?((p.is_playing?'speelt':'staat stil')+': '+(p.item?.name||'?')):'geen speler'));
+      if(!p||p.item?.uri!==uri)throw Error("Spotify speelde Don't be silly niet af (zie Diagnose).");
+    }
+    msg("Don't be silly!");buzz();
+  }catch(e){LOG('silly','err',e.message);msg(e.message,true);handleSpError(e)}
 }
 $('silly').onclick=silly;
 
@@ -1168,6 +1288,62 @@ async function incoming(){
   if(shared)await setFromLink(shared);
 }
 
+/* ---------- Diagnose-scherm ---------- */
+let dbgFilter='all';
+function fmtT(t){const d=new Date(t);return d.toLocaleTimeString('nl-NL')+'.'+String(d.getMilliseconds()).padStart(3,'0').slice(0,1)}
+function logLine(e){return fmtT(e.t)+' '+e.c.toUpperCase().padEnd(7)+' '+(e.l==='err'?'FOUT ':e.l==='warn'?'LET OP ':'')+e.m+(e.d?' '+e.d:'')+(e.tab!==TAB_ID?' [tab '+e.tab+']':'')}
+function renderLog(){
+  const box=$('dbgLog');if(!box)return;
+  const f=dbgFilter;
+  const rows=logBuf.filter(e=>f==='all'||(f==='err'&&(e.l==='err'||e.l==='warn'||e.c==='note'))||(f==='spotify'&&['api','auth','device','spotify','silly'].includes(e.c))||(f==='switch'&&['switch','kink','note','silly'].includes(e.c))).slice(-300).reverse();
+  box.innerHTML='';
+  rows.forEach(e=>{const d=document.createElement('div');d.className=e.c==='note'?'note':e.l;const tm=document.createElement('time');tm.textContent=fmtT(e.t);d.appendChild(tm);d.appendChild(document.createTextNode(e.c.toUpperCase()+' '+e.m+(e.d?' '+e.d:'')));box.appendChild(d)});
+  if(!rows.length)box.textContent='Nog niets gelogd.';
+}
+function renderSum(){
+  const exp=+(ls('ks_expiry')||0),left=Math.round((exp-Date.now())/60000);
+  const items=[
+    ['VERSIE',APP_VERSION+' (tab '+TAB_ID+')'],
+    ['APPARAAT',(IS_PHONE?'Telefoon':'Computer')+(matchMedia('(display-mode: standalone)').matches?', geïnstalleerde app':', browser')],
+    ['KOPPELING',hasLogin()?(authBroken?'<span class="bad">verlopen</span>':'<span class="good">ok</span>'):'<span class="bad">niet gekoppeld</span>'],
+    ['SLEUTEL GELDIG',exp?(left>0?left+' min':'<span class="bad">verlopen</span>'):'-'],
+    ['TOESTEMMINGEN',(ls('ks_scope')||'-').split(' ').length+' scopes'],
+    ['AFSPELEN OP',ls('ks_device')?'vast apparaat':'automatisch'],
+    ['LAATSTE APPARATEN',lastDevList.length?lastDevList.map(x=>x.name+(x.is_active?' *':'')).join(', '):'-'],
+    ['MODUS',mode+(autoAway?', weg voor reclame':'')+(spIssue?', <span class="bad">'+spIssue+'</span>':'')],
+    ['KINK-GEGEVENS',kinkNow?(Math.round((Date.now()-kinkNow.at)/1000)+' s oud'):'<span class="bad">geen</span>'],
+    ['ZICHTBAAR',document.visibilityState],
+    ['LAATSTE FOUT',lastErr?lastErr.code+' om '+new Date(lastErr.t).toLocaleTimeString('nl-NL'):'-']
+  ];
+  $('dbgSum').innerHTML=items.map(([k,v])=>'<div><b>'+k+'</b>'+v+'</div>').join('');
+}
+function openDbg(){renderSum();renderLog();$('dbgModal').classList.add('show')}
+function logExport(){
+  const head=['KINK Switch diagnose','Versie: '+APP_VERSION,'Tijd: '+new Date().toLocaleString('nl-NL'),'Apparaat: '+(IS_PHONE?'telefoon':'computer')+', '+navigator.userAgent,
+    'Koppeling: '+(hasLogin()?(authBroken?'verlopen':'ok'):'niet gekoppeld')+', sleutel nog '+Math.round((+(ls('ks_expiry')||0)-Date.now())/60000)+' min','Scopes: '+(ls('ks_scope')||'-'),
+    'Afspelen op: '+(ls('ks_device')?'vast':'automatisch')+', mijn apparaat: '+(lastDevList.find(x=>x.id===ls('ks_myDevice'))?.name||'?'),'Vertraging: '+delayMs()/1000+' s, achtergrond: '+(bgOn()?'aan':'uit'),'----'];
+  return head.join('\n')+'\n'+logBuf.map(logLine).join('\n');
+}
+async function runDiag(){
+  LOG('note','info','--- Test Spotify gestart ---');
+  try{const t=await getToken();LOG('diag','ok','Sleutel ok')}catch(e){LOG('diag','err','Sleutel: '+e.message);renderSum();return}
+  try{const me=await api('/me');LOG('diag','ok','Account: '+(me?.display_name||'?')+', product: '+(me?.product||'onbekend'))}catch(e){LOG('diag','err','Account: '+e.message)}
+  try{await spDevices()}catch(e){LOG('diag','err','Apparaten: '+e.message)}
+  try{const p=await api('/me/player');LOG('diag','info','Speler: '+(p?((p.is_playing?'speelt':'gepauzeerd')+' op '+(p.device?.name||'?')+(p.device?.is_restricted?' (beperkt)':'')+', shuffle '+(p.shuffle_state?'aan':'uit')):'niets actief'))}catch(e){LOG('diag','err','Speler: '+e.message)}
+  LOG('note','info','--- Test Spotify klaar ---');renderSum();
+}
+$('openDbg').onclick=()=>{$('modal').classList.remove('show');openDbg()};
+$('dbgClose').onclick=()=>$('dbgModal').classList.remove('show');
+$('dbgRun').onclick=()=>runDiag();
+$('dbgMark').onclick=()=>{LOG('note','err','>>> GEBRUIKER: er ging net iets mis <<<');renderLog();$('dbgMark').textContent='Gemarkeerd';setTimeout(()=>$('dbgMark').textContent='Er ging net iets mis',1500)};
+$('dbgNote').onclick=()=>{const t=prompt('Wat gebeurde er? (bijvoorbeeld: Don\'t be silly gedrukt, niets gehoord)');if(t){LOG('note','info','NOTITIE: '+t);renderLog()}};
+$('dbgCopy').onclick=async()=>{const t=logExport();try{await navigator.clipboard.writeText(t);$('dbgCopy').textContent='Gekopieerd'}catch(e){prompt('Kopieer de log',t)}setTimeout(()=>$('dbgCopy').textContent='Kopieer log',1500)};
+$('dbgShare').onclick=async()=>{const t=logExport();if(navigator.share){try{await navigator.share({title:'KINK Switch diagnose',text:t})}catch(e){}}else{try{await navigator.clipboard.writeText(t);$('dbgShare').textContent='Gekopieerd'}catch(e){}}};
+$('dbgClear').onclick=()=>{logBuf=[];try{localStorage.removeItem('ks_log')}catch(e){}LOG('app','info','Log gewist');renderLog()};
+$('dbgFil').onclick=e=>{const b=e.target.closest('button');if(!b)return;dbgFilter=b.dataset.f;[...$('dbgFil').children].forEach(x=>x.classList.toggle('on',x===b));renderLog()};
+$('swTech').onclick=()=>{const on=ls('ks_techmsg')!=='1';ls('ks_techmsg',on?'1':'0');setSw('swTech',on);saved('foutcodes '+(on?'aan':'uit'))};
+setInterval(()=>{if($('dbgModal').classList.contains('show'))renderSum()},2000);
+
 /* ---------- Events ---------- */
 $('openSettings').onclick=()=>settings();
 $('closeSettings').onclick=()=>{$('modal').classList.remove('show');tick()};
@@ -1203,6 +1379,9 @@ if('mediaSession' in navigator){
 /* ---------- Init ---------- */
 renderAuto();setPP(false);setMode('kink');
 msg(hasLogin()?'Spotify gekoppeld':'Spotify niet gekoppeld. Tik op het tandwiel.');
+LOG('app','info','Gestart '+APP_VERSION+', '+(IS_PHONE?'telefoon':'computer')+', '+(matchMedia('(display-mode: standalone)').matches?'geïnstalleerde app':'browser'));
+if(location.hash==='#diagnose')setTimeout(openDbg,300);
+window.addEventListener('hashchange',()=>{if(location.hash==='#diagnose')openDbg()});
 callback();incoming();lastSpCheck=Date.now()-58500;tick();keepAwake();renderSpotIdle();setInterval(pollSpotify,10000);
 // Klok: een Web Worker geeft elke seconde een seintje. Browsers remmen gewone timers in een
 // verborgen tabblad sterk af, die van een Worker veel minder. Zonder Worker valt hij terug op setInterval.
