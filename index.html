@@ -31,14 +31,12 @@ svg{display:block}
 /* Bovenbalk */
 .top{grid-area:top;display:flex;align-items:center;justify-content:space-between;padding:2px 4px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.14em;font-size:14px;white-space:nowrap}
-@media (max-width:440px){.top{gap:8px}.top .right{gap:8px}.brand{gap:8px}.brand .wm{font-size:13px!important}.brand svg{width:26px!important;height:26px!important}.silly{font-size:10px!important;padding:0 9px!important;min-height:34px}.clock{font-size:20px!important}.brand{font-size:12px;letter-spacing:.1em}.clock{font-size:24px}.silly{font-size:11px;padding:0 10px}}
 .top .right{display:flex;align-items:center;gap:12px}
 .silly{white-space:nowrap;min-height:40px;padding:0 12px;border-radius:8px;background:#2a1414;border:1px solid var(--hot);color:#ffb3ad;font-weight:900;font-size:12px;letter-spacing:.08em}
 .silly:active{background:var(--hot);color:#fff}
 .brand svg{width:34px;height:34px;flex:none}
 .brand .wm{font-family:'Archivo Black',system-ui,sans-serif;font-size:19px;letter-spacing:.01em;line-height:1}
 .brand .wm span{color:var(--kink)}
-.src .name{font-family:'Archivo Black',system-ui,sans-serif;font-weight:400!important}
 .brand i{width:10px;height:10px;border-radius:50%;background:var(--kink);box-shadow:0 0 12px var(--kink)}
 .clock{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em}
 
@@ -66,7 +64,7 @@ svg{display:block}
 .src:focus{outline:none}
 .src .ico{width:54px;height:54px;border-radius:10px;display:grid;place-items:center;background:#22262e}
 .src .ico svg{width:30px;height:30px}
-.src .name{display:block;font-size:clamp(24px,6.4vw,36px);font-weight:950;letter-spacing:-.01em;line-height:1}
+.src .name{display:block;font-size:clamp(24px,6.4vw,36px);font-family:'Archivo Black',system-ui,sans-serif;font-weight:400;letter-spacing:-.01em;line-height:1}
 .src .meta{display:block;font-size:14px;color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .src .np{display:block;margin-top:8px;min-width:0}
 .src .np em{display:block;font-style:normal;font-size:11px;font-weight:900;letter-spacing:.14em;opacity:.6}
@@ -118,7 +116,7 @@ svg{display:block}
 .src .np .gtag{display:inline-block;opacity:1;font-size:11px}
 .src .np #kinkArtist{display:inline}
 .src .np .gtag:empty{display:none}
-.src.fav{border-color:var(--hot)!important;box-shadow:0 0 0 4px #ff5a4e33,0 10px 50px -12px #ff5a4e88}
+.src.fav{box-shadow:0 0 0 4px #ff5a4e33,0 10px 50px -12px #ff5a4e88}
 .src.fav .np em::after{content:" \00B7  JOUW MUZIEK";color:var(--hot);opacity:1}
 .src.kink.active.fav .np em::after{color:#7a0f08}
 .src.fresh:not(.active){border-color:var(--kink);animation:fresh 1.4s ease-in-out 4}
@@ -126,6 +124,7 @@ svg{display:block}
 .src .tag{position:absolute;top:18px;right:18px;font-size:12px;font-weight:900;letter-spacing:.12em;padding:6px 10px;border-radius:8px;background:#22262e;color:var(--muted)}
 .src.kink.active{background:linear-gradient(150deg,#e6ff6b,var(--kink) 55%,#a9cc1c);border-color:var(--kink);color:var(--kink-ink);box-shadow:0 10px 50px -12px #d9ff4299}
 .src.spot.active{background:linear-gradient(150deg,#4ff08a,var(--spot) 55%,#11a845);border-color:var(--spot);color:var(--spot-ink);box-shadow:0 10px 50px -12px #1ed76099}
+.src.fav,.src.fav.fresh,.src.active.fav{border-color:var(--hot)}
 .src.active .ico{background:#0000001f}
 .src.active .meta{color:inherit;opacity:.75}
 .src.active .tag{background:#00000026;color:inherit}
@@ -160,6 +159,7 @@ svg{display:block}
   .ctl{min-height:70px;flex-direction:row;gap:10px;font-size:16px}
 }
 @media (max-height:560px){.clock{font-size:22px}.banner{padding:10px 14px}.banner b{font-size:17px}.count{font-size:26px}.ctl{min-height:60px}.src{padding:14px;min-height:110px}.src .ico{width:42px;height:42px}}
+@media (max-width:440px){.top{gap:8px}.brand{gap:8px;font-size:12px;letter-spacing:.1em}.brand .wm{font-size:13px}.brand svg{width:26px;height:26px}.silly{font-size:10px;padding:0 9px}.clock{font-size:20px}}
 
 /* Instellingen */
 .modal{display:none;position:fixed;inset:0;background:#000c;backdrop-filter:blur(6px);z-index:5;padding:16px;align-items:center;justify-content:center}
@@ -175,8 +175,6 @@ svg{display:block}
 .copyrow{display:grid;grid-template-columns:1fr auto;gap:8px}
 .btn{min-height:48px;padding:0 16px;border-radius:8px;background:#22262e;font-weight:800;font-size:14px}
 .btn.primary{background:var(--kink);color:var(--kink-ink)}
-.check{display:flex!important;gap:12px;align-items:center}
-.check input{width:22px;height:22px;accent-color:var(--kink)}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
 .pl{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;padding:8px;border-radius:10px;background:#0b0d10;border:1px solid var(--line);margin-top:8px;min-height:72px}
 .pl img,.pl .ph{width:56px;height:56px;border-radius:10px;object-fit:cover;background:#22262e}
@@ -193,7 +191,7 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 .chip.on{background:var(--kink);color:var(--kink-ink);border-color:var(--kink)}
 .chip .x{margin-left:8px;opacity:.6}
 .addrow{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
-.set{padding:0!important;overflow:hidden!important;display:flex;flex-direction:column}
+.set{padding:0;overflow:hidden;display:flex;flex-direction:column}
 .set .shead{padding:18px 20px 0}
 .set .shead h2{margin:0 0 4px;font-size:22px}
 .set .note{display:flex;gap:8px;align-items:center;color:#ffd789;font-size:13px;font-weight:700;margin:6px 0 12px}
@@ -212,7 +210,7 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 .sw{width:52px;height:32px;border-radius:99px;background:#2c313b;position:relative;flex:none;border:0;padding:0}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:var(--text);transition:left .2s}
 .sw[aria-checked="true"]{background:var(--spot)}.sw[aria-checked="true"]::after{left:23px}
-.set .numin{width:84px!important;flex:none;text-align:center;font-weight:800!important}
+.set .numin{width:84px;flex:none;text-align:center;font-weight:800}
 .chips2{display:flex;flex-wrap:wrap;gap:8px;padding:4px 16px 12px}
 .chip2{min-height:42px;padding:0 14px;border-radius:8px;background:#1b1f27;border:1px solid #2a2e37;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px;color:var(--text)}
 .chip2.hear{background:var(--kink);color:var(--kink-ink);border-color:var(--kink)}
@@ -234,12 +232,12 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 .devopt .rad{width:22px;height:22px;border-radius:50%;border:2px solid #4a505b;flex:none;display:grid;place-items:center}
 .devopt.on .rad{border-color:var(--spot)}.devopt.on .rad::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--spot)}
 .devopt b{display:block;font-weight:800}.devopt small{display:block;color:var(--muted);font-size:13px}
-.dbg{width:min(900px,100%)!important;max-height:94dvh;display:flex;flex-direction:column;gap:10px}
+.dbg{width:min(900px,100%);max-height:94dvh;overflow:auto;display:flex;flex-direction:column;gap:10px}
 .dhead{display:flex;align-items:center;justify-content:space-between;gap:10px}.dhead h2{margin:0}
 .dsum{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:4px}
 .dsum div{background:#0b0d10;border:1px solid #23272f;border-radius:8px;padding:5px 8px;font-size:12px;line-height:1.3;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .dbg .btn{min-height:42px;padding:0 12px;font-size:13px}
-.dbg{overflow:auto!important}.dlog{min-height:320px}
+.dlog{min-height:320px}
 .dsum b{display:block;font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:2px}
 .dsum .bad{color:var(--hot);font-weight:800}.dsum .good{color:var(--spot);font-weight:800}
 .dbtns{display:flex;flex-wrap:wrap;gap:8px}
@@ -254,7 +252,7 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 .set .sfoot small{flex:1;color:var(--muted);font-size:13px;transition:color .2s}
 .set .sfoot small.saved{color:var(--spot);font-weight:800}
 .set .sfoot .close{min-height:50px;padding:0 28px;border-radius:10px;background:#262a33;font-weight:900;font-size:16px}
-.src.spot.issue{border-color:var(--hot)!important;background:linear-gradient(150deg,#2e1210,var(--panel2) 70%)!important;color:var(--text)!important}
+.src.spot.issue{border-color:var(--hot);background:linear-gradient(150deg,#2e1210,var(--panel2) 70%);color:var(--text)}
 .src.spot.issue .tag{background:var(--hot);color:#fff}
 .src.spot.issue .np em{color:#ff9a92;opacity:1}
 .src.spot.blink{animation:spblink .5s ease-in-out 6}
@@ -411,7 +409,7 @@ const REDIRECT = location.origin + location.pathname.replace(/index\.html$/,'');
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 /* ---------- Diagnose-log ---------- */
 // Bewaart de laatste 600 gebeurtenissen op dit apparaat (nooit sleutels of tokens), zodat je ze kunt delen.
-const APP_VERSION='v19';
+const APP_VERSION='v20';
 const TAB_ID=Math.random().toString(36).slice(2,6);
 let logBuf=[],logTimer=null,lastErr=null;
 try{logBuf=JSON.parse(localStorage.getItem('ks_log')||'[]')}catch(e){logBuf=[]}
@@ -441,8 +439,7 @@ let autoAway=Number(ls('ks_autoAway'))||0;
 // handledBreak: starttijd van het blok dat al is afgehandeld, zodat we niet twee keer wisselen
 let handledBreak=Number(ls('ks_handledBreak'))||0;
 const MAX_AWAY=10*60000; // vangnet: nooit langer dan 10 minuten weg
-// Wachttijd na een melding van KINK. Standaard 20 s; wie nog op de oude standaard 8 s stond, gaat mee naar 20 s.
-(function migrateDelay(){const old=ls('ks_delay');if(ls('ks_delay2')===null&&old!==null&&old!==''&&old!=='8')ls('ks_delay2',old)})();
+// Wachttijd voordat de app KINK verlaat. Standaard 20 s.
 function delayMs(){const v=ls('ks_delay2');return Math.max(0,Math.min(60,v===null||v===''?20:Number(v)||0))*1000}
 function setAway(v){autoAway=v;ls('ks_autoAway',v?String(v):null)}
 function setHandled(v){handledBreak=v;ls('ks_handledBreak',String(v))}
@@ -454,7 +451,7 @@ async function autoToSpotify(breakStart){
   if(!hasLogin())return msg('Automatisch wisselen kan niet: Spotify is niet gekoppeld.',true);
   busy=true;
   try{await playList();setAway(Date.now());msg('Reclame of nieuws op KINK: even naar Spotify.');buzz()}
-  catch(e){msg('Automatisch wisselen mislukt: '+e.message,true);buzz();handleSpError(e)}
+  catch(e){if(!aborted(e)){msg('Automatisch wisselen mislukt: '+e.message,true);buzz();handleSpError(e,{kind:'break'})}}
   busy=false;
 }
 async function autoToKink(why){
@@ -473,7 +470,7 @@ function tick(){
   const now=Date.now();
   metaDue();
   // Sleutel op tijd vernieuwen, vijf minuten voor hij verloopt
-  if(hasLogin()&&!authBroken&&!refreshing&&tokenExpiry&&tokenExpiry-now<5*60000&&now-lastSpCheck>15000){lastSpCheck=now;getToken().catch(()=>{})}
+  if(hasLogin()&&!authBroken&&!refreshing&&tokenExpiry&&tokenExpiry-now<5*60000&&now-lastRefreshTry>15000){lastRefreshTry=now;getToken().catch(()=>{})}
   $('clock').textContent=hhmm(now);
   if(!busy){
     const fresh=metaFresh(now),d=delayMs();
@@ -568,7 +565,7 @@ async function keepAwake(){
   try{wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
 }
 document.addEventListener('visibilitychange',()=>{
-  LOG('app','info','Zichtbaarheid: '+document.visibilityState);if(document.visibilityState==='visible'){keepAwake();lastSpCheck=0;tick()}});
+  LOG('app','info','Zichtbaarheid: '+document.visibilityState);if(document.visibilityState==='visible'){keepAwake();if(spWatchUntil)checkSpotify();tick()}});
 
 /* ---------- Bronnen ---------- */
 function setMode(m){
@@ -589,7 +586,7 @@ async function startKink(fromAuto){
   iStarted=false;
   LOG('switch','info','KINK starten'+(fromAuto?' (automatisch)':''));
   if(!fromAuto){
-    setAway(0);
+    setAway(0);pendingSwitch=null;kinkSeq++;
     // Zelf KINK gekozen tijdens een blok: dit blok niet meer automatisch overslaan
     if(kinkNow?.isBreak)setHandled(kinkNow.breakStart);
     if(kinkNow?.title)banHandled=kinkNow.artist+kinkNow.title;
@@ -606,7 +603,12 @@ async function startKink(fromAuto){
 
 /* ---------- Spotify bereikbaar? Waarschuwing in de Spotify-tegel ---------- */
 const IS_PHONE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
-let spIssue='',spWatchUntil=0,lastSpCheck=0,spChecking=false,noDevCount=0;
+let spIssue='',spWatchUntil=0,spChecking=false,lastRefreshTry=0;
+// Wissel die mislukte omdat Spotify sliep. Komt Spotify terug, dan doet de app hem alsnog.
+let pendingSwitch=null;
+// Telt hoe vaak je zelf KINK kiest, zodat een lopende Spotify-controle weet dat hij moet stoppen.
+let kinkSeq=0;
+const aborted=e=>/^Afgebroken/.test(e&&e.message||'');
 function renderSpIssue(){
   const t=$('spotifyMode');t.classList.toggle('issue',!!spIssue);
   if(!spIssue)return;
@@ -627,43 +629,52 @@ function clearSpIssue(found){
   setMode(mode);if(found)msg('Spotify gevonden. De app kan weer wisselen.');
 }
 function blinkSpotify(){const t=$('spotifyMode');t.classList.remove('blink');void t.offsetWidth;t.classList.add('blink');setTimeout(()=>t.classList.remove('blink'),3200)}
-// Controleert koppeling en of er een Spotify-speler is. Stil als alles goed is.
+// Na een tik op de waarschuwing: is Spotify er weer? Zo ja, dan de mislukte wissel alsnog doen.
 async function checkSpotify(){
   if(spChecking||!hasLogin())return;
-  spChecking=true;lastSpCheck=Date.now();
+  spChecking=true;
   try{
     try{await getToken()}catch(e){if(authBroken)setSpIssue('login');return}
     const list=await spDevices();
-    if(list.length){clearSpIssue(spIssue==='nodevice');noDevCount=0}
-    else if(spIssue!=='login'){
-      // Spotify geeft soms een lege lijst terwijl de app op de achtergrond speelt. Speelt Spotify via ons, geen waarschuwing.
-      if(mode==='spotify'&&iStarted){LOG('spotify','warn','Spotify meldt geen apparaten, maar speelt via deze app: geen waarschuwing');return}
-      if(++noDevCount>=2||mode!=='spotify')setSpIssue('nodevice');
-    }
+    if(list.length){clearSpIssue(spIssue==='nodevice');retryPending()}
   }catch(e){}
   finally{spChecking=false}
 }
-// Na een tik: 30 seconden lang elke 3 seconden kijken of Spotify er al is
+async function retryPending(){
+  const p=pendingSwitch;pendingSwitch=null;
+  if(!p||Date.now()-p.at>5*60000||busy)return;
+  const now=Date.now(),fresh=metaFresh(now);
+  if(p.kind==='tap'){LOG('switch','info','Spotify is terug: wissel alsnog');return goSpotify()}
+  if(p.kind==='silly'){LOG('switch','info',"Spotify is terug: Don't be silly alsnog");return silly()}
+  if(p.kind==='break'&&fresh&&kinkNow.isBreak){LOG('switch','info','Spotify is terug, nog steeds reclame: naar Spotify');return autoToSpotify(kinkNow.breakStart)}
+  if(p.kind==='ban'&&fresh&&kinkNow.artist+kinkNow.title===p.key){LOG('switch','info','Spotify is terug, Must skip speelt nog: naar Spotify');return banToSpotify(p.key,kinkNow.artist)}
+  LOG('switch','info','Spotify is terug, reden voor de wissel is voorbij: KINK blijft');
+  msg('Spotify is er weer. KINK speelt gewoon door.');
+}
+// Na een tik: 90 seconden lang elke 3 seconden kijken of Spotify er al is
 function watchSpotify(){
-  spWatchUntil=Date.now()+30000;renderSpIssue();
+  spWatchUntil=Date.now()+90000;renderSpIssue();
   const loop=async()=>{
     if(!spWatchUntil||!spIssue)return;
     if(Date.now()>spWatchUntil){spWatchUntil=0;renderSpIssue();msg('Spotify nog niet gevonden. Tik nog een keer op de Spotify-tegel.',true);return}
-    lastSpCheck=0;await checkSpotify();if(spWatchUntil)setTimeout(loop,3000);
+    await checkSpotify();if(spWatchUntil)setTimeout(loop,3000);
   };
   setTimeout(loop,2500);
 }
-function handleSpError(e){
+function handleSpError(e,retry){
   const m=String(e&&e.message||e);
-  if(/Geen Spotify-apparaat/.test(m)){setSpIssue('nodevice');blinkSpotify()}
+  if(/Geen Spotify-apparaat|niet af/.test(m)){setSpIssue('nodevice');blinkSpotify();if(retry)pendingSwitch={...retry,at:Date.now()}}
   else if(authBroken||/verlopen|Koppel eerst/.test(m)){setSpIssue('login');blinkSpotify()}
 }
 function fixSpotify(){
   if(spIssue==='login'){$('clientId').value=ls('ks_client')||'';connect();return}
   watchSpotify();
-  if(IS_PHONE&&/Android/i.test(navigator.userAgent))location.href='intent://open#Intent;scheme=spotify;package=com.spotify.music;S.browser_fallback_url='+encodeURIComponent('https://open.spotify.com')+';end';
-  else if(IS_PHONE)location.href='spotify:';
-  else window.open('https://open.spotify.com','_blank');
+  // Opent je playlist in de Spotify-app. Daarmee meldt Spotify zich weer aan en kan de app hem besturen.
+  const uri=playlistUri(),path=uri?uri.split(':').slice(1).join('/'):'',web='https://open.spotify.com/'+path;
+  LOG('spotify','info','Spotify openen'+(path?' met je playlist':''));
+  if(IS_PHONE&&/Android/i.test(navigator.userAgent))location.href='intent://open.spotify.com/'+path+'#Intent;scheme=https;package=com.spotify.music;S.browser_fallback_url='+encodeURIComponent(web)+';end';
+  else if(IS_PHONE)location.href=uri||'spotify:';
+  else window.open(web,'_blank');
 }
 
 /* ---------- Spotify OAuth (PKCE) ---------- */
@@ -855,6 +866,7 @@ async function playList(){
   const wasKink=mode==='kink'&&!radio.paused;
   try{return await playListInner()}
   catch(e){
+    if(/^Afgebroken/.test(e.message))throw e;
     LOG('switch','err','Naar Spotify mislukt: '+e.message);
     // Nooit stilte: speelde KINK, dan gaat KINK gewoon door
     if(wasKink||mode==='spotify'){iStarted=false;radio.load();radio.play().then(()=>{setMode('kink');setPP(true)}).catch(()=>{})}
@@ -876,7 +888,12 @@ async function playListInner(){
   try{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}
   catch(e){if(body?.offset){delete body.offset;randomStart=false;await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}else throw e}
   setMode('spotify');setPP(true);iStarted=true;
-  if(!(await verifySpotify()))throw Error('Geen Spotify-apparaat gevonden: Spotify meldt geen nummer. Open de Spotify-app.');
+  const seq=kinkSeq;
+  if(!(await verifySpotify())){
+    // Intussen zelf KINK gekozen? Dan is er niets mis, gewoon stoppen.
+    if(seq!==kinkSeq){LOG('switch','info','Intussen KINK gekozen, Spotify-controle gestopt');throw Error('Afgebroken: KINK gekozen')}
+    throw Error('Geen Spotify-apparaat gevonden: Spotify meldt geen nummer. Open de Spotify-app.');
+  }
   if(shuffle){
     const ok=await ensureShuffle(dev);
     // Lengte van de playlist onbekend? Dan na het aanzetten van shuffle één keer doorspringen naar een willekeurig nummer.
@@ -906,7 +923,7 @@ async function goSpotify(){
   LOG('switch','info','Spotify-tegel ingedrukt');
   if(!hasLogin())return settings('Sp');
   setAway(0); // handmatig gekozen: niet automatisch terug
-  try{msg('Spotify start...');await playList();if(!$('status').classList.contains('err'))msg('Spotify speelt je playlist'+(ls('ks_shuffle')!=='0'?' op shuffle':''))}catch(e){msg(e.message,true);handleSpError(e)}
+  try{msg('Spotify start...');await playList();if(!$('status').classList.contains('err'))msg('Spotify speelt je playlist'+(ls('ks_shuffle')!=='0'?' op shuffle':''))}catch(e){if(!aborted(e)){msg(e.message,true);handleSpError(e,{kind:'tap'})}}
 }
 
 async function toggle(){
@@ -1153,62 +1170,44 @@ async function banToSpotify(key,artist){
   if(!hasLogin())return;
   busy=true;
   try{await playList();setAway(Date.now());msg(artist+' op KINK: even naar Spotify.')}
-  catch(e){msg('Wisselen mislukt: '+e.message,true);handleSpError(e)}
+  catch(e){if(!aborted(e)){msg('Wisselen mislukt: '+e.message,true);handleSpError(e,{kind:'ban',key})}}
   busy=false;
 }
 
 /* ---------- Don't be silly ---------- */
-// Zoekt "Don't be Silly" van Wodan Boys. Alleen een afspeelbare versie van de juiste artiest telt.
-async function findSilly(){
-  const tries=['track:"Don\'t be Silly" artist:"Wodan Boys"',"Wodan Boys Don't be Silly",'Wodan Boys'];
-  for(const q of tries){
-    // Altijd met land NL zoeken: dan geeft Spotify de versie die hier afspeelbaar is
-    const d=await api('/search?type=track&limit=10&market=NL&q='+encodeURIComponent(q));
-    const items=d?.tracks?.items||[];
-    LOG('silly','info','Zoeken "'+q+'": '+(items.map(t=>(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name+(t.is_playable===false?' (niet afspeelbaar)':t.is_playable?' (afspeelbaar)':'')).slice(0,5).join(' | ')||'niets gevonden'));
-    const wodan=items.filter(t=>(t.artists||[]).some(a=>/wodan/i.test(a.name))&&t.is_playable!==false);
-    const hit=wodan.find(t=>/silly/i.test(t.name))||(q==='Wodan Boys'?null:null);
-    if(hit)return hit;
-  }
-  return null;
-}
 // Don't be silly: de single van Wodan Boys (album met één nummer). Starten als context,
-// net als een playlist; dat werkt betrouwbaar. Zoeken is alleen nog de reserve.
+// net als een playlist; dat werkt betrouwbaar.
 const SILLY_ALBUM='spotify:album:0V64voJRjQ3zboCinONl2c';
 async function silly(){
   LOG('silly','info',"Don't be silly ingedrukt");
   if(!hasLogin())return settings('Sp');
   msg("Don't be silly...");
+  const wasKink=mode==='kink'&&!radio.paused;
   try{
     const dev=await deviceId();
     radio.pause();setAway(0);
     await wakeDevice(dev);
-    const isSilly=p=>p&&p.is_playing&&p.item&&((p.context&&p.context.uri===SILLY_ALBUM)||/silly/i.test(p.item.name||''));
+    const play=()=>api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{context_uri:SILLY_ALBUM,offset:{position:0},position_ms:0});
     const check=async label=>{await sleep(1600);let p=null;try{p=await api('/me/player')}catch(e){}
-      LOG('silly','info',label+': '+(p?((p.is_playing?'speelt':'staat stil')+': '+(p.item?.name||'geen nummer geladen')+(p.context?.uri?' (context '+p.context.uri+')':'')+' op '+(p.device?.name||'?')):'geen speler actief'));return isSilly(p)};
-    let ok=false;
-    try{
-      await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{context_uri:SILLY_ALBUM,offset:{position:0},position_ms:0});
-      setMode('spotify');setPP(true);iStarted=true;
-      ok=await check('Na afspelen (album)');
-      if(!ok){
-        LOG('silly','warn','Nog niet aan het spelen, tweede poging met apparaat geactiveerd');
-        try{await api('/me/player','PUT',{device_ids:[dev],play:false});await sleep(700)}catch(e){}
-        await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{context_uri:SILLY_ALBUM,offset:{position:0},position_ms:0});
-        ok=await check('Na tweede poging (album)');
-      }
-    }catch(e){
-      if(/apparaat|verlopen/i.test(e.message))throw e;
-      LOG('silly','warn','Album starten mislukt ('+e.message+'), nu via zoeken');
-      const t=await findSilly();
-      if(!t)throw Error("Don't be Silly van Wodan Boys niet gevonden op Spotify (zie Diagnose).");
-      await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',t.album?.uri?{context_uri:t.album.uri,offset:{uri:t.uri},position_ms:0}:{uris:[t.uri],position_ms:0});
-      setMode('spotify');setPP(true);iStarted=true;
-      ok=await check('Na afspelen (zoeken)');
+      LOG('silly','info',label+': '+(p?((p.is_playing?'speelt':'staat stil')+': '+(p.item?.name||'geen nummer geladen')+(p.context?.uri?' (context '+p.context.uri+')':'')+' op '+(p.device?.name||'?')):'geen speler actief'));
+      return !!(p&&p.is_playing&&p.item&&(p.context?.uri===SILLY_ALBUM||/silly/i.test(p.item.name||'')))};
+    await play();
+    setMode('spotify');setPP(true);iStarted=true;
+    let ok=await check('Na afspelen');
+    if(!ok){
+      LOG('silly','warn','Nog niet aan het spelen, tweede poging met apparaat geactiveerd');
+      try{await api('/me/player','PUT',{device_ids:[dev],play:false});await sleep(700)}catch(e){}
+      await play();
+      ok=await check('Na tweede poging');
     }
-    if(!ok){setSpIssue('nodevice');throw Error("Spotify speelde Don't be silly niet af. Open de Spotify-app (zie Diagnose).")}
+    if(!ok)throw Error("Spotify speelde Don't be silly niet af. Open de Spotify-app (zie Diagnose).");
     msg("Don't be silly!");buzz();
-  }catch(e){LOG('silly','err',e.message);msg(e.message,true);handleSpError(e)}
+  }catch(e){
+    LOG('silly','err',e.message);msg(e.message,true);
+    // Nooit stilte: speelde KINK, dan gaat KINK gewoon door
+    if(wasKink||mode==='spotify'){iStarted=false;radio.load();radio.play().then(()=>{setMode('kink');setPP(true)}).catch(()=>{})}
+    handleSpError(e,{kind:'silly'});
+  }
 }
 $('silly').onclick=silly;
 
@@ -1409,8 +1408,8 @@ $('addSkip').onclick=()=>addTo('skip');$('newSkip').onkeydown=e=>{if(e.key==='En
 $('copyRedirect').onclick=async()=>{try{await navigator.clipboard.writeText($('redirectUri').value);$('copyRedirect').textContent='Gekopieerd'}catch(e){$('redirectUri').select()}};
 $('connect').onclick=connect;
 $('logout').onclick=()=>{['ks_token','ks_expiry','ks_refresh','ks_verifier','ks_state','ks_scope'].forEach(k=>ls(k,null));token=null;msg('Spotify ontkoppeld');renderSpAccount();saved('Spotify ontkoppeld')};
-$('playPause').onclick=()=>mode==='spotify'?toggle():radio.paused?startKink():radio.pause();
-$('kinkMode').onclick=()=>startKink();
+$('playPause').onclick=()=>mode==='spotify'?toggle():radio.paused?kinkTap():radio.pause();
+$('kinkMode').onclick=kinkTap;
 $('spotifyMode').onclick=()=>spIssue?fixSpotify():goSpotify();
 $('next').onclick=()=>mode==='spotify'?next().then(()=>setTimeout(pollSpotify,800)):goSpotify();
 $('autoBtn').onclick=()=>{auto=!auto;ls('ks_auto',auto?'1':'0');if(!auto)setAway(0);renderAuto();setSw('swAuto',auto);tick();msg(auto?'Automatisch wisselen staat aan':'Automatisch wisselen staat uit')};
@@ -1420,18 +1419,35 @@ radio.onpause=()=>{if(mode==='kink'){setPP(false);setMode('kink')}};
 // Stuurwielknoppen en vergrendelscherm: "volgende" tijdens KINK schakelt naar Spotify
 if('mediaSession' in navigator){
   navigator.mediaSession.metadata=new MediaMetadata({title:'KINK live',artist:'KINK Switch',artwork:[{src:'icon-512.png',sizes:'512x512',type:'image/png'}]});
-  navigator.mediaSession.setActionHandler('play',()=>startKink());
+  navigator.mediaSession.setActionHandler('play',kinkTap);
   navigator.mediaSession.setActionHandler('pause',()=>radio.pause());
   navigator.mediaSession.setActionHandler('nexttrack',goSpotify);
 }
 
+// Eerste keer KINK na het openen van de app: loopt er reclame of nieuws, dan meteen naar Spotify.
+let firstKinkTap=true;
+async function kinkTap(){
+  const first=firstKinkTap;firstKinkTap=false;
+  const now=Date.now();
+  if(first&&auto&&hasLogin()&&playlistUri()&&!busy&&metaFresh(now)&&kinkNow.isBreak&&now-kinkNow.breakStart<5*60000){
+    LOG('switch','info','KINK gekozen tijdens reclame/nieuws: meteen naar Spotify');
+    await autoToSpotify(kinkNow.breakStart);
+    // Lukte het niet, dan toch KINK, zoals gevraagd
+    if(mode!=='spotify'&&radio.paused){radio.load();radio.play().catch(()=>{})}
+    return;
+  }
+  return startKink();
+}
+
 /* ---------- Init ---------- */
+// Opruimen: sleutels van functies die niet meer bestaan
+['ks_delay','ks_gcache','ks_genreSwitch','ks_genres','ks_useGenre','ks_sillyUri','ks_sillyName'].forEach(k=>{if(ls(k)!==null)ls(k,null)});
 renderAuto();setPP(false);setMode('kink');
 msg(hasLogin()?'Spotify gekoppeld':'Spotify niet gekoppeld. Tik op het tandwiel.');
 LOG('app','info','Gestart '+APP_VERSION+', '+(IS_PHONE?'telefoon':'computer')+', '+(matchMedia('(display-mode: standalone)').matches?'geïnstalleerde app':'browser'));
 if(location.hash==='#diagnose')setTimeout(openDbg,300);
 window.addEventListener('hashchange',()=>{if(location.hash==='#diagnose')openDbg()});
-callback();incoming();lastSpCheck=Date.now()-58500;tick();keepAwake();renderSpotIdle();setInterval(pollSpotify,10000);
+callback();incoming();tick();keepAwake();renderSpotIdle();setInterval(pollSpotify,10000);
 // Klok: een Web Worker geeft elke seconde een seintje. Browsers remmen gewone timers in een
 // verborgen tabblad sterk af, die van een Worker veel minder. Zonder Worker valt hij terug op setInterval.
 (function startClock(){

@@ -34,11 +34,11 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 
 The first time you save a song to KINK Catch, the app asks Spotify once for permission to edit your playlists. Nothing to change in the dashboard.
 
-Tip: the app can only control a Spotify player that is running. If a switch fails, the Spotify tile asks you to open Spotify with one tap.
+Tip: the app can only control a Spotify player that is running. If a switch fails, the Spotify tile opens your playlist in Spotify with one tap and the app finishes the switch by itself.
 
 ## Features
 
-- **Auto switch.** Ads or news on KINK? Spotify. Music back? KINK. Hands free.
+- **Auto switch.** Ads or news on KINK? Spotify. Music back? KINK. Hands free. Open the app during a break and tap KINK: you go straight to Spotify.
 - **Live now playing.** Artist big, song title below, on both tiles. Also shown in the page title and the Android media notification.
 - **Must hear.** Tap the heart on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
 - **KINK Catch.** Tap the add icon on the KINK tile and the song lands in your private KINK Catch playlist on Spotify (created for you the first time). Changed your mind? Undo right from the confirmation.
@@ -48,7 +48,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
 - **Smart Spotify resume.** Switching back to Spotify continues your playlist where you left it.
 - **Always shuffle.** Your playlist starts on shuffle at a random song, every time. Turn it off in settings if you like order.
-- **Spotify check.** Every switch to Spotify is verified: the app waits until Spotify reports the song it is playing. No song? KINK keeps playing (or comes back) and the Spotify tile turns red: one tap opens Spotify. No false alarms while Spotify plays in the background.
+- **Spotify check.** Every switch to Spotify is verified: the app waits until Spotify reports the song it is playing. No song? KINK keeps playing and the Spotify tile turns red. One tap opens your playlist in Spotify, and as soon as Spotify is back the app does the switch it missed (if the reason still applies). No false alarms while Spotify plays in the background.
 - **Plays where you tap.** Tap on your phone and Spotify plays on your phone, tap on your laptop and it plays there. You can pick a fixed device in settings too. Several copies of the app (phone and laptop) never fight over your music: only the copy that started the playback switches it.
 - **Stays connected.** The Spotify login is refreshed in time and safely across tabs, so you're not asked to reconnect.
 - **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
@@ -65,6 +65,8 @@ Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add 
 
 - **On your phone, keep it on screen.** Phones pause pages in the background, so in the car keep the app open in the holder with "Scherm aan houden" on.
 - **On your computer, use Chrome.** With "Ook op de achtergrond meekijken" on, the app keeps working as a background tab. Add the site to "Always keep these sites active" under Settings, Performance, so Chrome never unloads it.
+- **Spotify falls asleep.** Android puts a paused Spotify to sleep after a while, and then no app can control it. Set Spotify's battery use to Unrestricted (long press the Spotify icon, App info, Battery). If it still dozes off, one tap on the red tile wakes it.
+- **Install, don't just add a shortcut.** The installed app gets its own window and is the only way to share playlists from Spotify. Use one copy on your phone and close old KINK Switch tabs in Chrome.
 - **Data use.** The app itself uses about 1 to 2 MB per hour. The KINK stream is roughly 86 MB per hour; Spotify depends on your quality setting.
 - **Stream delay.** Before leaving KINK (ads, news or a Must skip artist) the app waits 20 seconds, because the stream you hear runs behind KINK's data. That way you don't lose the end of a song. Coming back to KINK, for music or a Must hear artist, happens instantly. You can tune this in settings.
 
