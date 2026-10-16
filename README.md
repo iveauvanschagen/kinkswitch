@@ -68,7 +68,7 @@ Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add 
 - **Spotify falls asleep.** Android puts a paused Spotify to sleep after a while, and then no app can control it. Set Spotify's battery use to Unrestricted (long press the Spotify icon, App info, Battery). If it still dozes off, one tap on the red tile wakes it.
 - **Install, don't just add a shortcut.** The installed app gets its own window and is the only way to share playlists from Spotify. Use one copy on your phone and close old KINK Switch tabs in Chrome.
 - **Data use.** The app itself uses about 1 to 2 MB per hour. The KINK stream is roughly 86 MB per hour; Spotify depends on your quality setting.
-- **Stream delay.** Before leaving KINK (ads, news or a Must skip artist) the app waits 20 seconds, because the stream you hear runs behind KINK's data. That way you don't lose the end of a song. Coming back to KINK, for music or a Must hear artist, happens instantly. You can tune this in settings.
+- **Stream delay.** Before leaving KINK (ads, news or a Must Skip artist) the app waits 20 seconds, because the stream you hear runs behind KINK's data. That way you don't lose the end of a song. Coming back to KINK, for music or a Must hear artist, happens instantly. You can tune this in settings.
 
 ## Credits
 
