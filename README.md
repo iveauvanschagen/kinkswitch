@@ -19,7 +19,7 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 
 ## How it works
 
-1. **KINK tells us what's on.** KINK publishes live now playing data: artist, title, length and a marker when an ad break starts. The app reads it every 15 seconds, every 3 seconds near the end of a song and every 5 seconds during a break.
+1. **KINK tells us what's on.** KINK publishes live now playing data: artist, title, length and a marker when an ad break starts. The app reads it every 15 seconds, every 3 seconds near the end of a song and every 2.5 seconds during a break.
 2. **Spotify does the playing.** Using the Spotify Web API, the app tells your Spotify app (phone or computer) what to play, pause or skip. Your music keeps playing in Spotify itself.
 3. **The app decides when to switch.** An ad marker or a long item without a title (news, commercials) means a break: off to Spotify. A real song with a title means music is back: return to KINK. Short jingles and DJ talk are ignored.
 
@@ -34,7 +34,7 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 
 The first time you save a song to KINK Catch, the app asks Spotify once for permission to edit your playlists. Nothing to change in the dashboard.
 
-Tip: the app can only control a Spotify player that is running. If none is found, the Spotify tile asks you to open Spotify with one tap.
+Tip: the app can only control a Spotify player that is running. If a switch fails, the Spotify tile asks you to open Spotify with one tap.
 
 ## Features
 
@@ -48,7 +48,7 @@ Tip: the app can only control a Spotify player that is running. If none is found
 - **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
 - **Smart Spotify resume.** Switching back to Spotify continues your playlist where you left it.
 - **Always shuffle.** Your playlist starts on shuffle at a random song, every time. Turn it off in settings if you like order.
-- **Spotify check.** The app keeps an eye on Spotify. Not running or login expired? The Spotify tile turns red and tells you what to do: one tap opens Spotify (or reconnects) and the tile clears itself once Spotify is back. KINK keeps playing meanwhile.
+- **Spotify check.** Every switch to Spotify is verified: the app waits until Spotify reports the song it is playing. No song? KINK keeps playing (or comes back) and the Spotify tile turns red: one tap opens Spotify. No false alarms while Spotify plays in the background.
 - **Plays where you tap.** Tap on your phone and Spotify plays on your phone, tap on your laptop and it plays there. You can pick a fixed device in settings too. Several copies of the app (phone and laptop) never fight over your music: only the copy that started the playback switches it.
 - **Stays connected.** The Spotify login is refreshed in time and safely across tabs, so you're not asked to reconnect.
 - **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
@@ -59,14 +59,14 @@ Tip: the app can only control a Spotify player that is running. If none is found
 
 ## Something not working?
 
-Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add `#diagnose` to the URL). You'll see the current state of the app and a log of the last 600 events: every Spotify call with its status code, token refreshes, device choices and every switch decision. Tap **Er ging net iets mis** right after a problem to mark the moment, add a **Notitie** if you like, then **Kopieer log** or **Delen** and send it over. Tokens and keys are never logged.
+Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add `#diagnose` to the URL). You'll see the current state of the app and a log of the last 600 events: every Spotify call with its status code, the artist and song Spotify reports, token refreshes, device choices and every switch decision. Tap **Er ging net iets mis** right after a problem to mark the moment, add a **Notitie** if you like, then **Kopieer log** or **Delen** and send it over. Tokens and keys are never logged.
 
 ## Good to know
 
 - **On your phone, keep it on screen.** Phones pause pages in the background, so in the car keep the app open in the holder with "Scherm aan houden" on.
 - **On your computer, use Chrome.** With "Ook op de achtergrond meekijken" on, the app keeps working as a background tab. Add the site to "Always keep these sites active" under Settings, Performance, so Chrome never unloads it.
 - **Data use.** The app itself uses about 1 to 2 MB per hour. The KINK stream is roughly 86 MB per hour; Spotify depends on your quality setting.
-- **Stream delay.** The app waits 20 seconds after a KINK marker, because the stream you hear runs behind KINK's data. That way you don't lose the end of a song. You can tune this in settings.
+- **Stream delay.** Before leaving KINK (ads, news or a Must skip artist) the app waits 20 seconds, because the stream you hear runs behind KINK's data. That way you don't lose the end of a song. Coming back to KINK, for music or a Must hear artist, happens instantly. You can tune this in settings.
 
 ## Credits
 

@@ -326,7 +326,7 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
         <div class="line"><div class="tx"><b>Diagnose en log</b><small>Alles wat er misging, om te delen met Claude.</small></div><button class="btn" id="openDbg">Open</button></div>
       </div>
       <div class="grp"><h4>Vertraging</h4>
-        <div class="line"><div class="tx"><b>Wacht na een melding van KINK</b><small>In seconden. Zodat je het eind van een nummer niet mist.</small></div><input class="numin" id="delay" type="number" min="0" max="60" inputmode="numeric"></div>
+        <div class="line"><div class="tx"><b>Wacht voordat de app KINK verlaat</b><small>In seconden, bij reclame, nieuws of Must skip. Zodat je het eind van een nummer niet mist. Terug naar KINK gaat altijd direct.</small></div><input class="numin" id="delay" type="number" min="0" max="60" inputmode="numeric"></div>
       </div>
     </div>
     <div class="pane" id="paneArt" hidden>
@@ -411,7 +411,7 @@ const REDIRECT = location.origin + location.pathname.replace(/index\.html$/,'');
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 /* ---------- Diagnose-log ---------- */
 // Bewaart de laatste 600 gebeurtenissen op dit apparaat (nooit sleutels of tokens), zodat je ze kunt delen.
-const APP_VERSION='v17';
+const APP_VERSION='v19';
 const TAB_ID=Math.random().toString(36).slice(2,6);
 let logBuf=[],logTimer=null,lastErr=null;
 try{logBuf=JSON.parse(localStorage.getItem('ks_log')||'[]')}catch(e){logBuf=[]}
@@ -472,7 +472,6 @@ async function autoToKink(why){
 function tick(){
   const now=Date.now();
   metaDue();
-  if(document.visibilityState==='visible'&&now-lastSpCheck>60000)checkSpotify();
   // Sleutel op tijd vernieuwen, vijf minuten voor hij verloopt
   if(hasLogin()&&!authBroken&&!refreshing&&tokenExpiry&&tokenExpiry-now<5*60000&&now-lastSpCheck>15000){lastSpCheck=now;getToken().catch(()=>{})}
   $('clock').textContent=hhmm(now);
@@ -480,7 +479,7 @@ function tick(){
     const fresh=metaFresh(now),d=delayMs();
     if(autoAway){
       if(mode!=='spotify')setAway(0);
-      else if(fresh&&!kinkNow.isBreak&&kinkNow.title&&!isBanned(kinkNow.artist)&&now>=kinkNow.start+d)autoToKink('Weer muziek op KINK: '+(kinkNow.artist?kinkNow.artist+' - ':'')+kinkNow.title);
+      else if(fresh&&!kinkNow.isBreak&&kinkNow.title&&!isBanned(kinkNow.artist))autoToKink('Weer muziek op KINK: '+(kinkNow.artist?kinkNow.artist+' - ':'')+kinkNow.title);
       else if(now-autoAway>MAX_AWAY)autoToKink('Terug naar KINK (na 10 minuten)');
     }else if(auto&&mode==='kink'&&!radio.paused&&fresh&&kinkNow.isBreak&&kinkNow.breakStart!==handledBreak
       &&now>=kinkNow.breakStart+d&&now-kinkNow.breakStart<5*60000){
@@ -547,7 +546,7 @@ async function pollMeta(){
 // tijdens een reclameblok elke 5 seconden en verder elke 15 seconden.
 function nextMetaWait(){
   if(!kinkNow)return 15000;
-  if(kinkNow.isBreak)return 5000;
+  if(kinkNow.isBreak||autoAway)return 2500; // tijdens een blok snel kijken, zodat terug naar KINK direct gaat
   if(kinkNow.dur){
     const left=kinkNow.start+kinkNow.dur-Date.now();
     if(left>-60000&&left<=4000)return 3000;
@@ -587,6 +586,7 @@ function setMode(m){
 
 // Geeft true terug als KINK echt speelt
 async function startKink(fromAuto){
+  iStarted=false;
   LOG('switch','info','KINK starten'+(fromAuto?' (automatisch)':''));
   if(!fromAuto){
     setAway(0);
@@ -594,7 +594,7 @@ async function startKink(fromAuto){
     if(kinkNow?.isBreak)setHandled(kinkNow.breakStart);
     if(kinkNow?.title)banHandled=kinkNow.artist+kinkNow.title;
   }
-  if(hasLogin()){try{await api('/me/player/pause','PUT')}catch(e){}}
+  if(hasLogin()){try{await api('/me/player/pause','PUT',undefined,false,true)}catch(e){}}
   try{
     radio.load(); // altijd vers inhaken op de livestream, niet op een oude buffer
     LOG('kink','info','Stream laden');
@@ -606,7 +606,7 @@ async function startKink(fromAuto){
 
 /* ---------- Spotify bereikbaar? Waarschuwing in de Spotify-tegel ---------- */
 const IS_PHONE=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
-let spIssue='',spWatchUntil=0,lastSpCheck=0,spChecking=false;
+let spIssue='',spWatchUntil=0,lastSpCheck=0,spChecking=false,noDevCount=0;
 function renderSpIssue(){
   const t=$('spotifyMode');t.classList.toggle('issue',!!spIssue);
   if(!spIssue)return;
@@ -634,7 +634,12 @@ async function checkSpotify(){
   try{
     try{await getToken()}catch(e){if(authBroken)setSpIssue('login');return}
     const list=await spDevices();
-    if(list.length)clearSpIssue(spIssue==='nodevice');else if(spIssue!=='login')setSpIssue('nodevice');
+    if(list.length){clearSpIssue(spIssue==='nodevice');noDevCount=0}
+    else if(spIssue!=='login'){
+      // Spotify geeft soms een lege lijst terwijl de app op de achtergrond speelt. Speelt Spotify via ons, geen waarschuwing.
+      if(mode==='spotify'&&iStarted){LOG('spotify','warn','Spotify meldt geen apparaten, maar speelt via deze app: geen waarschuwing');return}
+      if(++noDevCount>=2||mode!=='spotify')setSpIssue('nodevice');
+    }
   }catch(e){}
   finally{spChecking=false}
 }
@@ -742,7 +747,7 @@ async function doRefresh(){
   return (navigator.locks&&navigator.locks.request)?navigator.locks.request('kink-switch-token',run):run();
 }
 
-async function api(path,method='GET',body,retried){
+async function api(path,method='GET',body,retried,quiet403){
   const t0=Date.now();
   const t=await getToken();
   let r;
@@ -753,10 +758,11 @@ async function api(path,method='GET',body,retried){
   const txt=await r.text();let d=null;try{d=txt?JSON.parse(txt):null}catch(e){}
   if(!r.ok){
     const reason=d?.error?.reason||'',m=d?.error?.message||'';
+    if(quiet403&&r.status===403){LOG('api','info',method+' '+p+' 403 (niets om te pauzeren)');throw Error('niets om te pauzeren')}
     LOG('api','err',method+' '+p+' '+r.status+' ('+ms+' ms) '+m+(reason?' / '+reason:''));
     lastErr={t:Date.now(),code:r.status+(reason?' '+reason:'')};
     // Sleutel geweigerd terwijl hij nog geldig leek? Eén keer vernieuwen en opnieuw proberen.
-    if(r.status===401&&!retried){token=null;ls('ks_expiry','0');LOG('auth','warn','401 ontvangen, sleutel wordt vernieuwd');return api(path,method,body,true)}
+    if(r.status===401&&!retried){token=null;ls('ks_expiry','0');LOG('auth','warn','401 ontvangen, sleutel wordt vernieuwd');return api(path,method,body,true,quiet403)}
     if(r.status===404&&/device|player|active/i.test(m+' '+reason+' '+path))throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
     if(r.status===403)throw Error('Spotify weigert (403'+(reason?' '+reason:'')+'). '+(m||''));
     throw Error((m||'Spotify fout')+' ('+r.status+')');
@@ -779,7 +785,12 @@ let lastDevList=[];
 async function spDevices(){const d=await api('/me/player/devices');lastDevList=d?.devices||[];LOG('device','info','Apparaten: '+(lastDevList.map(x=>x.name+' ('+x.type+(x.is_active?', actief':'')+(x.is_restricted?', beperkt':'')+')').join(', ')||'geen'));return lastDevList}
 async function deviceId(){
   const list=await spDevices();
-  if(!list.length)throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
+  if(!list.length){
+    // Spotify geeft soms even een lege lijst. Het laatst gebruikte apparaat toch proberen; de controle na afspelen beslist.
+    const last=ls('ks_myDevice');
+    if(last){LOG('device','warn','Geen apparaten gemeld, laatst gebruikte apparaat toch proberen');return last}
+    throw Error('Geen Spotify-apparaat gevonden. Open de Spotify-app op je telefoon en probeer opnieuw.');
+  }
   const pick=ls('ks_device');
   let dev=pick&&list.find(x=>x.id===pick);
   if(!dev){
@@ -788,13 +799,24 @@ async function deviceId(){
     const last=ls('ks_myDevice');
     dev=same.find(x=>x.id===last)||same.find(x=>x.is_active)||same[0]||list.find(x=>x.is_active)||list[0];
   }
-  ls('ks_myDevice',dev.id);
+  ls('ks_myDevice',dev.id);ls('ks_myDeviceName',dev.name+'|'+dev.type);
   LOG('device','info','Gekozen: '+dev.name+' ('+dev.type+')'+(pick?' via instelling':' automatisch'));
   return dev.id;
 }
 // Speelt Spotify nu op het apparaat dat deze kopie van de app zelf heeft gekozen?
+// iStarted: deze kopie van de app heeft Spotify zelf gestart (en is daarna niet terug naar KINK gegaan).
+let iStarted=false;
 async function ownsSpotify(){
-  try{const p=await api('/me/player');return !!(p&&p.is_playing&&p.device&&p.device.id===ls('ks_myDevice'))}catch(e){return false}
+  let p=null;
+  try{p=await api('/me/player')}catch(e){LOG('switch','info','Spotify-status onbekend ('+e.message+'), '+(iStarted?'deze kopie startte Spotify':'niet door deze kopie gestart'));return iStarted}
+  // Spotify meldt soms "niets actief" terwijl de app op de achtergrond gewoon speelt. Dan vertrouwen we op wat wij zelf deden.
+  if(!p||!p.device){LOG('switch','info','Spotify meldt geen actieve weergave, '+(iStarted?'maar deze kopie startte Spotify: gaat door':'en deze kopie startte niets'));return iStarted}
+  const d=p.device,idMatch=d.id===ls('ks_myDevice');
+  // Spotify geeft hetzelfde apparaat soms een ander ID. Naam en type tellen dan ook, maar alleen als deze kopie Spotify startte.
+  const nameMatch=iStarted&&(d.name+'|'+d.type)===ls('ks_myDeviceName');
+  if(!idMatch&&nameMatch)LOG('switch','info','Ander ID maar zelfde apparaat ('+d.name+'), deze kopie startte Spotify: gaat door');
+  if(!idMatch&&!nameMatch)LOG('switch','info','Spotify speelt op '+(d.name||'ander apparaat')+' ('+d.type+', id '+String(d.id||'?').slice(0,8)+', mijn id '+String(ls('ks_myDevice')||'?').slice(0,8)+')');
+  return idMatch||nameMatch||iStarted&&!p.is_playing;
 }
 
 function playlistUri(){
@@ -830,6 +852,16 @@ async function ensureShuffle(dev){
   return false;
 }
 async function playList(){
+  const wasKink=mode==='kink'&&!radio.paused;
+  try{return await playListInner()}
+  catch(e){
+    LOG('switch','err','Naar Spotify mislukt: '+e.message);
+    // Nooit stilte: speelde KINK, dan gaat KINK gewoon door
+    if(wasKink||mode==='spotify'){iStarted=false;radio.load();radio.play().then(()=>{setMode('kink');setPP(true)}).catch(()=>{})}
+    throw e;
+  }
+}
+async function playListInner(){
   const context=playlistUri();
   if(!context){openPicker();throw Error('Kies eerst een playlist')}
   const dev=await deviceId();
@@ -843,13 +875,31 @@ async function playList(){
   await wakeDevice(dev);
   try{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}
   catch(e){if(body?.offset){delete body.offset;randomStart=false;await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',body)}else throw e}
-  setMode('spotify');setPP(true);
+  setMode('spotify');setPP(true);iStarted=true;
+  if(!(await verifySpotify()))throw Error('Geen Spotify-apparaat gevonden: Spotify meldt geen nummer. Open de Spotify-app.');
   if(shuffle){
     const ok=await ensureShuffle(dev);
     // Lengte van de playlist onbekend? Dan na het aanzetten van shuffle één keer doorspringen naar een willekeurig nummer.
     if(ok&&body&&!randomStart){try{await api('/me/player/next?device_id='+encodeURIComponent(dev),'POST')}catch(e){}}
     if(!ok)msg('Shuffle aanzetten lukte niet. Zet het eventueel aan in de Spotify-app.',true);
   }
+}
+// Kijkt tot ongeveer 4 seconden of Spotify een nummer meldt. Pas dan weten we dat het wisselen gelukt is.
+async function verifySpotify(){
+  for(let i=0;i<4;i++){
+    await sleep(i===0?500:1200);
+    let p=null;try{p=await api('/me/player')}catch(e){}
+    if(p&&p.item){
+      const artist=(p.item.artists||[]).map(a=>a.name).join(', ');
+      LOG('spotify','ok','Spotify speelt: '+artist+' - '+p.item.name+(p.is_playing?'':' (gepauzeerd)')+' op '+(p.device?.name||'?'));
+      spotNow={title:p.item.name,artist,main:(p.item.artists||[])[0]?.name||''};lastSpotKey=p.item.id||p.item.name;
+      $('spotLabel').textContent='NU OP SPOTIFY';$('spotArtist').textContent=artist;$('spotSong').textContent=p.item.name;
+      updateMediaInfo();renderFavBtns();clearSpIssue(false);
+      return true;
+    }
+    LOG('spotify','warn','Spotify meldt nog geen nummer (poging '+(i+1)+' van 4)');
+  }
+  return false;
 }
 
 async function goSpotify(){
@@ -937,7 +987,7 @@ function addTo(kind){
 }
 
 /* ---------- Titel en Android-melding: wat speelt er nu ---------- */
-let spotNow=null;
+let spotNow=null,lastSpotKey='';
 function updateMediaInfo(){
   let title='KINK live',artist='KINK';
   if(mode==='spotify'&&spotNow){title=spotNow.title;artist=spotNow.artist||'Spotify'}
@@ -1112,57 +1162,51 @@ async function banToSpotify(key,artist){
 async function findSilly(){
   const tries=['track:"Don\'t be Silly" artist:"Wodan Boys"',"Wodan Boys Don't be Silly",'Wodan Boys'];
   for(const q of tries){
-    let d;
-    try{d=await api('/search?type=track&limit=10&market=from_token&q='+encodeURIComponent(q))}
-    catch(e){d=await api('/search?type=track&limit=10&q='+encodeURIComponent(q))}
+    // Altijd met land NL zoeken: dan geeft Spotify de versie die hier afspeelbaar is
+    const d=await api('/search?type=track&limit=10&market=NL&q='+encodeURIComponent(q));
     const items=d?.tracks?.items||[];
-    LOG('silly','info','Zoeken "'+q+'": '+(items.map(t=>(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name+(t.is_playable===false?' (niet afspeelbaar)':'')).slice(0,5).join(' | ')||'niets gevonden'));
+    LOG('silly','info','Zoeken "'+q+'": '+(items.map(t=>(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name+(t.is_playable===false?' (niet afspeelbaar)':t.is_playable?' (afspeelbaar)':'')).slice(0,5).join(' | ')||'niets gevonden'));
     const wodan=items.filter(t=>(t.artists||[]).some(a=>/wodan/i.test(a.name))&&t.is_playable!==false);
     const hit=wodan.find(t=>/silly/i.test(t.name))||(q==='Wodan Boys'?null:null);
     if(hit)return hit;
   }
   return null;
 }
+// Don't be silly: de single van Wodan Boys (album met één nummer). Starten als context,
+// net als een playlist; dat werkt betrouwbaar. Zoeken is alleen nog de reserve.
+const SILLY_ALBUM='spotify:album:0V64voJRjQ3zboCinONl2c';
 async function silly(){
   LOG('silly','info',"Don't be silly ingedrukt");
   if(!hasLogin())return settings('Sp');
-  msg("Don't be silly zoeken...");
+  msg("Don't be silly...");
   try{
-    let uri=ls('ks_sillyUri'),name=ls('ks_sillyName')||'';
-    // Oude, mogelijk verkeerde keuze uit eerdere versies niet blind vertrouwen
-    if(uri&&!name){ls('ks_sillyUri',null);uri=null}
-    if(!uri){
-      const t=await findSilly();
-      if(!t)throw Error("Don't be Silly van Wodan Boys niet gevonden op Spotify (zie Diagnose).");
-      uri=t.uri;name=(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name;ls('ks_sillyUri',uri);ls('ks_sillyName',name);
-    }
-    LOG('silly','info','Nummer: '+name+' ('+uri+')');
     const dev=await deviceId();
     radio.pause();setAway(0);
     await wakeDevice(dev);
-    const play=async u=>{await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{uris:[u],position_ms:0})};
-    try{await play(uri)}
-    catch(e){
+    const isSilly=p=>p&&p.is_playing&&p.item&&((p.context&&p.context.uri===SILLY_ALBUM)||/silly/i.test(p.item.name||''));
+    const check=async label=>{await sleep(1600);let p=null;try{p=await api('/me/player')}catch(e){}
+      LOG('silly','info',label+': '+(p?((p.is_playing?'speelt':'staat stil')+': '+(p.item?.name||'geen nummer geladen')+(p.context?.uri?' (context '+p.context.uri+')':'')+' op '+(p.device?.name||'?')):'geen speler actief'));return isSilly(p)};
+    let ok=false;
+    try{
+      await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{context_uri:SILLY_ALBUM,offset:{position:0},position_ms:0});
+      setMode('spotify');setPP(true);iStarted=true;
+      ok=await check('Na afspelen (album)');
+      if(!ok){
+        LOG('silly','warn','Nog niet aan het spelen, tweede poging met apparaat geactiveerd');
+        try{await api('/me/player','PUT',{device_ids:[dev],play:false});await sleep(700)}catch(e){}
+        await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',{context_uri:SILLY_ALBUM,offset:{position:0},position_ms:0});
+        ok=await check('Na tweede poging (album)');
+      }
+    }catch(e){
       if(/apparaat|verlopen/i.test(e.message))throw e;
-      LOG('silly','warn','Afspelen mislukt, opnieuw zoeken: '+e.message);
-      ls('ks_sillyUri',null);ls('ks_sillyName',null);
-      const t=await findSilly();if(!t)throw e;
-      uri=t.uri;ls('ks_sillyUri',uri);ls('ks_sillyName',(t.artists||[]).map(a=>a.name).join(', ')+' - '+t.name);
-      await play(uri);
+      LOG('silly','warn','Album starten mislukt ('+e.message+'), nu via zoeken');
+      const t=await findSilly();
+      if(!t)throw Error("Don't be Silly van Wodan Boys niet gevonden op Spotify (zie Diagnose).");
+      await api('/me/player/play?device_id='+encodeURIComponent(dev),'PUT',t.album?.uri?{context_uri:t.album.uri,offset:{uri:t.uri},position_ms:0}:{uris:[t.uri],position_ms:0});
+      setMode('spotify');setPP(true);iStarted=true;
+      ok=await check('Na afspelen (zoeken)');
     }
-    setMode('spotify');setPP(true);
-    // Controleren of Spotify het echt speelt; anders één keer opnieuw, met het apparaat expliciet geactiveerd
-    await sleep(1600);
-    let p=null;try{p=await api('/me/player')}catch(e){}
-    LOG('silly','info','Na afspelen: '+(p?((p.is_playing?'speelt':'staat stil')+': '+(p.item?.name||'?')+' op '+(p.device?.name||'?')):'geen speler actief'));
-    if(!p||p.item?.uri!==uri||!p.is_playing){
-      LOG('silly','warn','Niet het juiste nummer of niet aan het spelen, tweede poging');
-      try{await api('/me/player','PUT',{device_ids:[dev],play:true});await sleep(800)}catch(e){}
-      await play(uri);await sleep(1600);
-      try{p=await api('/me/player')}catch(e){p=null}
-      LOG('silly','info','Na tweede poging: '+(p?((p.is_playing?'speelt':'staat stil')+': '+(p.item?.name||'?')):'geen speler'));
-      if(!p||p.item?.uri!==uri)throw Error("Spotify speelde Don't be silly niet af (zie Diagnose).");
-    }
+    if(!ok){setSpIssue('nodevice');throw Error("Spotify speelde Don't be silly niet af. Open de Spotify-app (zie Diagnose).")}
     msg("Don't be silly!");buzz();
   }catch(e){LOG('silly','err',e.message);msg(e.message,true);handleSpError(e)}
 }
@@ -1191,10 +1235,15 @@ async function pollSpotify(){
   if(mode!=='spotify'||document.visibilityState!=='visible'||!hasLogin())return renderSpotIdle();
   try{
     const p=await api('/me/player');const it=p?.item;
-    if(!it)return renderSpotIdle();
+    if(!it){
+      // Spotify meldt even geen nummer: laat het laatst bekende staan, of anders je playlist
+      if(mode==='spotify'){$('spotLabel').textContent='NU OP SPOTIFY';if(!spotNow){$('spotArtist').textContent=ls('ks_playlistName')||'Je playlist';$('spotSong').textContent=''}return}
+      return renderSpotIdle();
+    }
     $('spotLabel').textContent=p.is_playing?'NU OP SPOTIFY':'GEPAUZEERD';
     $('spotArtist').textContent=(it.artists||[]).map(a=>a.name).join(', ');$('spotSong').textContent=it.name;
     spotNow={title:it.name,artist:(it.artists||[]).map(a=>a.name).join(', '),main:(it.artists||[])[0]?.name||''};updateMediaInfo();renderFavBtns();
+    const k=it.id||it.name;if(k!==lastSpotKey){lastSpotKey=k;LOG('spotify','info','Spotify speelt: '+spotNow.artist+' - '+it.name+(p.is_playing?'':' (gepauzeerd)'))}
   }catch(e){}
 }
 function renderSpotIdle(){
