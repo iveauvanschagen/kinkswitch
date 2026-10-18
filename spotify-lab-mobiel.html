@@ -38,9 +38,9 @@ button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
     <ol>
       <li>Sluit KINK Switch en het lab op je Mac. Open Spotify op je telefoon, speel even en pauzeer.</li>
       <li>Open deze pagina op je <b>telefoon</b> in Chrome en tik op <b>Start</b>. KINK gaat spelen en het scherm blijft aan.</li>
-      <li>Elke minuut (instelbaar) zet het lab Spotify op volume 0, speelt anderhalve seconde en pauzeert weer. Luister of je iets hoort en of KINK hapert.</li>
+      <li>Elke 9 minuten (instelbaar) laat het lab Spotify zo kort mogelijk spelen en pauzeert weer. Volume 0 lukt op je Pixel niet, dus je hoort het even. Luister hoe erg de hapering in KINK is.</li>
       <li>Wil je het meteen horen, tik dan op <b>Eén keer testen</b>.</li>
-      <li>Laat hem minstens 15 minuten lopen, langer dan de 11 minuten waarna Spotify normaal verdwijnt.</li>
+      <li>Laat hem minstens 30 minuten lopen. Blijft je telefoon al die tijd zichtbaar, dan werkt het om de 9 minuten.</li>
       <li>Tik op <b>Stop</b>. Het lab zet Spotify terug op het oude volume en laat KINK spelen. Tik op <b>Kopieer resultaat</b> en stuur het op.</li>
     </ol>
   </div>
@@ -49,13 +49,13 @@ button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
     <h2>INSTELLINGEN</h2>
     <div class="row">
       <label>Elke <select id="every">
-        <option value="1">1 minuut</option><option value="3">3 minuten</option><option value="5">5 minuten</option><option value="9">9 minuten</option>
+        <option value="9">9 minuten</option><option value="5">5 minuten</option><option value="3">3 minuten</option><option value="1">1 minuut</option>
       </select></label>
       <label>Afspelen <select id="len">
         <option value="min">Zo kort mogelijk</option><option value="1500">1,5 seconde</option><option value="800">0,8 seconde</option><option value="3000">3 seconden</option>
       </select></label>
     </div>
-    <label class="chk" style="margin-top:10px"><input type="checkbox" id="loud"> Toch afspelen als volume 0 niet lukt (dan hoor je Spotify kort)</label>
+    <label class="chk" style="margin-top:10px"><input type="checkbox" id="loud" checked> Toch afspelen als volume 0 niet lukt (dan hoor je Spotify kort)</label>
     <div class="row" style="margin-top:10px">
       <button id="start" class="go">Start</button>
       <button id="once">Eén keer testen</button>
@@ -158,7 +158,7 @@ async function playKink(){try{radio.src=STREAM+'?_='+Date.now();await radio.play
 
 /* Het seintje: volume 0, kort spelen, pauze, volume terug */
 async function ping(manual){
-  if(pinging)return;pinging=true;
+  if(pinging)return;pinging=true;if(!manual)lastPing=Date.now();
   try{
     const d=await checkDev();
     if(!d){L('Seintje kan niet: telefoon is niet zichtbaar in Spotify','bad');return}
@@ -167,7 +167,7 @@ async function ping(manual){
     const vol=p&&p.device&&p.device.id===d.id&&typeof p.device.volume_percent==='number'?p.device.volume_percent:(typeof d.volume_percent==='number'?d.volume_percent:null);
     let muted=false;
     try{await api('/me/player/volume?volume_percent=0&device_id='+encodeURIComponent(d.id),'PUT');muted=true}catch(e){L('Volume op 0 lukt niet: '+e.message,'bad')}
-    if(!muted&&!$('loud').checked){L('Seintje overgeslagen: volume kon niet op 0 (vink "Toch afspelen" aan om het te horen)');return}
+    if(!muted&&!$('loud').checked){lastPing=Date.now();L('Seintje overgeslagen: volume kon niet op 0 (vink "Toch afspelen" aan om het te horen)');return}
     const len=$('len').value==='min'?0:+$('len').value,t0=Date.now();
     const kinkBefore=!radio.paused;
     try{await api('/me/player/play?device_id='+encodeURIComponent(d.id),'PUT')}
