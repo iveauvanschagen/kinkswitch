@@ -60,6 +60,7 @@ button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
     <div class="row" style="margin-top:10px">
       <button id="start" class="go">Start</button>
       <button id="copy">Kopieer resultaat</button>
+      <button id="share">Delen</button>
       <button id="clear">Wis</button>
       <button id="practice">Oefen nu</button>
     </div>
@@ -232,6 +233,19 @@ $('keep').onchange=()=>{st.keep=$('keep').value;if(st.run)L('Wakker houden nu '+
 $('dev').onchange=()=>{st.target=$('dev').value;save()};
 $('reload').onclick=loadDevices;
 $('clear').onclick=()=>{st={log:[],run:false,target:st.target,keep:st.keep,warn:st.warn,practice:0,warned:{},seen:null,lastActive:null,gone:0,checks:0,lastKeep:0,visible:null,startedAt:0};save();renderLog();render()};
+
+// Delen: als tekstbestand via het deelmenu (bijvoorbeeld naar Google Drive), anders als tekst, anders downloaden
+async function shareResult(text,prefix){
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  const name=prefix+'-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.txt';
+  const file=new File([text],name,{type:'text/plain'});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});return}
+    if(navigator.share){await navigator.share({title:name,text});return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+$('share').onclick=()=>shareResult('KINK Switch lab\n'+'Apparaat: '+st.target+', checks: '+st.checks+', verdwenen: '+st.gone+'\n----\n'+st.log.map(e=>t2(e.t)+'  '+e.m).join('\n'),'kink-lab');
 $('copy').onclick=async()=>{
   const t='KINK Switch lab\n'+'Apparaat: '+st.target+', checks: '+st.checks+', verdwenen: '+st.gone+'\n----\n'+st.log.map(e=>t2(e.t)+'  '+e.m).join('\n');
   try{await navigator.clipboard.writeText(t);$('copy').textContent='Gekopieerd'}catch(e){prompt('Kopieer het resultaat',t)}

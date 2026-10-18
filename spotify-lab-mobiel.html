@@ -52,7 +52,7 @@ button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
         <option value="1">1 minuut</option><option value="3">3 minuten</option><option value="5">5 minuten</option><option value="9">9 minuten</option>
       </select></label>
       <label>Afspelen <select id="len">
-        <option value="1500">1,5 seconde</option><option value="800">0,8 seconde</option><option value="3000">3 seconden</option>
+        <option value="min">Zo kort mogelijk</option><option value="1500">1,5 seconde</option><option value="800">0,8 seconde</option><option value="3000">3 seconden</option>
       </select></label>
     </div>
     <label class="chk" style="margin-top:10px"><input type="checkbox" id="loud"> Toch afspelen als volume 0 niet lukt (dan hoor je Spotify kort)</label>
@@ -60,6 +60,7 @@ button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
       <button id="start" class="go">Start</button>
       <button id="once">Eén keer testen</button>
       <button id="copy">Kopieer resultaat</button>
+      <button id="share">Delen</button>
       <button id="clear">Wis</button>
     </div>
   </div>
@@ -167,7 +168,7 @@ async function ping(manual){
     let muted=false;
     try{await api('/me/player/volume?volume_percent=0&device_id='+encodeURIComponent(d.id),'PUT');muted=true}catch(e){L('Volume op 0 lukt niet: '+e.message,'bad')}
     if(!muted&&!$('loud').checked){L('Seintje overgeslagen: volume kon niet op 0 (vink "Toch afspelen" aan om het te horen)');return}
-    const len=+$('len').value,t0=Date.now();
+    const len=$('len').value==='min'?0:+$('len').value,t0=Date.now();
     const kinkBefore=!radio.paused;
     try{await api('/me/player/play?device_id='+encodeURIComponent(d.id),'PUT')}
     catch(e){
@@ -175,11 +176,17 @@ async function ping(manual){
       const pl=ls('ks_playlist');
       if(pl)await api('/me/player/play?device_id='+encodeURIComponent(d.id),'PUT',{context_uri:pl});else throw e;
     }
-    await sleep(len);
+    let played=len;
+    if($('len').value==='min'){
+      // Pauzeren zodra Spotify meldt dat hij speelt (maximaal 3 seconden wachten)
+      const tp=Date.now();let ok=false;
+      while(Date.now()-tp<3000){try{const q=await api('/me/player');if(q&&q.is_playing){ok=true;break}}catch(e){}await sleep(120)}
+      played=Date.now()-tp;if(!ok)L('Spotify meldde binnen 3 s niet dat hij speelde','bad');
+    }else await sleep(len);
     try{await api('/me/player/pause?device_id='+encodeURIComponent(d.id),'PUT')}catch(e){L('Pauzeren mislukt: '+e.message,'bad')}
     if(muted&&vol!==null){try{await api('/me/player/volume?volume_percent='+vol+'&device_id='+encodeURIComponent(d.id),'PUT')}catch(e){L('Volume terugzetten mislukt: '+e.message,'bad')}}
     pings++;lastPing=Date.now();
-    L((manual?'Test: ':'Seintje: ')+(muted?'volume 0':'HOORBAAR')+', '+(len/1000).toString().replace('.',',')+' s gespeeld'+(vol!==null?', volume terug op '+vol+'%':'')+' ('+(Date.now()-t0)+' ms)');
+    L((manual?'Test: ':'Seintje: ')+(muted?'volume 0':'HOORBAAR')+', '+(played/1000).toFixed(1).replace('.',',')+' s gespeeld'+($('len').value==='min'?' (zo kort mogelijk)':'')+(vol!==null?', volume terug op '+vol+'%':'')+' ('+(Date.now()-t0)+' ms)');
     // KINK weer aan als Android hem heeft stilgezet
     await sleep(400);
     if(kinkBefore&&radio.paused){const t1=Date.now();if(await playKink())L('KINK weer gestart na '+(Date.now()-t1)+' ms','good')}
@@ -202,7 +209,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 $('start').onclick=async()=>{
   if(!run){
     run=true;startedAt=Date.now();pings=0;hits=0;visible=null;seen=null;lastCheck=0;lastPing=Date.now();
-    L('--- Start: seintje elke '+$('every').value+' min, '+$('len').selectedOptions[0].textContent+' ---');
+    L('--- Start: seintje elke '+$('every').value+' min, '+$('len').selectedOptions[0].textContent.toLowerCase()+' ---');
     await keepAwake();await playKink();await checkDev();
   }else{
     run=false;L('--- Gestopt na '+mins(Date.now()-startedAt)+': '+pings+' seintjes, KINK '+hits+' keer onderbroken ---');
@@ -212,6 +219,19 @@ $('start').onclick=async()=>{
   render();
 };
 $('once').onclick=async()=>{if(radio.paused){await playKink();await sleep(2500)}ping(true)};
+
+// Delen: als tekstbestand via het deelmenu (bijvoorbeeld naar Google Drive), anders als tekst, anders downloaden
+async function shareResult(text,prefix){
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  const name=prefix+'-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.txt';
+  const file=new File([text],name,{type:'text/plain'});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});return}
+    if(navigator.share){await navigator.share({title:name,text});return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+$('share').onclick=()=>shareResult('KINK Switch lab mobiel\nSeintjes: '+pings+', KINK onderbroken: '+hits+'\n----\n'+log.map(e=>t2(e.t)+'  '+e.m).join('\n'),'kink-lab-mobiel');
 $('copy').onclick=async()=>{
   const t='KINK Switch lab mobiel\nSeintjes: '+pings+', KINK onderbroken: '+hits+'\n----\n'+log.map(e=>t2(e.t)+'  '+e.m).join('\n');
   try{await navigator.clipboard.writeText(t);$('copy').textContent='Gekopieerd'}catch(e){prompt('Kopieer het resultaat',t)}
