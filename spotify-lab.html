@@ -42,6 +42,7 @@ button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
       <li><b>Ronde 2:</b> open Spotify op je telefoon, pauzeer, zet wakker houden op 5 minuten en tik weer op Start.</li>
       <li>Tik op <b>Kopieer resultaat</b> en stuur het op.</li>
     </ol>
+    <p style="color:var(--muted);margin:12px 0 0"><b style="color:var(--text)">Oefenen met waarschuwen:</b> laat Waarschuwen voor reclame aan en het lab start. Vlak voor het hele en halve uur kijkt het of je telefoon klaarstaat. Alleen als hij weg is, zegt de log wat je moet doen (met een piepje). Wil je niet wachten, tik dan op <b>Oefen nu</b>: dan doet het lab alsof er over 3 minuten reclame komt.</p>
   </div>
 
   <div class="card">
@@ -52,11 +53,15 @@ button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
       <label>Wakker houden <select id="keep">
         <option value="0">Uit</option><option value="2">Elke 2 minuten</option><option value="5">Elke 5 minuten</option><option value="10">Elke 10 minuten</option>
       </select></label>
+      <label>Waarschuwen voor reclame <select id="warn">
+        <option value="5">5 minuten van tevoren</option><option value="3">3 minuten van tevoren</option><option value="0">Uit</option>
+      </select></label>
     </div>
     <div class="row" style="margin-top:10px">
       <button id="start" class="go">Start</button>
       <button id="copy">Kopieer resultaat</button>
       <button id="clear">Wis</button>
+      <button id="practice">Oefen nu</button>
     </div>
   </div>
 
@@ -69,6 +74,7 @@ button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
       <div class="stat"><small>LAATST ACTIEF</small><b id="sActive">-</b></div>
       <div class="stat"><small>VERDWENEN</small><b id="sGone">0 keer</b></div>
       <div class="stat"><small>CHECKS</small><b id="sChecks">0</b></div>
+      <div class="stat" style="grid-column:1/-1"><small>VOLGENDE RECLAME</small><b id="sAd">-</b></div>
     </div>
   </div>
 
@@ -87,6 +93,7 @@ const mins=ms=>Math.round(ms/60000)+' min';
 
 let st;try{st=JSON.parse(ls('ks_lab')||'null')}catch(e){st=null}
 if(!st)st={log:[],run:false,target:'',keep:'0',seen:null,lastActive:null,gone:0,checks:0,lastKeep:0,visible:null,startedAt:0};
+if(st.warn===undefined)st.warn='5';st.practice=st.practice||0;st.warned=st.warned||{};
 function save(){try{ls('ks_lab',JSON.stringify({...st,log:st.log.slice(-800)}))}catch(e){}}
 function L(text,cls){st.log.push({t:Date.now(),m:text,c:cls||''});save();renderLog()}
 function renderLog(){const el=$('log');el.innerHTML='';st.log.slice(-300).forEach(e=>{const d=document.createElement('div');d.textContent=t2(e.t)+'  '+e.m;if(e.c)d.className=e.c;el.appendChild(d)});el.scrollTop=el.scrollHeight}
@@ -97,7 +104,33 @@ function render(){
   $('sSince').textContent=st.seen?t2(st.seen)+' ('+mins(Date.now()-st.seen)+')':'-';
   $('sActive').textContent=st.lastActive?t2(st.lastActive)+' ('+mins(Date.now()-st.lastActive)+' geleden)':'-';
   $('sGone').textContent=st.gone+' keer';$('sChecks').textContent=st.checks;
-  $('keep').value=st.keep;
+  $('keep').value=st.keep;$('warn').value=st.warn;
+  const ad=nextAd(Date.now()),lead=+st.warn;
+  let t=lead?hm(ad)+(st.practice===ad?' (oefening)':'')+', over '+Math.max(0,Math.ceil((ad-Date.now())/60000))+' min':'Waarschuwen staat uit';
+  const w=st.warned[ad];
+  if(lead&&w==='action')t='<span class="bad">ACTIE: open Spotify op je telefoon, speel even en pauzeer</span> (reclame om '+hm(ad)+')';
+  else if(lead&&(w==='ready'||w==='fixed'))t='<span class="good">Klaar voor de reclame om '+hm(ad)+'</span>';
+  $('sAd').innerHTML=t;
+  document.title=lead&&w==='action'?'Open Spotify! · KINK Switch lab':'KINK Switch lab';
+}
+const hm=d=>new Date(d).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'});
+// Volgende reclame: het eerstvolgende hele of halve uur, of de oefentijd
+function nextAd(now){
+  if(st.practice&&st.practice>now-60000)return st.practice;
+  const d=new Date(now);d.setSeconds(0,0);const m=d.getMinutes();d.setMinutes(m<30?30:60);return +d;
+}
+function beep(){try{const a=new (window.AudioContext||window.webkitAudioContext)();[0,0.25].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.value=.15;o.start(a.currentTime+t);o.stop(a.currentTime+t+.15)})}catch(e){}}
+// Waarschuwen: alleen als je telefoon er vlak voor de reclame niet is
+function adWarn(now,visible){
+  const lead=+st.warn;if(!lead)return;
+  const ad=nextAd(now),name=st.target.split('|')[0];
+  if(now<ad-lead*60000||now>ad)return;
+  const w=st.warned[ad];
+  if(!w){
+    if(visible){st.warned[ad]='ready';L('Reclame om '+hm(ad)+': '+name+' staat klaar, niets doen','good')}
+    else{st.warned[ad]='action';L('ACTIE: reclame om '+hm(ad)+' en '+name+' slaapt. Open Spotify op je telefoon, speel even en pauzeer.','bad');beep()}
+  }else if(w==='action'&&visible){st.warned[ad]='fixed';L('Gelukt: '+name+' staat klaar voor de reclame om '+hm(ad),'good')}
+  else if(w==='action'&&now-(st.lastBeep||0)>60000){st.lastBeep=now;beep()}
 }
 
 /* Sleutel: zelfde aanpak als de app */
@@ -164,6 +197,9 @@ async function check(){
   }
   if(!dev&&st.visible===null)L('Nog niet zichtbaar: open Spotify op je telefoon','bad');
   st.visible=!!dev;
+  adWarn(now,!!dev);
+  // Reclametijd voorbij: kort verslag
+  const prev=st.lastAd||0,adNow=nextAd(now-1);if(st.warn!=='0'&&prev&&prev!==adNow&&st.warned[prev]&&now>prev){L('Reclametijd '+hm(prev)+' voorbij: '+(st.warned[prev]==='action'?'telefoon was NIET klaar':'telefoon was klaar'))}st.lastAd=adNow;
   // Wakker houden: alleen als er nergens iets speelt, zodat we nooit muziek onderbreken
   const k=+st.keep;
   if(k&&dev&&now-st.lastKeep>=k*60000){
@@ -179,7 +215,7 @@ async function check(){
 
 /* Klok: Worker, zodat een achtergrondtabblad blijft lopen */
 let lastTick=0;
-function tick(){if(st.run&&Date.now()-lastTick>=30000){lastTick=Date.now();check()}render()}
+function tick(){const n=Date.now(),ad=nextAd(n),inWin=+st.warn&&n>=ad-st.warn*60000&&n<=ad;if(st.run&&n-lastTick>=(inWin?15000:30000)){lastTick=n;check()}render()}
 try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),5000)'],{type:'text/javascript'})));w.onmessage=tick}catch(e){setInterval(tick,5000)}
 
 $('start').onclick=()=>{
@@ -190,10 +226,12 @@ $('start').onclick=()=>{
   }else{st.run=false;L('--- Gestopt na '+mins(Date.now()-st.startedAt)+' ---')}
   save();render();
 };
+$('warn').onchange=()=>{st.warn=$('warn').value;if(st.run)L('Waarschuwen voor reclame: '+(st.warn==='0'?'uit':st.warn+' min van tevoren'));save();render()};
+$('practice').onclick=()=>{if(!st.run)return L('Tik eerst op Start','bad');if(st.warn==='0'){st.warn='5'}st.practice=Date.now()+3*60000;L('Oefening: we doen alsof er om '+hm(st.practice)+' reclame komt');lastTick=0;tick();save();render()};
 $('keep').onchange=()=>{st.keep=$('keep').value;if(st.run)L('Wakker houden nu '+(st.keep==='0'?'uit':'elke '+st.keep+' min'));save();render()};
 $('dev').onchange=()=>{st.target=$('dev').value;save()};
 $('reload').onclick=loadDevices;
-$('clear').onclick=()=>{st={log:[],run:false,target:st.target,keep:st.keep,seen:null,lastActive:null,gone:0,checks:0,lastKeep:0,visible:null,startedAt:0};save();renderLog();render()};
+$('clear').onclick=()=>{st={log:[],run:false,target:st.target,keep:st.keep,warn:st.warn,practice:0,warned:{},seen:null,lastActive:null,gone:0,checks:0,lastKeep:0,visible:null,startedAt:0};save();renderLog();render()};
 $('copy').onclick=async()=>{
   const t='KINK Switch lab\n'+'Apparaat: '+st.target+', checks: '+st.checks+', verdwenen: '+st.gone+'\n----\n'+st.log.map(e=>t2(e.t)+'  '+e.m).join('\n');
   try{await navigator.clipboard.writeText(t);$('copy').textContent='Gekopieerd'}catch(e){prompt('Kopieer het resultaat',t)}
