@@ -21,7 +21,7 @@ Open it: **https://iveauvanschagen.github.io/kinkswitch/**
 
 1. **KINK tells us what's on.** KINK publishes live now playing data: artist, title, length and a marker when an ad break starts. The app reads it every 15 seconds, every 3 seconds near the end of a song and every 2.5 seconds during a break.
 2. **Spotify does the playing.** Using the Spotify Web API, the app tells your Spotify app (phone or computer) what to play, pause or skip. Your music keeps playing in Spotify itself.
-3. **The app decides when to switch.** An ad marker or a long item without a title (news, commercials) means a break: off to Spotify. A real song with a title means music is back: return to KINK. Short jingles and DJ talk are ignored.
+3. **The app decides when to switch.** An ad marker means a break: off to Spotify. A long item without a title (news, commercials) only counts around the hour and half hour, when KINK actually airs ads and news; at other times it's the DJ talking and KINK stays on. A real song with a title means music is back: return to KINK. Short jingles and DJ talk are ignored.
 
 ## Get started
 
@@ -43,7 +43,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **Must hear.** Tap the heart on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
 - **KINK Catch.** Tap the add icon on the KINK tile and the song lands in your private KINK Catch playlist on Spotify (created for you the first time). Changed your mind? Undo right from the confirmation.
 - **Missed on KINK.** Heard something great while driving? Open Playlist, switch to "Gemist op KINK" and add any of the last songs KINK played.
-- **Must skip.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song.
+- **Must skip.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song. The banner celebrates with a rotating pun (Born Skippy, Skipperdeflip and friends) and reminds you your ears are safe.
 - **Don't be silly.** The panic button. One tap and Wodan Boys - Don't be Silly blasts through Spotify.
 - **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
 - **Smart Spotify resume.** Switching back to Spotify continues your playlist where you left it.
@@ -60,7 +60,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 
 ## Something not working?
 
-Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add `#diagnose` to the URL). You'll see the current state of the app and a log of the last 600 events: every Spotify call with its status code, the artist and song Spotify reports, token refreshes, device choices and every switch decision. Tap **Er ging net iets mis** right after a problem to mark the moment, add a **Notitie** if you like, then **Kopieer log** or **Delen** and send it over. Tokens and keys are never logged.
+Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add `#diagnose` to the URL). You'll see the current state of the app and a log of the last 600 events: what KINK itself reports (the latest items with times, lengths and ad markers), every Spotify call with its status code, the artist and song Spotify reports, token refreshes, device choices and every switch decision. Tap **Er ging net iets mis** right after a problem to mark the moment, add a **Notitie** if you like, then **Kopieer log** or **Delen** and send it over. Tokens and keys are never logged.
 
 ## Spotify lab
 

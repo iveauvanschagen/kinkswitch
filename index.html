@@ -45,6 +45,9 @@ svg{display:block}
   background:var(--panel);border:1px solid var(--line);transition:background .4s,border-color .4s}
 .dot{width:14px;height:14px;border-radius:50%;background:var(--spot);flex:none;box-shadow:0 0 0 0 currentColor}
 .banner .txt{flex:1;min-width:0}
+.banner .eyebrow{display:block;font-size:11px;font-weight:900;letter-spacing:.14em;color:#ff7a70;margin-bottom:2px}
+.banner .eyebrow[hidden]{display:none}
+.banner.skip small{white-space:normal}
 .banner b{display:block;font-size:20px;font-weight:850;line-height:1.15}
 .banner small{display:block;color:var(--muted);font-size:14px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .count{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
@@ -278,7 +281,7 @@ summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--muted)}
 
   <section class="banner" id="banner" aria-live="polite">
     <span class="dot"></span>
-    <div class="txt"><b id="adTitle">Muziek</b><small id="nextLabel">Wacht op gegevens van KINK</small></div>
+    <div class="txt"><span class="eyebrow" id="adEyebrow" hidden>MUST SKIP</span><b id="adTitle">Muziek</b><small id="nextLabel">Wacht op gegevens van KINK</small></div>
     <div class="count" id="countdown"></div>
   </section>
 
@@ -418,7 +421,7 @@ const REDIRECT = location.origin + location.pathname.replace(/index\.html$/,'');
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
 /* ---------- Diagnose-log ---------- */
 // Bewaart de laatste 600 gebeurtenissen op dit apparaat (nooit sleutels of tokens), zodat je ze kunt delen.
-const APP_VERSION='v21';
+const APP_VERSION='v22';
 const TAB_ID=Math.random().toString(36).slice(2,6);
 let logBuf=[],logTimer=null,lastErr=null;
 try{logBuf=JSON.parse(localStorage.getItem('ks_log')||'[]')}catch(e){logBuf=[]}
@@ -450,7 +453,18 @@ let handledBreak=Number(ls('ks_handledBreak'))||0;
 const MAX_AWAY=10*60000; // vangnet: nooit langer dan 10 minuten weg
 // Wachttijd voordat de app KINK verlaat. Standaard 20 s.
 function delayMs(){const v=ls('ks_delay2');return Math.max(0,Math.min(60,v===null||v===''?20:Number(v)||0))*1000}
-function setAway(v){autoAway=v;ls('ks_autoAway',v?String(v):null)}
+function setAway(v){autoAway=v;ls('ks_autoAway',v?String(v):null);if(!v)setSkipInfo(null)}
+// Must skip: de banner maakt er een grapje van in plaats van "Reclame overgeslagen"
+const SKIP_PUNS=['Deze slaan we over','Skip skip hooray','Born Skippy','Skip happens','Skipperdeflip'];
+const SKIP_EARS=['Oren beveiligd tegen {band}','Je oren zijn je dankbaar','Geen bloedende oren vandaag'];
+let skipInfo=null;try{skipInfo=JSON.parse(ls('ks_skipInfo')||'null')}catch(e){}
+function setSkipInfo(v){skipInfo=v;ls('ks_skipInfo',v?JSON.stringify(v):null)}
+function pickOther(list,last){const opts=list.filter(x=>x!==last);return opts[Math.floor(Math.random()*opts.length)]||list[0]}
+let lastPun='',lastEar='';
+function newSkipInfo(artist){
+  lastPun=pickOther(SKIP_PUNS,lastPun);lastEar=pickOther(SKIP_EARS,lastEar);
+  return {pun:lastPun,ear:lastEar.replace('{band}',artist||'deze band')};
+}
 function setHandled(v){handledBreak=v;ls('ks_handledBreak',String(v))}
 function metaFresh(now){return kinkNow&&now-kinkNow.at<60000}
 
@@ -459,7 +473,7 @@ async function autoToSpotify(breakStart){
   LOG('switch','info','Reclame/nieuws op KINK: naar Spotify');
   if(!hasLogin())return msg('Automatisch wisselen kan niet: Spotify is niet gekoppeld.',true);
   busy=true;
-  try{await playList();setAway(Date.now());msg('Reclame of nieuws op KINK: even naar Spotify.');buzz()}
+  try{await playList();setAway(Date.now());setSkipInfo(null);msg('Reclame of nieuws op KINK: even naar Spotify.');buzz()}
   catch(e){if(!aborted(e)){msg('Automatisch wisselen mislukt: '+e.message,true);buzz();handleSpError(e,{kind:'break'})}}
   busy=false;
 }
@@ -508,7 +522,11 @@ function setPP(playing){
 function renderAd(now){
   let cls='',title,label,count='';
   const fresh=metaFresh(now);
-  if(autoAway){
+  // Na de Must skip begint reclame? Dan klopt "Reclame overgeslagen" weer.
+  const skipping=autoAway&&skipInfo&&!(fresh&&kinkNow.isBreak);
+  if(skipping){
+    cls='away skip';title=skipInfo.pun;label=skipInfo.ear;count=fmt((now-autoAway)/1000);
+  }else if(autoAway){
     cls='away';title='Reclame overgeslagen';label='Terug zodra KINK muziek draait';count=fmt((now-autoAway)/1000);
   }else if(fresh&&kinkNow.isBreak){
     cls='now';title='Nu reclame of nieuws';
@@ -520,11 +538,21 @@ function renderAd(now){
   }else{
     cls='soon';title='Geen gegevens van KINK';label='Automatisch wisselen wacht op KINK';
   }
-  $('banner').className='banner '+cls;$('adTitle').textContent=title;$('nextLabel').textContent=label;$('countdown').textContent=count;
+  $('banner').className='banner '+cls;$('adTitle').textContent=title;$('adEyebrow').hidden=!skipping;$('nextLabel').textContent=label;$('countdown').textContent=count;
 }
 
 /* ---------- Now playing van KINK (alleen tonen, nog geen automatisch wisselen) ---------- */
 let kinkNow=null,metaFails=0;
+// Reclame en nieuws zendt KINK alleen uit rond het hele en halve uur (6 minuten ervoor tot 6 minuten erna)
+function inAdWindow(ts){const m=new Date(ts).getMinutes();return m>=54||m<=6||(m>=24&&m<=36)}
+function hms(ts){return new Date(ts).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+let talkLogged=0,lastKinkData='';
+// Zet wat KINK zelf doorgeeft in de log, maar alleen als er iets veranderd is
+function logKinkData(items){
+  const desc=items.slice(0,4).map(it=>hms(it.start)+' '+(it.type==='ad'?'RECLAME':it.title?'nummer':'zonder titel')+(it.dur?' '+fmt(it.dur/1000):'')+(it.title?' "'+(it.artist?it.artist+' - ':'')+it.title+'"':'')).join(' | ');
+  if(desc===lastKinkData)return;lastKinkData=desc;
+  LOG('kink','info','KINK-data: '+desc);
+}
 async function pollMeta(){
   if(document.visibilityState!=='visible'&&mode!=='kink'&&!bgOn())return;
   try{
@@ -533,13 +561,18 @@ async function pollMeta(){
     const items=[...x.querySelectorAll('nowplaying-info')].map(el=>{const p={};el.querySelectorAll('property').forEach(q=>p[q.getAttribute('name')]=q.textContent);
       return {type:el.getAttribute('type'),start:+p.cue_time_start||0,dur:+p.cue_time_duration||0,title:p.cue_title||'',artist:p.track_artist_name||''}}).sort((a,b)=>b.start-a.start);
     const last=items[0];if(!last)return;
+    logKinkData(items);
     // Blokdetectie: loop terug vanaf het nieuwste item tot het laatste echte nummer.
-    // Een reclamemarkering, of een item zonder titel van 45 seconden of langer (nieuws, reclame), betekent een blok.
-    // Korte items zonder titel (jingles, presentator) tellen niet.
+    // Een reclamemarkering telt altijd. Een item zonder titel van 45 seconden of langer telt alleen
+    // rond het hele en halve uur, want alleen dan zendt KINK reclame en nieuws uit. Daarbuiten is het de presentator.
     let breakStart=0;
     for(const it of items){
       if(it.type!=='ad'&&it.title)break;
-      if(it.type==='ad'||it.dur>=45000)breakStart=it.start;
+      if(it.type==='ad')breakStart=it.start;
+      else if(it.dur>=45000){
+        if(inAdWindow(it.start))breakStart=it.start;
+        else if(talkLogged!==it.start){talkLogged=it.start;LOG('kink','info','Lang stuk zonder titel om '+hms(it.start)+' ('+fmt(it.dur/1000)+'), buiten reclametijd: presentator, KINK blijft')}
+      }
     }
     const sig=(last.type)+'|'+(last.artist||'')+'|'+(last.title||'')+'|'+breakStart;
     if(sig!==(window.__lastSig||'')){window.__lastSig=sig;LOG('kink','info',breakStart?'Blok (reclame/nieuws) sinds '+hhmm(breakStart):(last.title?'Nummer: '+(last.artist?last.artist+' - ':'')+last.title:'Jingle of presentator'))}
@@ -1201,7 +1234,7 @@ async function banToSpotify(key,artist){
   LOG('switch','info','Must skip op KINK ('+artist+'): naar Spotify');
   if(!hasLogin())return;
   busy=true;
-  try{await playList();setAway(Date.now());msg(artist+' op KINK: even naar Spotify.')}
+  try{await playList();setAway(Date.now());setSkipInfo(newSkipInfo(artist));msg(artist+' op KINK: even naar Spotify.')}
   catch(e){if(!aborted(e)){msg('Wisselen mislukt: '+e.message,true);handleSpError(e,{kind:'ban',key})}}
   busy=false;
 }
