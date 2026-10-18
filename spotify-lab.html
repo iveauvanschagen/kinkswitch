@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KINK Switch lab</title>
+<style>
+:root{--bg:#0b0d10;--panel:#14171c;--line:#262a33;--text:#eef1f4;--muted:#8b93a1;--spot:#1ed760;--hot:#ff5a4e;--kink:#d9ff42}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px}
+main{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{margin:0;font-size:22px}
+h1 span{color:var(--kink)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{margin:0 0 8px;font-size:13px;letter-spacing:.12em;color:var(--kink)}
+ol{margin:0;padding-left:20px;color:var(--muted)}
+ol b{color:var(--text)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+label{color:var(--muted);font-size:13px}
+select,button{font:inherit;color:var(--text);background:#22262e;border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-height:44px}
+button{font-weight:800;cursor:pointer}
+button.go{background:var(--spot);border-color:var(--spot);color:#06210f}
+button.stop{background:var(--hot);border-color:var(--hot);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.stat{background:#0f1216;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat small{display:block;color:var(--muted);font-size:11px;letter-spacing:.1em;font-weight:800}
+.stat b{font-size:18px}
+.good{color:var(--spot)}.bad{color:var(--hot)}
+#log{background:#0f1216;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:50vh;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<main>
+  <h1>KINK Switch <span>lab</span></h1>
+
+  <div class="card">
+    <h2>HOE HET WERKT</h2>
+    <ol>
+      <li><b>Telefoon:</b> speel in Spotify even een nummer, zet hem op pauze en leg je telefoon weg met het scherm uit. Veeg Spotify niet weg.</li>
+      <li><b>Mac:</b> open deze pagina in Chrome, kies je telefoon en tik op Start. Het tabblad mag op de achtergrond staan.</li>
+      <li><b>Ronde 1:</b> wakker houden uit. Laat hem lopen tot je telefoon verdwijnt, of een uur.</li>
+      <li><b>Ronde 2:</b> open Spotify op je telefoon, pauzeer, zet wakker houden op 5 minuten en tik weer op Start.</li>
+      <li>Tik op <b>Kopieer resultaat</b> en stuur het op.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>INSTELLINGEN</h2>
+    <div class="row">
+      <label>Apparaat <select id="dev"><option value="">Lijst laden...</option></select></label>
+      <button id="reload">Vernieuw lijst</button>
+      <label>Wakker houden <select id="keep">
+        <option value="0">Uit</option><option value="2">Elke 2 minuten</option><option value="5">Elke 5 minuten</option><option value="10">Elke 10 minuten</option>
+      </select></label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="start" class="go">Start</button>
+      <button id="copy">Kopieer resultaat</button>
+      <button id="clear">Wis</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>NU</h2>
+    <div class="stats">
+      <div class="stat"><small>STATUS</small><b id="sRun">Gestopt</b></div>
+      <div class="stat"><small>APPARAAT</small><b id="sDev">-</b></div>
+      <div class="stat"><small>ZICHTBAAR SINDS</small><b id="sSince">-</b></div>
+      <div class="stat"><small>LAATST ACTIEF</small><b id="sActive">-</b></div>
+      <div class="stat"><small>VERDWENEN</small><b id="sGone">0 keer</b></div>
+      <div class="stat"><small>CHECKS</small><b id="sChecks">0</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>LOG</h2>
+    <div id="log"></div>
+  </div>
+</main>
+<script>
+// Los testpagina: kijkt alleen of Spotify je telefoon blijft zien. Raakt KINK niet aan.
+// Gebruikt de koppeling van KINK Switch op hetzelfde adres (zelfde sleutels, zelfde vergrendeling bij vernieuwen).
+const $=id=>document.getElementById(id);
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
+const t2=d=>new Date(d).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const mins=ms=>Math.round(ms/60000)+' min';
+
+let st;try{st=JSON.parse(ls('ks_lab')||'null')}catch(e){st=null}
+if(!st)st={log:[],run:false,target:'',keep:'0',seen:null,lastActive:null,gone:0,checks:0,lastKeep:0,visible:null,startedAt:0};
+function save(){try{ls('ks_lab',JSON.stringify({...st,log:st.log.slice(-800)}))}catch(e){}}
+function L(text,cls){st.log.push({t:Date.now(),m:text,c:cls||''});save();renderLog()}
+function renderLog(){const el=$('log');el.innerHTML='';st.log.slice(-300).forEach(e=>{const d=document.createElement('div');d.textContent=t2(e.t)+'  '+e.m;if(e.c)d.className=e.c;el.appendChild(d)});el.scrollTop=el.scrollHeight}
+function render(){
+  $('sRun').textContent=st.run?'Loopt'+(st.keep!=='0'?', wakker houden':''):'Gestopt';
+  $('start').textContent=st.run?'Stop':'Start';$('start').className=st.run?'stop':'go';
+  $('sDev').innerHTML=st.visible===null?'-':st.visible?'<span class="good">zichtbaar</span>':'<span class="bad">weg</span>';
+  $('sSince').textContent=st.seen?t2(st.seen)+' ('+mins(Date.now()-st.seen)+')':'-';
+  $('sActive').textContent=st.lastActive?t2(st.lastActive)+' ('+mins(Date.now()-st.lastActive)+' geleden)':'-';
+  $('sGone').textContent=st.gone+' keer';$('sChecks').textContent=st.checks;
+  $('keep').value=st.keep;
+}
+
+/* Sleutel: zelfde aanpak als de app */
+let token=null,tokenExpiry=0,refreshing=null;
+function freshStored(){const t=ls('ks_token'),e=+(ls('ks_expiry')||0);return t&&Date.now()<e-60000?{t,e}:null}
+async function getToken(){
+  if(token&&Date.now()<tokenExpiry-60000)return token;
+  const f=freshStored();if(f){token=f.t;tokenExpiry=f.e;return token}
+  if(!refreshing)refreshing=doRefresh().finally(()=>{refreshing=null});
+  return refreshing;
+}
+async function doRefresh(){
+  const run=async()=>{
+    const f=freshStored();if(f){token=f.t;tokenExpiry=f.e;return token}
+    const refresh=ls('ks_refresh'),id=ls('ks_client');
+    if(!refresh||!id)throw Error('Niet gekoppeld. Koppel eerst Spotify in KINK Switch op dit apparaat.');
+    const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:id,grant_type:'refresh_token',refresh_token:refresh})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){const f2=freshStored();if(f2&&ls('ks_refresh')!==refresh){token=f2.t;tokenExpiry=f2.e;return token}throw Error('Sleutel vernieuwen mislukt: '+(d.error||r.status))}
+    token=d.access_token;tokenExpiry=Date.now()+d.expires_in*1000;ls('ks_token',token);ls('ks_expiry',String(tokenExpiry));if(d.refresh_token)ls('ks_refresh',d.refresh_token);
+    L('Sleutel vernieuwd');return token;
+  };
+  return (navigator.locks&&navigator.locks.request)?navigator.locks.request('kink-switch-token',run):run();
+}
+async function api(path,method='GET',body){
+  const t=await getToken();
+  const r=await fetch('https://api.spotify.com/v1'+path,{method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+  if(r.status===401){token=null;ls('ks_expiry','0');throw Error('401, sleutel wordt vernieuwd')}
+  if(r.status===204||r.status===202)return null;
+  const txt=await r.text();let d=null;try{d=txt?JSON.parse(txt):null}catch(e){}
+  if(!r.ok)throw Error(r.status+' '+(d?.error?.message||''));
+  return d;
+}
+
+/* Apparaat kiezen: op naam en soort, want Spotify wisselt soms van ID */
+const keyOf=d=>d.name+'|'+d.type;
+async function loadDevices(){
+  try{
+    const d=await api('/me/player/devices'),list=d?.devices||[];
+    const sel=$('dev'),cur=st.target||ls('ks_myDeviceName')||'';
+    sel.innerHTML='';
+    const keys=new Set(list.map(keyOf));if(cur&&!keys.has(cur))list.push({name:cur.split('|')[0],type:(cur.split('|')[1]||'')+', nu niet zichtbaar',_k:cur});
+    list.forEach(x=>{const o=document.createElement('option');o.value=x._k||keyOf(x);o.textContent=x.name+' ('+x.type+')';sel.appendChild(o)});
+    if(!list.length){sel.innerHTML='<option value="">Geen apparaten. Open Spotify en vernieuw.</option>';return}
+    sel.value=cur&&[...sel.options].some(o=>o.value===cur)?cur:(list.find(x=>x.type==='Smartphone')?keyOf(list.find(x=>x.type==='Smartphone')):sel.options[0].value);
+    st.target=sel.value;save();
+  }catch(e){L('Lijst laden mislukt: '+e.message,'bad')}
+}
+
+/* Eén check */
+async function check(){
+  if(!st.run||!st.target)return;
+  st.checks++;
+  let list=[],p=null;
+  try{list=(await api('/me/player/devices'))?.devices||[]}catch(e){L('Check mislukt: '+e.message,'bad');render();return}
+  try{p=await api('/me/player')}catch(e){}
+  const dev=list.find(x=>keyOf(x)===st.target),now=Date.now();
+  const playingOnIt=!!(p&&p.device&&dev&&keyOf(p.device)===st.target);
+  if(dev&&(dev.is_active||playingOnIt))st.lastActive=now;
+  if(dev&&st.visible!==true){st.seen=now;L('Zichtbaar: '+dev.name+(dev.is_active?' (actief)':''),'good')}
+  if(!dev&&st.visible!==false&&st.visible!==null){
+    st.gone++;
+    L('WEG: '+st.target.split('|')[0]+' verdwenen, na '+(st.seen?mins(now-st.seen):'?')+' zichtbaar'+(st.lastActive?', '+mins(now-st.lastActive)+' na laatst actief':'')+(st.keep!=='0'?' (wakker houden elke '+st.keep+' min)':' (wakker houden uit)'),'bad');
+  }
+  if(!dev&&st.visible===null)L('Nog niet zichtbaar: open Spotify op je telefoon','bad');
+  st.visible=!!dev;
+  // Wakker houden: alleen als er nergens iets speelt, zodat we nooit muziek onderbreken
+  const k=+st.keep;
+  if(k&&dev&&now-st.lastKeep>=k*60000){
+    st.lastKeep=now;
+    if(p&&p.is_playing){L('Wakker houden overgeslagen: er speelt iets op '+(p.device?.name||'?'))}
+    else{
+      try{await api('/me/player','PUT',{device_ids:[dev.id],play:false});L('Wakker houden: seintje naar '+dev.name)}
+      catch(e){L('Wakker houden mislukt: '+e.message,'bad')}
+    }
+  }
+  save();render();
+}
+
+/* Klok: Worker, zodat een achtergrondtabblad blijft lopen */
+let lastTick=0;
+function tick(){if(st.run&&Date.now()-lastTick>=30000){lastTick=Date.now();check()}render()}
+try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),5000)'],{type:'text/javascript'})));w.onmessage=tick}catch(e){setInterval(tick,5000)}
+
+$('start').onclick=()=>{
+  if(!st.run){
+    if(!$('dev').value)return L('Kies eerst een apparaat','bad');
+    st.target=$('dev').value;st.keep=$('keep').value;st.run=true;st.visible=null;st.seen=null;st.lastActive=null;st.lastKeep=Date.now();st.startedAt=Date.now();
+    L('--- Start: '+st.target.split('|')[0]+', wakker houden '+(st.keep==='0'?'uit':'elke '+st.keep+' min')+' ---');lastTick=0;tick();
+  }else{st.run=false;L('--- Gestopt na '+mins(Date.now()-st.startedAt)+' ---')}
+  save();render();
+};
+$('keep').onchange=()=>{st.keep=$('keep').value;if(st.run)L('Wakker houden nu '+(st.keep==='0'?'uit':'elke '+st.keep+' min'));save();render()};
+$('dev').onchange=()=>{st.target=$('dev').value;save()};
+$('reload').onclick=loadDevices;
+$('clear').onclick=()=>{st={log:[],run:false,target:st.target,keep:st.keep,seen:null,lastActive:null,gone:0,checks:0,lastKeep:0,visible:null,startedAt:0};save();renderLog();render()};
+$('copy').onclick=async()=>{
+  const t='KINK Switch lab\n'+'Apparaat: '+st.target+', checks: '+st.checks+', verdwenen: '+st.gone+'\n----\n'+st.log.map(e=>t2(e.t)+'  '+e.m).join('\n');
+  try{await navigator.clipboard.writeText(t);$('copy').textContent='Gekopieerd'}catch(e){prompt('Kopieer het resultaat',t)}
+  setTimeout(()=>$('copy').textContent='Kopieer resultaat',1500);
+};
+renderLog();render();loadDevices();
+</script>
+</body>
+</html>
