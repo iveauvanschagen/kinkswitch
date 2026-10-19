@@ -1,0 +1,71 @@
+/* Kleuren, lettertype en de basisindeling van de app */
+@font-face {
+  font-family: 'Archivo Black';
+  src: url(../archivo-black.woff2) format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  --bg: #07080a;
+  --panel: #111318;
+  --panel2: #171a21;
+  --line: #262a33;
+  --text: #f5f6f8;
+  --muted: #8b919c;
+  --kink: #d9ff42;
+  --kink-ink: #0b0d06;
+  --spot: #1ed760;
+  --spot-ink: #04130a;
+  --warn: #ffb020;
+  --hot: #ff5a4e;
+  --r: 14px;
+}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+body {
+  background: radial-gradient(120% 70% at 50% -10%, #1a1f12 0%, var(--bg) 55%) fixed;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+button:focus-visible {
+  outline: 3px solid var(--kink);
+  outline-offset: 3px;
+}
+svg {
+  display: block;
+}
+
+.app {
+  height: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: 10px;
+  grid-template-areas: 'top' 'banner' 'sources' 'controls' 'foot';
+  grid-template-rows: auto auto 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr);
+}

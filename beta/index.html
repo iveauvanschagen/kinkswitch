@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07080a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>KINK Switch</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/panels.css">
+
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#171a21"/><g fill="none" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M120 196h220" stroke="#d9ff42"/><path d="M300 146l52 50-52 50" stroke="#d9ff42"/><path d="M392 316H172" stroke="#1ed760"/><path d="M212 266l-52 50 52 50" stroke="#1ed760"/></g></svg><div class="wm">KINK <span>SWITCH</span></div></div>
+    <div class="right"><button class="silly" id="silly" aria-label="Don't be silly afspelen">DON'T BE SILLY</button><div class="clock" id="clock">--:--</div></div>
+  </header>
+
+  <section class="banner" id="banner" aria-live="polite">
+    <span class="dot"></span>
+    <div class="txt"><span class="eyebrow" id="adEyebrow" hidden>MUST SKIP</span><b id="adTitle">Muziek</b><small id="nextLabel">Wacht op gegevens van KINK</small></div>
+    <div class="count" id="countdown"></div>
+  </section>
+
+  <section class="sources">
+    <div class="tile"><button class="src kink active" id="kinkMode" aria-label="KINK live">
+      <span class="tag" id="state">UIT</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1a10 10 0 0 1 0-14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/><circle cx="12" cy="12" r="2"/></svg></span>
+      <span style="min-width:0"><span class="name">KINK</span><span class="np"><em>NU OP KINK</em><strong><span id="kinkArtist">Live radio</span><span class="gtag" id="kinkGenre"></span></strong><span id="kinkSong"></span></span></span>
+    </button>
+    <div class="acts"><button class="ibtn" id="kinkAdd" aria-label="Toevoegen aan KINK Catch" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h12M3 12h12M3 18h7"/><path d="M18 13v8M14 17h8"/></svg></button><button class="ibtn" id="kinkFav" aria-label="Favoriet" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9.4C1.4 7.6 3.6 4.5 7 4.5c2.1 0 3.8 1.2 5 3 1.2-1.8 2.9-3 5-3 3.4 0 5.6 3.1 4.3 6.6-1.8 4.8-9.3 9.4-9.3 9.4z"/></svg></button></div></div>
+    <div class="tile"><button class="src spot" id="spotifyMode" aria-label="Spotify">
+      <span class="tag" id="spotTag">PLAYLIST</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+      <span style="min-width:0"><span class="name">Spotify</span><span class="np"><em id="spotLabel">PLAYLIST</em><strong id="spotArtist">Kies een playlist</strong><span id="spotSong"></span></span></span>
+    </button>
+    <div class="acts"><button class="ibtn" id="spotFav" aria-label="Favoriet" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9.4C1.4 7.6 3.6 4.5 7 4.5c2.1 0 3.8 1.2 5 3 1.2-1.8 2.9-3 5-3 3.4 0 5.6 3.1 4.3 6.6-1.8 4.8-9.3 9.4-9.3 9.4z"/></svg></button></div></div>
+  </section>
+
+  <section class="controls">
+    <button class="ctl" id="playPause" aria-label="Afspelen of pauzeren"></button>
+    <button class="ctl" id="next" aria-label="Volgende"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 5 5.5z"/><rect x="17.5" y="5" width="2.5" height="14" rx="1"/></svg><span>Volgende</span></button>
+    <button class="ctl" id="autoBtn" aria-label="Automatisch wisselen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg><span id="autoTxt">Auto</span></button>
+    <button class="ctl" id="plBtn" aria-label="Playlist kiezen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h13M3 12h13M3 18h8"/><path d="M17 18v-6l4-1"/><circle cx="15" cy="18" r="2"/></svg><span>Playlist</span></button>
+  </section>
+
+  <footer class="foot">
+    <div class="status" id="status">Spotify niet gekoppeld. Tik op het tandwiel.</div>
+    <button class="gear" id="openSettings" aria-label="Instellingen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </footer>
+  <audio id="radio" preload="none" playsinline>
+    <source src="https://playerservices.streamtheworld.com/api/livestream-redirect/KINK.mp3" type="audio/mpeg">
+  </audio>
+</div>
+
+<div class="toast" id="toast" hidden><span id="toastTxt"></span><button id="toastUndo">Ongedaan maken</button></div>
+
+<div class="modal" id="modal"><div class="modalbox set">
+  <div class="shead">
+    <h2>Instellingen</h2>
+    <div class="note"><i></i>Stel dit in als je stilstaat, niet tijdens het rijden.</div>
+    <div class="seg"><button class="on" id="stAlg">Algemeen</button><button id="stArt">Artiesten</button><button id="stSp">Spotify</button></div>
+  </div>
+  <div class="sbody">
+    <div class="pane" id="paneAlg">
+      <div class="grp"><h4>Rijden</h4>
+        <div class="line"><div class="tx"><b>Wissel bij reclame en nieuws</b><small>Meldt KINK reclame of nieuws, dan naar Spotify. Muziek terug? Dan weer KINK.</small></div><button class="sw" role="switch" id="swAuto" aria-label="Wissel bij reclame en nieuws"></button></div>
+        <div class="line"><div class="tx"><b>Scherm aan houden</b><small>Handig in de houder: het scherm gaat niet uit zolang de app open is.</small></div><button class="sw" role="switch" id="swWake" aria-label="Scherm aan houden"></button></div>
+        <div class="line"><div class="tx"><b>Ook op de achtergrond meekijken</b><small>Voor je computer: de app blijft wisselen als hij een tabblad op de achtergrond is.</small></div><button class="sw" role="switch" id="swBg" aria-label="Ook op de achtergrond meekijken"></button></div>
+      </div>
+      <div class="grp"><h4>Diagnose</h4>
+        <div class="line"><div class="tx"><b>Diagnose en log</b><small>Alles wat er misging, om te delen met Claude.</small></div><button class="btn" id="openDbg">Open</button></div>
+      </div>
+      <div class="grp"><h4>Vertraging</h4>
+        <div class="line"><div class="tx"><b>Wacht voordat de app KINK verlaat</b><small>In seconden, bij reclame, nieuws of Must skip. Zodat je het eind van een nummer niet mist. Terug naar KINK gaat altijd direct.</small></div><input class="numin" id="delay" type="number" min="0" max="60" inputmode="numeric"></div>
+      </div>
+    </div>
+    <div class="pane" id="paneArt" hidden>
+      <div class="grp"><h4><span class="dot" style="background:var(--kink)"></span>Must hear</h4>
+        <div class="sub">Draait KINK een van deze artiesten, dan gaat de app terug naar KINK en licht de tegel op.</div>
+        <div class="lbl">MIJN LIJST</div><div class="chips2" id="hearChips"></div>
+        <div class="addrow2"><input id="newHear" placeholder="Artiest toevoegen" autocomplete="off"><button class="btn" id="addHear">Toevoegen</button></div>
+      </div>
+      <div class="grp"><h4><span class="dot" style="background:var(--hot)"></span>Must skip</h4>
+        <div class="sub">Draait KINK een van deze artiesten, dan direct naar Spotify. Bij het volgende nummer terug.</div>
+        <div class="lbl">MIJN LIJST</div><div class="chips2" id="skipChips"></div>
+        <div class="addrow2"><input id="newSkip" placeholder="Artiest toevoegen" autocomplete="off"><button class="btn" id="addSkip">Toevoegen</button></div>
+      </div>
+      <p style="padding:0 4px">Tip: met het hartje op de KINK-tegel zet je een artiest met één tik in Must hear.</p>
+    </div>
+    <div class="pane" id="paneSp" hidden>
+      <div class="grp"><h4>Account</h4>
+        <div class="status2"><span class="ok" id="spIcon"></span><div style="flex:1;min-width:0"><b id="spState"></b><small id="spSub"></small></div></div>
+        <div class="btnrow"><button class="btn primary" id="connect">Koppel Spotify</button><button class="btn" id="logout">Ontkoppelen</button></div>
+      </div>
+      <div class="grp"><h4>Afspelen</h4>
+        <div class="line"><div class="tx"><b>Altijd op shuffle</b><small>Je playlist start op een willekeurig nummer en blijft shuffelen.</small></div><button class="sw" role="switch" id="swShuffle" aria-label="Altijd op shuffle"></button></div>
+        <div class="line"><div class="tx"><b>Spotify wakker houden</b><small>Een gepauzeerde Spotify valt na ongeveer 10 minuten in slaap. De app laat hem elke 9 minuten heel kort spelen, zodat hij klaarstaat. Je hoort Spotify even en KINK hapert kort.</small></div><button class="sw" role="switch" id="swKeep" aria-label="Spotify wakker houden"></button></div>
+      </div>
+      <div class="grp"><details id="adv"><summary>Geavanceerd</summary><div class="inner">
+        <h5>Afspelen op</h5>
+        <p>Standaard speelt Spotify op het apparaat waar je op tikt: je telefoon of je computer.</p>
+        <div id="devList"></div>
+        <div class="btnrow"><button class="btn" id="devRefresh">Vernieuw lijst</button></div>
+        <h5>Koppellink voor iemand anders</h5>
+        <p>Voeg diegene eerst toe onder User Management in het Spotify-dashboard.</p>
+        <div class="btnrow"><button class="btn" id="shareLink">Kopieer</button></div>
+        <h5>Client ID en Redirect URI</h5>
+        <p>Maak een app in het <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify Developer Dashboard</a>. Zet daar de Redirect URI hieronder exact zo neer, vink Web API aan en voeg het Spotify-account toe onder User Management. Spotify Premium is vereist.</p>
+        <label for="redirectUri">Redirect URI (kopieer naar Spotify)</label>
+        <div class="copyrow"><input id="redirectUri" readonly><button class="btn" id="copyRedirect">Kopieer</button></div>
+        <label for="clientId">Spotify Client ID</label>
+        <input id="clientId" placeholder="32 tekens uit het dashboard" autocomplete="off" spellcheck="false">
+      </div></details></div>
+    </div>
+  </div>
+  <div class="sfoot"><small id="savedNote">Wijzigingen worden direct bewaard</small><button class="close" id="closeSettings">Sluiten</button></div>
+</div></div>
+
+<div class="modal" id="dbgModal"><div class="modalbox dbg">
+  <div class="dhead"><h2>Diagnose</h2><button class="btn" id="dbgClose">Sluiten</button></div>
+  <div class="dsum" id="dbgSum"></div>
+  <div class="dbtns">
+    <button class="btn primary" id="dbgRun">Test Spotify nu</button>
+    <button class="btn" id="dbgKeep">Test wakker houden</button>
+    <button class="btn" id="dbgMark">Er ging net iets mis</button>
+    <button class="btn" id="dbgNote">Notitie</button>
+    <button class="btn" id="dbgCopy">Kopieer log</button>
+    <button class="btn" id="dbgShare">Delen</button>
+    <button class="btn" id="dbgClear">Wis log</button>
+  </div>
+  <div class="dfil" id="dbgFil"><button class="on" data-f="all">Alles</button><button data-f="err">Fouten</button><button data-f="spotify">Spotify</button><button data-f="switch">Wisselen</button><button data-f="keep">Wakker</button></div>
+  <div class="dlog" id="dbgLog"></div>
+</div></div>
+
+<div class="modal" id="plModal"><div class="modalbox">
+  <h2>Playlist</h2>
+  <div class="tabs"><button class="on" id="tabPlay">Afspelen</button><button id="tabMiss">Gemist op KINK</button></div>
+  <div id="paneMiss" hidden>
+    <p>De laatste nummers op KINK. Tik op het icoon om er een toe te voegen aan KINK Catch.</p>
+    <div id="missList"></div>
+  </div>
+  <div id="panePlay">
+    <button class="btn primary bigbtn" id="pastePl">Plak gekopieerde Spotify-link</button>
+    <p>Tip: in de Spotify-app kun je ook bij een playlist op Delen tikken en KINK Switch kiezen (als de app op je startscherm staat).</p>
+    <div id="plList"></div>
+  </div>
+  <button class="btn bigbtn" id="closePl">Sluiten</button>
+</div></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
