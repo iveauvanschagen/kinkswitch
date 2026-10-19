@@ -42,6 +42,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **Live now playing.** Artist big, song title below, on both tiles. Also shown in the page title and the Android media notification.
 - **Must hear.** Tap the heart on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
 - **KINK Catch.** Tap the add icon on the KINK tile and the song lands in your private KINK Catch playlist on Spotify (created for you the first time). Changed your mind? Undo right from the confirmation.
+- **KINK 1500.** Song from the KINK 1500 on the radio? The KINK tile shows its position, like #12 KINK 1500.
 - **Missed on KINK.** Heard something great while driving? Open Playlist, switch to "Gemist op KINK" and add any of the last songs KINK played.
 - **Must skip.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song. The banner celebrates with a rotating pun (Born Skippy, Skipperdeflip and friends) and reminds you your ears are safe.
 - **Don't be silly.** The panic button. One tap and Wodan Boys - Don't be Silly blasts through Spotify.
@@ -62,10 +63,6 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 
 Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add `#diagnose` to the URL). You'll see the current state of the app and a log of the last 600 events: what KINK itself reports (the latest items with times, lengths and ad markers), every Spotify call with its status code, the artist and song Spotify reports, token refreshes, device choices and every switch decision. Tap **Er ging net iets mis** right after a problem to mark the moment, add a **Notitie** if you like, then **Kopieer log** or **Delen** and send it over. Each line is tagged (KINK, WISSEL, SPOTIFY, WAKKER, APPARAAT, API, SLEUTEL, MELDING, TEST, NOTITIE, APP or FOUT); routine status polls are left out so the log stays readable. **Test wakker houden** runs the keep-awake ping right away and logs every step. Tokens and keys are never logged.
 
-## Spotify lab
-
-Wondering why Spotify drops off? Open `spotify-lab.html` (same address, e.g. `https://iveauvanschagen.github.io/kinkswitch/spotify-lab.html`) on your computer. It watches whether Spotify can still see your phone, logs when it disappears and can try to keep it awake with a silent nudge every few minutes. It never touches KINK and never interrupts music that is playing. Copy or share the result and compare a run with and without the nudge. `spotify-lab-mobiel.html` runs on your phone and tests the short play ping while KINK plays.
-
 ## Good to know
 
 - **On your phone, keep it on screen.** Phones pause pages in the background, so in the car keep the app open in the holder with "Scherm aan houden" on.
@@ -74,6 +71,27 @@ Wondering why Spotify drops off? Open `spotify-lab.html` (same address, e.g. `ht
 - **Install, don't just add a shortcut.** The installed app gets its own window and is the only way to share playlists from Spotify. Use one copy on your phone and close old KINK Switch tabs in Chrome.
 - **Data use.** The app itself uses about 1 to 2 MB per hour. The KINK stream is roughly 86 MB per hour; Spotify depends on your quality setting.
 - **Stream delay.** Before leaving KINK (ads, news or a Must skip artist) the app waits 20 seconds, because the stream you hear runs behind KINK's data. That way you don't lose the end of a song. Coming back to KINK, for music or a Must hear artist, happens instantly. You can tune this in settings.
+
+## Under the hood
+
+Plain HTML, CSS and modern JavaScript modules. No framework, no build step and no dependencies: GitHub Pages serves the files as they are.
+
+```
+index.html        markup only
+css/              base, home screen and panels
+js/main.js        start-up: wire up buttons and start the clock
+js/config.js      all fixed values (timings, URLs, puns) in one place
+js/state.js       everything that changes while the app runs
+js/switcher.js    every switch decision: ads, Must skip, Must hear, back to KINK
+js/kink/          KINK now playing, break detection and the stream
+js/k1500.js       finds a song's position in the KINK 1500
+js/data/          the KINK 1500 list
+js/spotify/       login, API calls, playback, keep awake and reachability
+js/ui/            tiles, banner, settings, playlist picker and diagnose
+sw.js             offline cache; bump CACHE together with APP_VERSION in config.js
+```
+
+Releases are tagged on GitHub (`v1.0.0`, `v1.1.0`, ...); the version shows in Diagnose.
 
 ## Credits
 

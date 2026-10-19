@@ -620,3 +620,10 @@ summary {
   text-align: center;
   margin-top: 14px;
 }
+/* Playlist kiezen: Sluiten blijft altijd zichtbaar onderaan */
+#closePl {
+  position: sticky;
+  bottom: -10px;
+  z-index: 1;
+  box-shadow: 0 0 0 14px var(--panel);
+}

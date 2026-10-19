@@ -4,6 +4,7 @@ import { isFav, toggleFav } from '../artists.js';
 import { catchSong, isCaught, loadMiss } from '../catch.js';
 import { $, radio } from '../dom.js';
 import { ICON_ADD, ICON_CHECK } from '../icons.js';
+import { k1500Pos } from '../k1500.js';
 import { kinkTap } from '../kink/radio.js';
 import { silly } from '../silly.js';
 import { goSpotify, next, pollSpotify, toggle } from '../spotify/player.js';
@@ -117,6 +118,9 @@ export function showKink() {
     S.lastFavKey = key;
     checkFav(S.kinkNow.artist, key);
   }
+  // Staat het nummer in de KINK 1500? Dan de positie naast de artiest
+  const pos = k1500Pos(S.kinkNow.artist, S.kinkNow.title);
+  $('kinkGenre').textContent = pos ? '#' + pos + ' KINK 1500' : '';
   // Nieuw nummer op KINK terwijl je naar Spotify luistert: tegel licht even op
   if (S.lastKinkSong && key !== S.lastKinkSong && S.mode === 'spotify') {
     $('kinkMode').classList.add('fresh');

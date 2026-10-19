@@ -686,7 +686,7 @@
   .app {
     grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
     grid-template-rows: auto auto 1fr auto;
-    grid-template-areas: 'top top' 'sources banner' 'sources controls' 'foot foot';
+    grid-template-areas: 'top top' 'banner banner' 'sources controls' 'foot foot';
   }
   .banner {
     flex-wrap: wrap;

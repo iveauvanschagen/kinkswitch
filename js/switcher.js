@@ -165,7 +165,6 @@ export async function banToSpotify(key, artist) {
 export function checkFav(artist, key) {
   const tile = $('kinkMode');
   tile.classList.remove('fav');
-  $('kinkGenre').textContent = '';
   if (!artist || !isFav(artist)) return;
   tile.classList.add('fav');
   buzz();
