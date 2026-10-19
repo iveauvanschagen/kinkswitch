@@ -6,7 +6,7 @@ import { radio } from '../dom.js';
 import { LOG } from '../log.js';
 import { api } from './api.js';
 import { hasLogin } from './auth.js';
-import { pickDevice, spDevices } from './player.js';
+import { noteQueued, pickDevice, spDevices } from './player.js';
 import { handleSpError, setSpIssue } from './reach.js';
 import { ls } from '../store.js';
 import { msg } from '../ui/status.js';
@@ -57,6 +57,7 @@ export async function keepAwakeSpotify(test) {
     try {
       p = await api('/me/player');
     } catch (e) {}
+    noteQueued(p);
     if (p && p.is_playing) {
       LOG('keep', 'info', how + ': niet nodig, Spotify speelt al op ' + (p.device?.name || '?'));
       return;

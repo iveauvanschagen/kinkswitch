@@ -160,11 +160,18 @@ export function renderSpotIdle() {
   if (S.spIssue) return renderSpIssue();
   if (S.mode === 'spotify') return;
   const pl = ls('ks_playlistName') || (ls('ks_playlist') ? 'Je playlist' : 'Kies een playlist');
-  if (S.spReady) {
+  if (S.spQueued) {
+    // Spotify gaat verder met dit nummer uit je playlist
+    $('spotTag').textContent = S.spReady ? 'KLAAR' : 'PLAYLIST';
+    $('spotLabel').textContent = 'VERDER MET';
+    $('spotArtist').textContent = S.spQueued.artist;
+    $('spotSong').textContent = S.spQueued.title;
+  } else if (S.spReady) {
     $('spotTag').textContent = 'KLAAR';
     $('spotLabel').textContent = 'KLAAR OP ' + S.spReady.toUpperCase();
     $('spotArtist').textContent = pl;
-    $('spotSong').textContent = 'Tik om te wisselen';
+    $('spotSong').textContent =
+      ls('ks_shuffle') !== '0' ? 'Start op een willekeurig nummer' : 'Tik om te wisselen';
   } else {
     $('spotTag').textContent = 'PLAYLIST';
     $('spotLabel').textContent = 'PLAYLIST';

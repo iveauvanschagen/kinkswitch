@@ -58,6 +58,10 @@ export const S = {
   goBusy: false,
   sillyBusy: false,
   spotNow: null,
+  // Het nummer uit je gekozen playlist dat in Spotify klaarstaat (null = niets of iets anders)
+  spQueued: null,
+  // Na een nieuwe start: de playlist die Spotify moet melden voordat we een nummer tonen
+  spExpect: null,
   lastSpotKey: '',
 
   // Is Spotify bereikbaar?

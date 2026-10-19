@@ -15,6 +15,7 @@ export function setPlaylist(uri, name, total) {
   ls('ks_playlist', uri);
   ls('ks_playlistName', name || 'Je playlist');
   ls('ks_playlistTotal', total > 0 ? String(total) : null);
+  S.spQueued = null;
   renderSpotIdle();
   $('plModal').classList.remove('show');
   msg('Playlist gekozen: ' + (name || 'je playlist'));

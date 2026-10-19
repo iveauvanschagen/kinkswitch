@@ -6,7 +6,7 @@ import { metaFresh } from '../kink/meta.js';
 import { LOG } from '../log.js';
 import { silly } from '../silly.js';
 import { connect, getToken, hasLogin } from './auth.js';
-import { goSpotify, pickDevice, playlistUri, spDevices } from './player.js';
+import { goSpotify, pickDevice, playlistUri, readQueued, spDevices } from './player.js';
 import { ls } from '../store.js';
 import { autoToSpotify, banToSpotify } from '../switcher.js';
 import { msg } from '../ui/status.js';
@@ -57,6 +57,7 @@ export async function checkSpotify() {
       LOG('spotify', 'ok', 'Spotify staat klaar op ' + S.spReady);
       if (wasIssue) msg('Spotify staat klaar op ' + S.spReady);
       if (S.pendingSwitch) retryPending();
+      else if (S.mode !== 'spotify') await readQueued();
     } else {
       S.spReady = '';
       // Spotify geeft soms een lege lijst terwijl hij via ons speelt. Dan geen waarschuwing.

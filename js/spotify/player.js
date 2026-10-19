@@ -1,6 +1,6 @@
 // Spotify afspelen: apparaat kiezen, playlist starten, controleren of hij echt speelt, shuffle.
 import { S } from '../state.js';
-import { IS_PHONE } from '../config.js';
+import { IS_PHONE, SILLY_ALBUM } from '../config.js';
 import { $, radio } from '../dom.js';
 import { LOG } from '../log.js';
 import { aborted, api } from './api.js';
@@ -231,11 +231,29 @@ export async function playListInner() {
     throw Error('Kies eerst een playlist');
   }
   const dev = await deviceId();
-  let resume = false;
+  let resume = false,
+    before = null;
   try {
-    const p = await api('/me/player');
-    resume = p?.context?.uri === context;
+    before = await api('/me/player');
+    resume = before?.context?.uri === context;
   } catch (e) {}
+  const plName = ls('ks_playlistName') || 'je playlist';
+  if (resume) {
+    LOG(
+      'spotify',
+      'info',
+      `Spotify: verder in ${plName}` +
+        (before.item ? ` met ${artistsOf(before.item)} - ${before.item.name}` : '')
+    );
+  } else {
+    LOG(
+      'spotify',
+      'info',
+      `Spotify: ${plName} nieuw gestart${ls('ks_shuffle') !== '0' ? ' op een willekeurig nummer' : ''} (Spotify had: ${describeContext(before)})`
+    );
+  }
+  // Nieuw gestart: pas een nummer tonen als Spotify meldt dat het uit je playlist komt
+  S.spExpect = resume ? null : context;
   radio.pause();
   const shuffle = ls('ks_shuffle') !== '0';
   let body = resume ? undefined : { context_uri: context },
@@ -284,6 +302,36 @@ export async function playListInner() {
 }
 
 // Kijkt tot ongeveer 4 seconden of Spotify een nummer meldt. Pas dan weten we dat het wisselen gelukt is.
+// Namen van de artiesten van een nummer
+export function artistsOf(item) {
+  return (item?.artists || []).map(a => a.name).join(', ');
+}
+
+// Onthoud welk nummer uit je gekozen playlist klaarstaat. Iets anders (of niets) telt niet.
+export function noteQueued(p) {
+  const ctx = playlistUri();
+  S.spQueued =
+    p?.item && ctx && p.context?.uri === ctx ? { artist: artistsOf(p.item), title: p.item.name } : null;
+}
+
+// Vraag Spotify wat er klaarstaat (voor de tegel)
+export async function readQueued() {
+  try {
+    noteQueued(await api('/me/player'));
+  } catch (e) {}
+}
+
+// Wat had Spotify klaarstaan, in gewone woorden (voor de log)
+function describeContext(p) {
+  const uri = p?.context?.uri;
+  if (!p || !p.item) return 'niets';
+  if (!uri) return 'een los nummer zonder playlist';
+  if (uri === SILLY_ALBUM) return "Don't be silly";
+  if (uri.includes(':playlist:')) return 'een andere playlist';
+  if (uri.includes(':album:')) return 'een album';
+  return uri;
+}
+
 export async function verifySpotify() {
   for (let i = 0; i < 4; i++) {
     await sleep(i === 0 ? 500 : 1200);
@@ -291,8 +339,13 @@ export async function verifySpotify() {
     try {
       p = await api('/me/player');
     } catch (e) {}
+    // Nieuw gestart en Spotify meldt nog het oude nummer? Even wachten, niet tonen.
+    if (p && p.item && S.spExpect && p.context?.uri !== S.spExpect && i < 3) {
+      LOG('spotify', 'info', 'Spotify meldt nog het vorige nummer, even wachten');
+      continue;
+    }
     if (p && p.item) {
-      const artist = (p.item.artists || []).map(a => a.name).join(', ');
+      const artist = artistsOf(p.item);
       LOG(
         'spotify',
         'ok',
@@ -304,6 +357,16 @@ export async function verifySpotify() {
           ' op ' +
           (p.device?.name || '?')
       );
+      noteQueued(p);
+      if (S.spExpect && p.context?.uri !== S.spExpect) {
+        // Spotify speelt wel, maar meldt (nog) niet onze playlist: geen oud nummer tonen
+        $('spotLabel').textContent = 'NU OP SPOTIFY';
+        $('spotArtist').textContent = ls('ks_playlistName') || 'Je playlist';
+        $('spotSong').textContent = '';
+        clearSpIssue(false);
+        return true;
+      }
+      S.spExpect = null;
       S.spotNow = { title: p.item.name, artist, main: (p.item.artists || [])[0]?.name || '' };
       S.lastSpotKey = p.item.id || p.item.name;
       $('spotLabel').textContent = 'NU OP SPOTIFY';
@@ -391,6 +454,9 @@ export async function pollSpotify() {
     }
     if (S.spIssue === 'nodevice') clearSpIssue(false);
     if (p.is_playing) spActive();
+    noteQueued(p);
+    if (S.spExpect && p.context?.uri !== S.spExpect) return; // je playlist is nog niet geladen
+    S.spExpect = null;
     $('spotLabel').textContent = p.is_playing ? 'NU OP SPOTIFY' : 'GEPAUZEERD';
     $('spotArtist').textContent = (it.artists || []).map(a => a.name).join(', ');
     $('spotSong').textContent = it.name;
