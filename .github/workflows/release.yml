@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: ['js/config.js']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Release maken als de versie nieuw is
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -oP "APP_VERSION = '\K[^']+" js/config.js)
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            echo "Release $VERSION bestaat al"
+            exit 0
+          fi
+          NOTES=$(git log -1 --format=%b)
+          [ -z "$NOTES" ] && NOTES=$(git log -1 --format=%s)
+          gh release create "$VERSION" --title "KINK Switch ${VERSION#v}" --notes "$NOTES" --target "$GITHUB_SHA"
