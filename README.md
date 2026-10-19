@@ -42,8 +42,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **Live now playing.** Artist big, song title below, on both tiles. Also shown in the page title and the Android media notification.
 - **Must hear.** Tap the heart on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
 - **KINK Catch.** Tap the add icon on the KINK tile and the song lands in your private KINK Catch playlist on Spotify (created for you the first time). Changed your mind? Undo right from the confirmation.
-- **KINK 1500.** Song from the KINK 1500 on the radio? The KINK tile shows its position, like #12 KINK 1500.
-- **Missed on KINK.** Heard something great while driving? Open Playlist, switch to "Gemist op KINK" and add any of the last songs KINK played.
+- **Missed on KINK.** Heard something great while driving? Open Playlist, switch to "Gemist op KINK" and add any of the last 10 songs KINK played.
 - **Must skip.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song. The banner celebrates with a rotating pun (Born Skippy, Skipperdeflip and friends) and reminds you your ears are safe.
 - **Don't be silly.** The panic button. One tap and Wodan Boys - Don't be Silly blasts through Spotify.
 - **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
@@ -84,8 +83,6 @@ js/config.js      all fixed values (timings, URLs, puns) in one place
 js/state.js       everything that changes while the app runs
 js/switcher.js    every switch decision: ads, Must skip, Must hear, back to KINK
 js/kink/          KINK now playing, break detection and the stream
-js/k1500.js       finds a song's position in the KINK 1500
-js/data/          the KINK 1500 list
 js/spotify/       login, API calls, playback, keep awake and reachability
 js/ui/            tiles, banner, settings, playlist picker and diagnose
 sw.js             offline cache; bump CACHE together with APP_VERSION in config.js

@@ -82,7 +82,6 @@ if (['127.0.0.1', 'localhost'].includes(location.hostname)) {
     'util',
     'log',
     'artists',
-    'k1500',
     'catch',
     'silly',
     'switcher',

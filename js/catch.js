@@ -120,7 +120,7 @@ export async function catchSong(artist, title, btn) {
 export async function loadMiss() {
   $('missList').innerHTML = '<p>Laden...</p>';
   try {
-    const r = await fetch(KINK_META_URL + '&numberToFetch=10&_=' + Date.now(), { cache: 'no-store' });
+    const r = await fetch(KINK_META_URL + '&numberToFetch=30&_=' + Date.now(), { cache: 'no-store' });
     const x = new DOMParser().parseFromString(await r.text(), 'text/xml');
     S.missItems = [...x.querySelectorAll('nowplaying-info')]
       .map(el => {
@@ -134,7 +134,9 @@ export async function loadMiss() {
         };
       })
       .filter(i => i.type !== 'ad' && i.title && i.artist)
-      .sort((a, b) => b.start - a.start);
+      .sort((a, b) => b.start - a.start)
+      // Een deel van de items is reclame, jingle of presentator: ruim ophalen en de laatste 10 nummers tonen
+      .slice(0, 10);
   } catch (e) {
     S.missItems = [];
   }
