@@ -10,6 +10,7 @@ import { tick } from './switcher.js';
 import { bindDiagnose } from './ui/diagnose.js';
 import { bindPicker, incoming } from './ui/picker.js';
 import { bindSettings } from './ui/settings.js';
+import { bindTour, firstTour } from './ui/tour.js';
 import { msg } from './ui/status.js';
 import { bindHome, renderAuto, renderSpotIdle, setMode, setPP } from './ui/tiles.js';
 import { keepAwake } from './wakelock.js';
@@ -19,6 +20,7 @@ bindHome();
 bindPicker();
 bindSettings();
 bindDiagnose();
+bindTour();
 
 // Terug in de app: scherm aan, Spotify checken en meteen opnieuw beslissen
 document.addEventListener('visibilitychange', () => {
@@ -55,6 +57,7 @@ keepAwake();
 renderSpotIdle();
 setInterval(pollSpotify, 10000);
 startClock();
+firstTour();
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -99,6 +102,7 @@ if (['127.0.0.1', 'localhost'].includes(location.hostname)) {
     'ui/settings',
     'ui/picker',
     'ui/diagnose',
+    'ui/tour',
   ];
   for (const f of files) Object.assign(window, await import('./' + f + '.js'));
   for (const k of Object.keys(S)) {

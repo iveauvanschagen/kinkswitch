@@ -1,7 +1,7 @@
 // Service worker: bewaart de app zelf voor als je even geen netwerk hebt.
 // De radiostream en Spotify gaan altijd live over het netwerk.
 // Bij elke release gaat de versie omhoog, zodat alle bestanden tegelijk worden ververst.
-const CACHE = 'kink-switch-1.2.1';
+const CACHE = 'kink-switch-1.3.0';
 const FILES = [
   './',
   'index.html',
@@ -38,6 +38,7 @@ const FILES = [
   'js/ui/picker.js',
   'js/ui/settings.js',
   'js/ui/status.js',
+  'js/ui/tour.js',
   'js/ui/tiles.js',
 ];
 

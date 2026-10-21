@@ -627,3 +627,104 @@ summary {
   z-index: 1;
   box-shadow: 0 0 0 14px var(--panel);
 }
+/* Rondleiding en tips */
+#tour {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+#tour .tcatch {
+  position: fixed;
+  inset: 0;
+}
+#tour .tdim {
+  position: fixed;
+  inset: 0;
+  background: #000c;
+}
+#tour .thole {
+  position: fixed;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 4px var(--kink),
+    0 0 0 9999px #000c;
+  pointer-events: none;
+  transition: all 0.25s ease;
+}
+#tour .tcard {
+  position: fixed;
+  width: min(360px, calc(100vw - 32px));
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 20px 60px #000a;
+}
+#tour .tst {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--kink);
+}
+#tour h3 {
+  margin: 6px 44px 6px 0;
+  font-size: 20px;
+  font-weight: 900;
+}
+#tour p {
+  margin: 0;
+  color: #c9ccd3;
+  font-size: 15px;
+  line-height: 1.45;
+}
+#tour .tx {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #22262e;
+  color: var(--text);
+}
+#tour .tx svg {
+  width: 18px;
+  height: 18px;
+}
+#tour .trow {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  align-items: center;
+}
+#tour .tdots {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+#tour .tdots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: #3a3f4a;
+}
+#tour .tdots i.on {
+  width: 16px;
+  background: var(--kink);
+}
+#tour .tb {
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-weight: 850;
+  font-size: 15px;
+  background: #22262e;
+  color: var(--text);
+}
+#tour .tb.tp {
+  background: var(--kink);
+  color: var(--kink-ink);
+}

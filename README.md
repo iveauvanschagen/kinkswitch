@@ -55,6 +55,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
 - **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
 - **Background watching.** On your computer the app keeps switching even when it's a tab in the background. On by default on computers, off on phones.
+- **Guided tour.** The first time you open the app, a short tour shows every button and feature. Close it any time, restart it from settings (Algemeen). The first time Spotify falls asleep, a tip explains how to wake it.
 - **Clean settings.** Three tabs (Algemeen, Artiesten, Spotify), switches instead of checkboxes and every change is saved instantly, with a confirmation. Rarely needed options (fixed device, setup link, Client ID) live under Geavanceerd.
 - **Share with friends.** Copy a setup link from settings (Spotify, Geavanceerd) so a friend only has to tap Connect.
 
@@ -84,7 +85,7 @@ js/state.js       everything that changes while the app runs
 js/switcher.js    every switch decision: ads, Must skip, Must hear, back to KINK
 js/kink/          KINK now playing, break detection and the stream
 js/spotify/       login, API calls, playback, keep awake and reachability
-js/ui/            tiles, banner, settings, playlist picker and diagnose
+js/ui/            tiles, banner, settings, playlist picker, diagnose and the tour
 sw.js             offline cache; bump CACHE together with APP_VERSION in config.js
 ```
 

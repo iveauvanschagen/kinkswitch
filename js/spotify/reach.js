@@ -10,6 +10,7 @@ import { goSpotify, pickDevice, playlistUri, readQueued, spDevices } from './pla
 import { ls } from '../store.js';
 import { autoToSpotify, banToSpotify } from '../switcher.js';
 import { msg } from '../ui/status.js';
+import { spotTip } from '../ui/tour.js';
 import { blinkSpotify, renderSpIssue, renderSpotIdle, setMode } from '../ui/tiles.js';
 
 export function setSpIssue(kind) {
@@ -24,6 +25,7 @@ export function setSpIssue(kind) {
   S.spIssue = kind;
   S.spReady = '';
   renderSpotIdle();
+  if (kind === 'nodevice' && hasLogin()) spotTip();
 }
 
 export function clearSpIssue(found) {
