@@ -31,6 +31,8 @@ export const S = {
   handledBreak: Number(ls('ks_handledBreak')) || 0,
   // Must skip: het nummer dat al is overgeslagen, en de grap in de banner
   banHandled: '',
+  // Eenmalig overgeslagen nummer (Volgende op KINK): terug zodra KINK iets anders draait
+  skipKey: ls('ks_skipKey') || '',
   skipInfo: null,
   lastPun: '',
   lastEar: '',
@@ -50,6 +52,9 @@ export const S = {
   talkLogged: 0,
   lastKinkData: '',
   lastKinkSong: '',
+  // Reclameblok voor de log: starttijd en hoeveel reclames erin zaten
+  blockAds: null,
+  lastDevLog: '',
 
   // Spotify-apparaten en afspelen
   lastDevList: [],

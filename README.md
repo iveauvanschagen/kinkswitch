@@ -52,7 +52,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **Spotify check.** Every switch to Spotify is verified: the app waits until Spotify reports the song it is playing. No song? KINK keeps playing and the Spotify tile turns red. One tap opens your playlist in Spotify, and as soon as Spotify is back the app does the switch it missed (if the reason still applies). No false alarms while Spotify plays in the background.
 - **Plays where you tap.** Tap on your phone and Spotify plays on your phone, tap on your laptop and it plays there. You can pick a fixed device in settings too. Several copies of the app (phone and laptop) never fight over your music: only the copy that started the playback switches it.
 - **Stays connected.** The Spotify login is refreshed in time and safely across tabs, so you're not asked to reconnect.
-- **Steering wheel ready.** The "next" button on your wheel jumps from KINK to Spotify.
+- **Skip one song.** Not feeling the song on KINK? Tap Volgende (or next on your steering wheel). The app plays Spotify and goes back to KINK as soon as KINK plays something else. On Spotify, Volgende simply plays the next song.
 - **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
 - **Background watching.** On your computer the app keeps switching even when it's a tab in the background. On by default on computers, off on phones.
 - **Guided tour.** The first time you open the app, a short tour shows every button and feature. Close it any time, restart it from settings (Algemeen). The first time Spotify falls asleep, a tip explains how to wake it.
@@ -61,7 +61,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 
 ## Something not working?
 
-Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add `#diagnose` to the URL). You'll see the current state of the app and a log of the last 600 events: what KINK itself reports (the latest items with times, lengths and ad markers), every Spotify call with its status code, the artist and song Spotify reports, token refreshes, device choices and every switch decision. Tap **Er ging net iets mis** right after a problem to mark the moment, add a **Notitie** if you like, then **Kopieer log** or **Delen** and send it over. Each line is tagged (KINK, WISSEL, SPOTIFY, WAKKER, APPARAAT, API, SLEUTEL, MELDING, TEST, NOTITIE, APP or FOUT); routine status polls are left out so the log stays readable. **Test wakker houden** runs the keep-awake ping right away and logs every step. Tokens and keys are never logged.
+Open the gear, tab Algemeen, and tap **Open** next to "Diagnose en log" (or add `#diagnose` to the URL). You'll see the current state of the app and a log of the last 600 events: every song on KINK, each ad block (one line at the start, one at the end), every Spotify call with its status code, the artist and song Spotify reports, token refreshes, device choices and every switch decision. Tap **Er ging net iets mis** right after a problem to mark the moment, add a **Notitie** if you like, then **Kopieer log** or **Delen** and send it over. Each line is tagged (KINK, WISSEL, SPOTIFY, WAKKER, APPARAAT, API, SLEUTEL, MELDING, TEST, NOTITIE, APP or FOUT); routine status polls, single ads and unchanged device lists are left out so the log stays short. **Test wakker houden** runs the keep-awake ping right away and logs every step. Tokens and keys are never logged.
 
 ## Good to know
 

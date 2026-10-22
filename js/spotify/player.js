@@ -39,22 +39,15 @@ export async function spDevices() {
   const d = await api('/me/player/devices');
   S.lastDevList = d?.devices || [];
   if (S.lastDevList.length && S.spIssue === 'nodevice') clearSpIssue(false);
-  LOG(
-    'device',
-    'info',
-    'Apparaten: ' +
-      (S.lastDevList
-        .map(
-          x =>
-            x.name +
-            ' (' +
-            x.type +
-            (x.is_active ? ', actief' : '') +
-            (x.is_restricted ? ', beperkt' : '') +
-            ')'
-        )
-        .join(', ') || 'geen')
-  );
+  const desc =
+    S.lastDevList
+      .map(x => x.name + ' (' + x.type + (x.is_active ? ', actief' : '') + (x.is_restricted ? ', beperkt' : '') + ')')
+      .join(', ') || 'geen';
+  // Alleen in de log als er iets veranderd is
+  if (desc !== S.lastDevLog) {
+    S.lastDevLog = desc;
+    LOG('device', 'info', 'Apparaten: ' + desc);
+  }
   return S.lastDevList;
 }
 

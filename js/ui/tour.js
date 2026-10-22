@@ -40,7 +40,7 @@ const STEPS = [
   {
     sel: '.controls',
     title: 'Bediening',
-    text: 'Afspelen of pauzeren, Volgende (werkt ook met de knop op je stuur) en Auto om het automatisch wisselen aan of uit te zetten.',
+    text: 'Afspelen of pauzeren, Volgende en Auto. Volgende op KINK slaat alleen het huidige nummer over: de app gaat even naar Spotify en komt terug zodra KINK iets anders draait. Werkt ook met de knop op je stuur. Auto zet het automatisch wisselen aan of uit.',
   },
   {
     sel: '#plBtn',

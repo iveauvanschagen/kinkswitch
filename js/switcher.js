@@ -10,7 +10,7 @@ import { LOG } from './log.js';
 import { aborted } from './spotify/api.js';
 import { getToken, hasLogin } from './spotify/auth.js';
 import { keepAwakeSpotify } from './spotify/keepawake.js';
-import { ownsSpotify, playList } from './spotify/player.js';
+import { goSpotify, ownsSpotify, playList } from './spotify/player.js';
 import { handleSpError } from './spotify/reach.js';
 import { ls } from './store.js';
 import { renderAd } from './ui/banner.js';
@@ -28,7 +28,15 @@ export function delayMs() {
 export function setAway(v) {
   S.autoAway = v;
   ls('ks_autoAway', v ? String(v) : null);
-  if (!v) setSkipInfo(null);
+  if (!v) {
+    setSkipInfo(null);
+    setSkipKey('');
+  }
+}
+
+export function setSkipKey(k) {
+  S.skipKey = k;
+  ls('ks_skipKey', k || null);
 }
 
 export function setSkipInfo(v) {
@@ -110,7 +118,13 @@ export function tick() {
       d = delayMs();
     if (S.autoAway) {
       if (S.mode !== 'spotify') setAway(0);
-      else if (fresh && !S.kinkNow.isBreak && S.kinkNow.title && !isBanned(S.kinkNow.artist))
+      else if (
+        fresh &&
+        !S.kinkNow.isBreak &&
+        S.kinkNow.title &&
+        !isBanned(S.kinkNow.artist) &&
+        S.kinkNow.artist + S.kinkNow.title !== S.skipKey
+      )
         autoToKink(
           'Weer muziek op KINK: ' + (S.kinkNow.artist ? S.kinkNow.artist + ' - ' : '') + S.kinkNow.title
         );
@@ -141,6 +155,31 @@ export function tick() {
   }
   renderAd(now);
   keepAwakeSpotify();
+}
+
+// Volgende op KINK: alleen dit nummer overslaan. Draait KINK iets anders, dan gaat de app vanzelf terug.
+// Geen nummer op KINK (reclame, praten) of KINK staat uit? Dan gewoon naar Spotify, zoals een tik op de tegel.
+export async function skipSong() {
+  const k = S.kinkNow;
+  if (S.busy || S.mode !== 'kink' || radio.paused || !k || k.isBreak || !k.title || !metaFresh(Date.now()))
+    return goSpotify();
+  const key = k.artist + k.title;
+  LOG('switch', 'info', 'Nummer overslaan: ' + (k.artist ? k.artist + ' - ' : '') + k.title);
+  if (!hasLogin()) return msg('Overslaan kan niet: Spotify is niet gekoppeld.', true);
+  S.busy = true;
+  try {
+    await playList();
+    setAway(Date.now());
+    setSkipKey(key);
+    setSkipInfo({ song: true });
+    msg('Nummer overgeslagen. Terug zodra KINK een ander nummer draait.');
+  } catch (e) {
+    if (!aborted(e)) {
+      msg('Overslaan mislukt: ' + e.message, true);
+      handleSpError(e, { kind: 'song', key });
+    }
+  }
+  S.busy = false;
 }
 
 export async function banToSpotify(key, artist) {

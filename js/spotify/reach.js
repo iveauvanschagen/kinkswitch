@@ -1,6 +1,7 @@
 // Is Spotify bereikbaar? Waarschuwing in de Spotify-tegel, en een gemiste wissel alsnog doen.
 import { S } from '../state.js';
-import { IS_PHONE } from '../config.js';
+import { IS_PHONE, KEEP_EVERY } from '../config.js';
+import { keepOn } from './keepawake.js';
 import { $ } from '../dom.js';
 import { metaFresh } from '../kink/meta.js';
 import { LOG } from '../log.js';
@@ -8,7 +9,7 @@ import { silly } from '../silly.js';
 import { connect, getToken, hasLogin } from './auth.js';
 import { goSpotify, pickDevice, playlistUri, readQueued, spDevices } from './player.js';
 import { ls } from '../store.js';
-import { autoToSpotify, banToSpotify } from '../switcher.js';
+import { autoToSpotify, banToSpotify, skipSong } from '../switcher.js';
 import { msg } from '../ui/status.js';
 import { spotTip } from '../ui/tour.js';
 import { blinkSpotify, renderSpIssue, renderSpotIdle, setMode } from '../ui/tiles.js';
@@ -54,9 +55,19 @@ export async function checkSpotify() {
     const list = await spDevices();
     if (list.length) {
       const dev = pickDevice(list);
+      const was = S.spReady;
       S.spReady = dev ? dev.name : '';
       if (S.spIssue === 'nodevice') clearSpIssue(false);
-      LOG('spotify', 'ok', 'Spotify staat klaar op ' + S.spReady);
+      if (wasIssue || was !== S.spReady) LOG('spotify', 'ok', 'Spotify staat klaar op ' + S.spReady);
+      // Zichtbaar maar speelt niets (bijvoorbeeld net geopend): zo'n Spotify meldt zich binnen een paar minuten af.
+      // Dan niet 9 minuten wachten, maar over een minuut al even kort laten spelen.
+      if (dev && !dev.is_active && keepOn()) {
+        const soon = Date.now() - KEEP_EVERY + 60000;
+        if (S.lastSpActive > soon) {
+          S.lastSpActive = soon;
+          LOG('keep', 'info', 'Spotify staat klaar maar speelt niets: over een minuut even kort laten spelen');
+        }
+      }
       if (wasIssue) msg('Spotify staat klaar op ' + S.spReady);
       if (S.pendingSwitch) retryPending();
       else if (S.mode !== 'spotify') await readQueued();
@@ -97,6 +108,10 @@ export async function retryPending() {
   if (p.kind === 'ban' && fresh && S.kinkNow.artist + S.kinkNow.title === p.key) {
     LOG('switch', 'info', 'Spotify is terug, Must skip speelt nog: naar Spotify');
     return banToSpotify(p.key, S.kinkNow.artist);
+  }
+  if (p.kind === 'song' && fresh && S.kinkNow.artist + S.kinkNow.title === p.key) {
+    LOG('switch', 'info', 'Spotify is terug, overgeslagen nummer speelt nog: naar Spotify');
+    return skipSong();
   }
   LOG('switch', 'info', 'Spotify is terug, reden voor de wissel is voorbij: KINK blijft');
   msg('Spotify is er weer. KINK speelt gewoon door.');

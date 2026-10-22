@@ -12,7 +12,12 @@ export function renderAd(now) {
   const fresh = metaFresh(now);
   // Na de Must skip begint reclame? Dan klopt "Reclame overgeslagen" weer.
   const skipping = S.autoAway && S.skipInfo && !(fresh && S.kinkNow.isBreak);
-  if (skipping) {
+  if (skipping && S.skipInfo.song) {
+    cls = 'away';
+    title = 'Nummer overgeslagen';
+    label = 'Terug zodra KINK een ander nummer draait';
+    count = fmt((now - S.autoAway) / 1000);
+  } else if (skipping) {
     cls = 'away skip';
     title = S.skipInfo.pun;
     label = S.skipInfo.ear;
@@ -41,7 +46,7 @@ export function renderAd(now) {
   }
   $('banner').className = 'banner ' + cls;
   $('adTitle').textContent = title;
-  $('adEyebrow').hidden = !skipping;
+  $('adEyebrow').hidden = !skipping || !!S.skipInfo.song;
   $('nextLabel').textContent = label;
   $('countdown').textContent = count;
 }

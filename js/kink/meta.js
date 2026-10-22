@@ -4,7 +4,7 @@ import { $ } from '../dom.js';
 import { LOG } from '../log.js';
 import { bgOn } from '../ui/settings.js';
 import { renderFavBtns, showKink } from '../ui/tiles.js';
-import { fmt, hhmm, hms } from '../util.js';
+import { fmt, hhmm } from '../util.js';
 import { AD_WINDOW_MIN, BREAK_MIN_MS, KINK_META_URL } from '../config.js';
 
 export function metaFresh(now) {
@@ -18,22 +18,17 @@ export function inAdWindow(ts) {
   return m >= 60 - w || m <= w || (m >= 30 - w && m <= 30 + w);
 }
 
-// Zet wat KINK zelf doorgeeft in de log, maar alleen als er iets veranderd is
-export function logKinkData(items) {
-  const desc = items
-    .slice(0, 4)
+// Korte omschrijving van wat KINK doorgaf, voor de log bij het begin van een blok
+function kinkItems(items) {
+  return items
     .map(
       it =>
-        hms(it.start) +
+        hhmm(it.start) +
         ' ' +
-        (it.type === 'ad' ? 'RECLAME' : it.title ? 'nummer' : 'zonder titel') +
-        (it.dur ? ' ' + fmt(it.dur / 1000) : '') +
-        (it.title ? ' "' + (it.artist ? it.artist + ' - ' : '') + it.title + '"' : '')
+        (it.type === 'ad' ? 'reclame' : 'zonder titel') +
+        (it.dur ? ' ' + fmt(it.dur / 1000) : '')
     )
-    .join(' | ');
-  if (desc === S.lastKinkData) return;
-  S.lastKinkData = desc;
-  LOG('kink', 'info', 'KINK-data: ' + desc);
+    .join(', ');
 }
 
 export async function pollMeta() {
@@ -56,7 +51,6 @@ export async function pollMeta() {
       .sort((a, b) => b.start - a.start);
     const last = items[0];
     if (!last) return;
-    logKinkData(items);
     // Blokdetectie: loop terug vanaf het nieuwste item tot het laatste echte nummer.
     // Een reclamemarkering telt altijd. Een item zonder titel van 45 seconden of langer telt alleen
     // rond het hele en halve uur, want alleen dan zendt KINK reclame en nieuws uit. Daarbuiten is het de presentator.
@@ -71,27 +65,45 @@ export async function pollMeta() {
           LOG(
             'kink',
             'info',
-            'Lang stuk zonder titel om ' +
-              hms(it.start) +
-              ' (' +
-              fmt(it.dur / 1000) +
-              '), buiten reclametijd: presentator, KINK blijft'
+            'Praten om ' + hhmm(it.start) + ' (' + fmt(it.dur / 1000) + '), geen reclametijd: KINK blijft'
           );
         }
       }
     }
-    const sig = last.type + '|' + (last.artist || '') + '|' + (last.title || '') + '|' + breakStart;
-    if (sig !== (window.__lastSig || '')) {
-      window.__lastSig = sig;
+    // Hetzelfde blok houdt dezelfde starttijd. KINK geeft maar een paar items terug, dus anders schuift die op.
+    const prev = S.kinkNow;
+    if (
+      breakStart &&
+      prev?.isBreak &&
+      prev.breakStart < breakStart &&
+      !items.some(it => it.type !== 'ad' && it.title && it.start >= prev.breakStart)
+    )
+      breakStart = prev.breakStart;
+    // Log: één regel bij het begin van een blok, één bij het eind, en elk nieuw nummer. Losse reclames niet.
+    if (breakStart) {
+      if (!S.blockAds || S.blockAds.start !== breakStart) {
+        S.blockAds = { start: breakStart, ads: new Set() };
+        const upto = items.filter(it => it.start >= breakStart);
+        LOG('kink', 'info', 'Reclameblok sinds ' + hhmm(breakStart) + ' (' + kinkItems(upto.reverse()) + ')');
+      }
+      items.forEach(it => {
+        if (it.type === 'ad' && it.start >= breakStart && it.dur) S.blockAds.ads.add(it.start);
+      });
+    } else if (S.blockAds) {
+      const n = S.blockAds.ads.size;
       LOG(
         'kink',
         'info',
-        breakStart
-          ? 'Blok (reclame/nieuws) sinds ' + hhmm(breakStart)
-          : last.title
-            ? 'Nummer: ' + (last.artist ? last.artist + ' - ' : '') + last.title
-            : 'Jingle of presentator'
+        'Reclameblok voorbij na ' + fmt((last.start - S.blockAds.start) / 1000) + (n ? ', ' + n + ' reclames' : '')
       );
+      S.blockAds = null;
+    }
+    if (!breakStart && last.title) {
+      const sig = last.artist + '|' + last.title;
+      if (sig !== S.lastKinkData) {
+        S.lastKinkData = sig;
+        LOG('kink', 'info', 'Nummer: ' + (last.artist ? last.artist + ' - ' : '') + last.title);
+      }
     }
     S.kinkNow = { ...last, isBreak: !!breakStart, breakStart, at: Date.now() };
     S.metaFails = 0;

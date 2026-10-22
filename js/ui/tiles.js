@@ -9,7 +9,7 @@ import { silly } from '../silly.js';
 import { goSpotify, next, pollSpotify, toggle } from '../spotify/player.js';
 import { fixSpotify } from '../spotify/reach.js';
 import { ls } from '../store.js';
-import { checkFav, setAway, tick } from '../switcher.js';
+import { checkFav, setAway, skipSong, tick } from '../switcher.js';
 import { msg, setSw } from './status.js';
 import { mainArtist } from '../util.js';
 
@@ -207,8 +207,8 @@ export function bindHome() {
 
   $('spotifyMode').onclick = () => (S.spIssue ? fixSpotify() : goSpotify());
 
-  $('next').onclick = () =>
-    S.mode === 'spotify' ? next().then(() => setTimeout(pollSpotify, 800)) : goSpotify();
+  // Volgende: op Spotify het volgende nummer, op KINK alleen dit nummer overslaan
+  $('next').onclick = nextTap;
 
   $('autoBtn').onclick = () => {
     S.auto = !S.auto;
@@ -233,7 +233,7 @@ export function bindHome() {
     }
   };
 
-  // Stuurwielknoppen en vergrendelscherm: "volgende" tijdens KINK schakelt naar Spotify
+  // Stuurwielknoppen en vergrendelscherm: "volgende" tijdens KINK slaat het nummer over
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: 'KINK live',
@@ -242,6 +242,11 @@ export function bindHome() {
     });
     navigator.mediaSession.setActionHandler('play', kinkTap);
     navigator.mediaSession.setActionHandler('pause', () => radio.pause());
-    navigator.mediaSession.setActionHandler('nexttrack', goSpotify);
+    navigator.mediaSession.setActionHandler('nexttrack', nextTap);
   }
+}
+
+export function nextTap() {
+  if (S.mode === 'spotify') return next().then(() => setTimeout(pollSpotify, 800));
+  return skipSong();
 }
