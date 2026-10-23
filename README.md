@@ -42,7 +42,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **Live now playing.** Artist big, song title below, on both tiles. Also shown in the page title and the Android media notification.
 - **Must hear.** Tap the heart on any tile to save the artist playing right now. When KINK plays them, the tile lights up and the app takes you back.
 - **KINK Catch.** Tap the add icon on the KINK tile and the song lands in your private KINK Catch playlist on Spotify (created for you the first time). Changed your mind? Undo right from the confirmation.
-- **Missed on KINK.** Heard something great while driving? Open Playlist, switch to "Gemist op KINK" and add any of the last 10 songs KINK played.
+- **Missed on KINK.** Heard something great while driving? Open Playlist, switch to "Gemist op KINK" and add any of the last 10 songs KINK played (the app looks back 50 items, so ads and talk don't push songs out).
 - **Must skip.** Bands you'd rather not hear. KINK plays one, you're on Spotify instantly and back for the next song. The banner celebrates with a rotating pun (Born Skippy, Skipperdeflip and friends) and reminds you your ears are safe.
 - **Don't be silly.** The panic button. One tap and Wodan Boys - Don't be Silly blasts through Spotify.
 - **Playlist picker.** KINK Catch pinned on top, then your own playlists with covers, a paste button for any link or share directly from Spotify.
@@ -52,6 +52,9 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **Spotify check.** Every switch to Spotify is verified: the app waits until Spotify reports the song it is playing. No song? KINK keeps playing and the Spotify tile turns red. One tap opens your playlist in Spotify, and as soon as Spotify is back the app does the switch it missed (if the reason still applies). No false alarms while Spotify plays in the background.
 - **Plays where you tap.** Tap on your phone and Spotify plays on your phone, tap on your laptop and it plays there. You can pick a fixed device in settings too. Several copies of the app (phone and laptop) never fight over your music: only the copy that started the playback switches it.
 - **Stays connected.** The Spotify login is refreshed in time and safely across tabs, so you're not asked to reconnect.
+- **Smooth switch.** KINK fades out and back in when the app switches (1 second by default, set it or turn it off in settings).
+- **KINK channels.** Pick KINK, KINK DNA or KINK Distortion in settings (Zender). KINK Distortion shares no song info, so there the app does not switch automatically.
+- **Status line with attitude.** The line at the bottom rotates through short, cheeky messages ("1+1 gratis?? Nope, jij verdient muziek!").
 - **Skip one song.** Not feeling the song on KINK? Tap Volgende (or next on your steering wheel). The app plays Spotify and goes back to KINK as soon as KINK plays something else. On Spotify, Volgende simply plays the next song.
 - **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
 - **Background watching.** On your computer the app keeps switching even when it's a tab in the background. On by default on computers, off on phones.

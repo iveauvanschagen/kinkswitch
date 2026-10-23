@@ -12,6 +12,8 @@ import { bindPicker, incoming } from './ui/picker.js';
 import { bindSettings } from './ui/settings.js';
 import { bindTour, firstTour } from './ui/tour.js';
 import { msg } from './ui/status.js';
+import { say } from './texts.js';
+import { applyChannel } from './kink/channel.js';
 import { bindHome, renderAuto, renderSpotIdle, setMode, setPP } from './ui/tiles.js';
 import { keepAwake } from './wakelock.js';
 
@@ -36,10 +38,11 @@ document.addEventListener('visibilitychange', () => {
 for (const k of OLD_KEYS) if (ls(k) !== null) ls(k, null);
 
 // Eerste toestand tonen
+applyChannel();
 renderAuto();
 setPP(false);
 setMode('kink');
-msg(hasLogin() ? 'Spotify gekoppeld' : 'Spotify niet gekoppeld. Tik op het tandwiel.');
+msg(hasLogin() ? say('start') : 'Spotify niet gekoppeld. Tik op het tandwiel.');
 const installed = matchMedia('(display-mode: standalone)').matches;
 LOG(
   'app',
@@ -86,6 +89,9 @@ if (['127.0.0.1', 'localhost'].includes(location.hostname)) {
     'log',
     'artists',
     'catch',
+    'texts',
+    'kink/channel',
+    'kink/fade',
     'silly',
     'switcher',
     'wakelock',

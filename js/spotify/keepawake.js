@@ -90,7 +90,11 @@ export async function keepAwakeSpotify(test) {
     );
     try {
       await api('/me/player/pause?device_id=' + encodeURIComponent(dev.id), 'PUT', undefined, false, true);
-    } catch (e) {}
+    } catch (e) {
+      // Geen internet op het moment van pauzeren: later opnieuw, anders speelt Spotify door
+      S.keepPausePending = { id: dev.id, at: Date.now(), tried: 0 };
+      LOG('keep', 'warn', how + ': pauzeren lukte niet (' + e.message + '), opnieuw zodra er verbinding is');
+    }
     const played = Date.now() - t0;
     await sleep(400);
     let back = 'KINK speelde niet';
@@ -131,5 +135,24 @@ export async function keepAwakeSpotify(test) {
     S.keepPausing = false;
     S.keepBusy = false;
     S.busy = false;
+  }
+}
+
+// Een pauze na het wakker houden die niet aankwam (geen internet): opnieuw proberen, elke 10 seconden.
+// Alleen als KINK nog de baas is: speelt Spotify inmiddels expres, dan niet pauzeren.
+export async function retryKeepPause() {
+  const p = S.keepPausePending;
+  if (!p || S.keepBusy || !navigator.onLine || Date.now() - p.tried < 10000) return;
+  if (S.mode !== 'kink' || Date.now() - p.at > 60 * 60000) {
+    S.keepPausePending = null;
+    return;
+  }
+  p.tried = Date.now();
+  try {
+    await api('/me/player/pause?device_id=' + encodeURIComponent(p.id), 'PUT', undefined, false, true);
+    S.keepPausePending = null;
+    LOG('keep', 'ok', 'Pauze na wakker houden alsnog gelukt');
+  } catch (e) {
+    if (!/netwerk|fetch/i.test(e.message)) S.keepPausePending = null;
   }
 }

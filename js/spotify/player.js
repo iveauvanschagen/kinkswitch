@@ -11,7 +11,9 @@ import { ls } from '../store.js';
 import { setAway } from '../switcher.js';
 import { openPicker } from '../ui/picker.js';
 import { settings } from '../ui/settings.js';
-import { msg } from '../ui/status.js';
+import { clearMsg, msg } from '../ui/status.js';
+import { say } from '../texts.js';
+import { fadeOutKink, fadeReset } from '../kink/fade.js';
 import {
   renderFavBtns,
   renderSpIssue,
@@ -204,6 +206,7 @@ export async function playList() {
     // Nooit stilte: speelde KINK, dan gaat KINK gewoon door
     if (wasKink || S.mode === 'spotify') {
       S.iStarted = false;
+      fadeReset();
       radio.load();
       radio
         .play()
@@ -245,9 +248,19 @@ export async function playListInner() {
       `Spotify: ${plName} nieuw gestart${ls('ks_shuffle') !== '0' ? ' op een willekeurig nummer' : ''} (Spotify had: ${describeContext(before)})`
     );
   }
+  // Speelt Spotify je playlist al op dit apparaat? Dan niets sturen: Spotify weigert dat (403 Restriction violated).
+  if (resume && before?.is_playing && before.device?.id === dev) {
+    LOG('spotify', 'info', 'Spotify speelt al op ' + (before.device.name || 'dit apparaat') + ', niets te doen');
+    fadeOutKink();
+    setMode('spotify');
+    setPP(true);
+    S.iStarted = true;
+    spActive();
+    return;
+  }
   // Nieuw gestart: pas een nummer tonen als Spotify meldt dat het uit je playlist komt
   S.spExpect = resume ? null : context;
-  radio.pause();
+  fadeOutKink();
   const shuffle = ls('ks_shuffle') !== '0';
   let body = resume ? undefined : { context_uri: context },
     randomStart = false;
@@ -387,8 +400,7 @@ export async function goSpotify() {
   try {
     msg('Spotify start...');
     await playList();
-    if (!$('status').classList.contains('err'))
-      msg('Spotify speelt je playlist' + (ls('ks_shuffle') !== '0' ? ' op shuffle' : ''));
+    if (!$('status').classList.contains('err')) clearMsg();
   } catch (e) {
     if (!aborted(e)) {
       msg(e.message, true);
@@ -405,12 +417,12 @@ export async function toggle() {
     if (d?.is_playing) {
       await api('/me/player/pause', 'PUT');
       setPP(false);
-      msg('Spotify gepauzeerd');
+      msg(say('pause'));
     } else {
       await api('/me/player/play', 'PUT');
       setPP(true);
       setMode('spotify');
-      msg('Spotify speelt');
+      msg(say('resume'));
     }
   } catch (e) {
     msg(e.message, true);
@@ -421,7 +433,7 @@ export async function next() {
   try {
     await api('/me/player/next', 'POST');
     setMode('spotify');
-    msg('Volgend nummer');
+    clearMsg();
   } catch (e) {
     msg(e.message, true);
   }

@@ -11,6 +11,7 @@ import { goSpotify, pickDevice, playlistUri, readQueued, spDevices } from './pla
 import { ls } from '../store.js';
 import { autoToSpotify, banToSpotify, skipSong } from '../switcher.js';
 import { msg } from '../ui/status.js';
+import { say } from '../texts.js';
 import { spotTip } from '../ui/tour.js';
 import { blinkSpotify, renderSpIssue, renderSpotIdle, setMode } from '../ui/tiles.js';
 
@@ -36,7 +37,7 @@ export function clearSpIssue(found) {
   $('spotifyMode').classList.remove('issue');
   LOG('spotify', 'ok', 'Waarschuwing opgeheven');
   setMode(S.mode);
-  if (found) msg('Spotify gevonden. De app kan weer wisselen.');
+  if (found) msg(say('spotifyBack'));
 }
 
 // Is Spotify bereikbaar? Groen als hij klaarstaat, rood als hij er niet is. KINK speelt gewoon door.
@@ -68,7 +69,7 @@ export async function checkSpotify() {
           LOG('keep', 'info', 'Spotify staat klaar maar speelt niets: over een minuut even kort laten spelen');
         }
       }
-      if (wasIssue) msg('Spotify staat klaar op ' + S.spReady);
+      if (wasIssue) msg(say('spotifyBack'));
       if (S.pendingSwitch) retryPending();
       else if (S.mode !== 'spotify') await readQueued();
     } else {
@@ -126,7 +127,7 @@ export function watchSpotify() {
     if (Date.now() > S.spWatchUntil) {
       S.spWatchUntil = 0;
       renderSpIssue();
-      msg('Spotify nog niet gevonden. Tik nog een keer op de Spotify-tegel.', true);
+      msg(say('spotifyFail'), true);
       return;
     }
     await checkSpotify();

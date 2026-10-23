@@ -9,12 +9,13 @@ import { startKink } from './kink/radio.js';
 import { LOG } from './log.js';
 import { aborted } from './spotify/api.js';
 import { getToken, hasLogin } from './spotify/auth.js';
-import { keepAwakeSpotify } from './spotify/keepawake.js';
+import { keepAwakeSpotify, retryKeepPause } from './spotify/keepawake.js';
 import { goSpotify, ownsSpotify, playList } from './spotify/player.js';
 import { handleSpError } from './spotify/reach.js';
 import { ls } from './store.js';
 import { renderAd } from './ui/banner.js';
 import { msg } from './ui/status.js';
+import { say } from './texts.js';
 import { setMode } from './ui/tiles.js';
 import { buzz, hhmm, pickOther } from './util.js';
 
@@ -64,7 +65,7 @@ export async function autoToSpotify(breakStart) {
     await playList();
     setAway(Date.now());
     setSkipInfo(null);
-    msg('Reclame of nieuws op KINK: even naar Spotify.');
+    msg(say('ad'));
     buzz();
   } catch (e) {
     if (!aborted(e)) {
@@ -78,6 +79,8 @@ export async function autoToSpotify(breakStart) {
 
 export async function autoToKink(why) {
   LOG('switch', 'info', 'Terug naar KINK: ' + why);
+  // Weg geweest voor Must skip of een overgeslagen nummer? Dan was er geen reclame.
+  const wasSkip = !!S.skipInfo;
   setAway(0);
   if (S.mode !== 'spotify') return;
   S.busy = true;
@@ -89,9 +92,9 @@ export async function autoToKink(why) {
     return;
   }
   const ok = await startKink(true);
-  if (ok) msg(why);
+  if (ok) msg(say(wasSkip ? 'backSkip' : 'back'));
   else {
-    msg('Weer muziek op KINK. Tik op KINK.', true);
+    msg(say('kinkFail'), true);
     buzz();
   }
   S.busy = false;
@@ -154,6 +157,7 @@ export function tick() {
     }
   }
   renderAd(now);
+  retryKeepPause();
   keepAwakeSpotify();
 }
 
@@ -172,7 +176,7 @@ export async function skipSong() {
     setAway(Date.now());
     setSkipKey(key);
     setSkipInfo({ song: true });
-    msg('Nummer overgeslagen. Terug zodra KINK een ander nummer draait.');
+    msg(say('skipped'));
   } catch (e) {
     if (!aborted(e)) {
       msg('Overslaan mislukt: ' + e.message, true);
@@ -191,7 +195,7 @@ export async function banToSpotify(key, artist) {
     await playList();
     setAway(Date.now());
     setSkipInfo(newSkipInfo(artist));
-    msg(artist + ' op KINK: even naar Spotify.');
+    msg(say('ban', { band: artist }));
   } catch (e) {
     if (!aborted(e)) {
       msg('Wisselen mislukt: ' + e.message, true);
@@ -218,8 +222,8 @@ export function checkFav(artist, key) {
       }
       setAway(0);
       startKink(true).then(ok => {
-        if (ok) msg('Jouw muziek op KINK: ' + artist + ' - ' + S.kinkNow.title);
+        if (ok) msg(say('mustHear', { song: artist + ' - ' + S.kinkNow.title }));
       });
     });
-  } else msg('Jouw muziek op KINK: ' + artist + ' - ' + S.kinkNow.title);
+  } else msg(say('mustHear', { song: artist + ' - ' + S.kinkNow.title }));
 }

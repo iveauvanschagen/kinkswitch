@@ -82,6 +82,8 @@ export const S = {
   keepBusy: false,
   keepPausing: false,
   lastKeepRun: 0,
+  // Pauze na wakker houden die nog moet aankomen
+  keepPausePending: null,
 
   // KINK Catch en Gemist op KINK
   missItems: [],

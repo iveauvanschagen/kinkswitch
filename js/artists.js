@@ -3,6 +3,7 @@ import { S } from './state.js';
 import { BAN_SUGGESTIONS, SUGGESTIONS } from './config.js';
 import { ls } from './store.js';
 import { msg } from './ui/status.js';
+import { say } from './texts.js';
 import { renderFavBtns, showKink } from './ui/tiles.js';
 import { norm } from './util.js';
 
@@ -34,7 +35,7 @@ export function toggleFav(artist) {
     n = norm(artist),
     has = list.some(f => norm(f) === n);
   saveFavs(has ? list.filter(f => norm(f) !== n) : [...list, artist]);
-  msg(has ? artist + ' uit je favorieten gehaald' : artist + ' toegevoegd aan je favorieten');
+  msg(say(has ? 'hearRemoved' : 'hearAdded', { band: artist }));
   S.lastFavKey = '';
   showKink();
   renderFavBtns();

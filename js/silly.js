@@ -11,6 +11,8 @@ import { clearSpIssue, handleSpError } from './spotify/reach.js';
 import { setAway } from './switcher.js';
 import { settings } from './ui/settings.js';
 import { msg } from './ui/status.js';
+import { say } from './texts.js';
+import { fadeReset } from './kink/fade.js';
 import { setMode, setPP } from './ui/tiles.js';
 import { buzz, sleep } from './util.js';
 
@@ -18,7 +20,7 @@ export async function silly() {
   if (S.sillyBusy) return;
   LOG('switch', 'info', "Don't be silly ingedrukt");
   if (!hasLogin()) return settings('Sp');
-  msg("Don't be silly...");
+  msg(say('sillyStart'));
   const wasKink = S.mode === 'kink' && !radio.paused;
   S.sillyBusy = true;
   try {
@@ -76,7 +78,7 @@ export async function silly() {
     }
     if (!ok) throw Error("Spotify speelde Don't be silly niet af. Open de Spotify-app (zie Diagnose).");
     clearSpIssue(false);
-    msg("Don't be silly!");
+    msg(say('sillyDone'));
     buzz();
   } catch (e) {
     LOG('switch', 'err', e.message);
@@ -84,6 +86,7 @@ export async function silly() {
     // Nooit stilte: speelde KINK, dan gaat KINK gewoon door
     if (wasKink || S.mode === 'spotify') {
       S.iStarted = false;
+      fadeReset();
       radio.load();
       radio
         .play()

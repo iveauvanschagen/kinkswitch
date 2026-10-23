@@ -8,7 +8,10 @@ import { hasLogin } from '../spotify/auth.js';
 import { spActive } from '../spotify/keepawake.js';
 import { playlistUri } from '../spotify/player.js';
 import { autoToSpotify, setAway, setHandled } from '../switcher.js';
-import { msg } from '../ui/status.js';
+import { clearMsg, msg } from '../ui/status.js';
+import { say } from '../texts.js';
+import { applyChannel } from './channel.js';
+import { fadeInKink, fadeReset } from './fade.js';
 import { setMode, setPP } from '../ui/tiles.js';
 
 // Geeft true terug als KINK echt speelt
@@ -30,16 +33,21 @@ export async function startKink(fromAuto) {
     } catch (e) {}
   }
   try {
+    fadeReset();
+    applyChannel();
     radio.load(); // altijd vers inhaken op de livestream, niet op een oude buffer
     LOG('kink', 'info', 'Stream laden');
     await radio.play();
+    fadeInKink();
     setMode('kink');
     setPP(true);
-    msg(fromAuto ? 'Automatisch terug naar KINK' : 'KINK speelt live');
+    // Automatisch terug: de melding komt van de wissel zelf. Zelf gekozen: geen oude melding laten staan.
+    if (!fromAuto) clearMsg();
     return true;
   } catch (e) {
+    fadeReset();
     LOG('kink', 'err', 'Stream start niet: ' + e.message);
-    msg('KINK start niet. Tik nog een keer op KINK.', true);
+    msg(say('kinkFail'), true);
     return false;
   }
 }

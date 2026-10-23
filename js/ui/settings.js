@@ -12,6 +12,9 @@ import { msg, saved, setSw } from './status.js';
 import { renderAuto, renderFavBtns, showKink } from './tiles.js';
 import { norm } from '../util.js';
 import { keepAwake } from '../wakelock.js';
+import { CHANNELS, applyChannel, channel, channelKey } from '../kink/channel.js';
+import { fadeSec } from '../kink/fade.js';
+import { radio } from '../dom.js';
 
 export function bgDefault() {
   return !(window.matchMedia && matchMedia('(pointer:coarse)').matches);
@@ -120,6 +123,8 @@ export function settings(tab) {
   setSw('swShuffle', ls('ks_shuffle') !== '0');
   setSw('swKeep', keepOn());
   $('delay').value = delayMs() / 1000;
+  $('fade').value = fadeSec();
+  $('channel').value = channelKey();
   $('clientId').value = ls('ks_client') || '';
   $('redirectUri').value =
     location.protocol === 'file:' ? 'Niet beschikbaar bij een lokaal bestand' : REDIRECT;
@@ -265,6 +270,33 @@ export function bindSettings() {
     ls('ks_shuffle', on ? '1' : '0');
     setSw('swShuffle', on);
     saved('shuffle ' + (on ? 'aan' : 'uit'));
+  };
+
+  $('fade').onchange = () => {
+    const v = Math.max(0, Math.min(3, Math.round((Number(String($('fade').value).replace(',', '.')) || 0) * 2) / 2));
+    $('fade').value = v;
+    ls('ks_fade', String(v));
+    saved(v ? 'zachte overgang ' + String(v).replace('.', ',') + ' seconde' + (v === 1 ? '' : 'n') : 'zachte overgang uit');
+  };
+
+  // Andere zender: nieuwe stream en nieuwe nummerinfo. Speelde KINK, dan meteen de nieuwe zender.
+  $('channel').onchange = () => {
+    const k = CHANNELS[$('channel').value] ? $('channel').value : 'kink';
+    ls('ks_channel', k);
+    S.kinkNow = null;
+    S.lastKinkData = '';
+    S.blockAds = null;
+    S.nextMetaAt = 0;
+    const was = S.mode === 'kink' && !radio.paused;
+    applyChannel();
+    if (was) {
+      radio.load();
+      radio.play().catch(() => {});
+    }
+    showKink();
+    $('kinkArtist').textContent = channel().name;
+    $('kinkSong').textContent = '';
+    saved('zender ' + channel().name);
   };
 
   $('delay').onchange = () => {

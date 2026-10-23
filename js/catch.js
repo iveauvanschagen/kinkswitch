@@ -1,6 +1,7 @@
 // KINK Catch: nummers van KINK bewaren in een eigen Spotify-playlist, en Gemist op KINK.
 import { S } from './state.js';
-import { CATCH_NAME, KINK_META_URL } from './config.js';
+import { CATCH_NAME } from './config.js';
+import { metaUrl } from './kink/channel.js';
 import { $ } from './dom.js';
 import { ICON_ADD, ICON_CHECK } from './icons.js';
 import { api } from './spotify/api.js';
@@ -8,6 +9,7 @@ import { connect, hasLogin } from './spotify/auth.js';
 import { ls } from './store.js';
 import { settings } from './ui/settings.js';
 import { msg, toast } from './ui/status.js';
+import { say } from './texts.js';
 import { renderFavBtns } from './ui/tiles.js';
 import { hhmm, mainArtist, norm, songKey } from './util.js';
 
@@ -98,7 +100,7 @@ export async function catchSong(artist, title, btn) {
     renderFavBtns();
     renderMiss();
     const found = (t.artists || []).map(a => a.name).join(', ') + ' - ' + t.name;
-    toast('Toegevoegd aan ' + CATCH_NAME, found, async () => {
+    toast(say('caught'), found, async () => {
       try {
         await api('/playlists/' + id + '/items', 'DELETE', { items: [{ uri: t.uri }] });
       } catch (e) {
@@ -109,7 +111,7 @@ export async function catchSong(artist, title, btn) {
       setCaught(artist, title, null);
       renderFavBtns();
       renderMiss();
-      msg('Weer verwijderd uit ' + CATCH_NAME);
+      msg(say('released'));
     });
   } catch (e) {
     msg('Toevoegen mislukt: ' + e.message, true);
@@ -120,7 +122,7 @@ export async function catchSong(artist, title, btn) {
 export async function loadMiss() {
   $('missList').innerHTML = '<p>Laden...</p>';
   try {
-    const r = await fetch(KINK_META_URL + '&numberToFetch=30&_=' + Date.now(), { cache: 'no-store' });
+    const r = await fetch(metaUrl() + '&numberToFetch=50&_=' + Date.now(), { cache: 'no-store' });
     const x = new DOMParser().parseFromString(await r.text(), 'text/xml');
     S.missItems = [...x.querySelectorAll('nowplaying-info')]
       .map(el => {

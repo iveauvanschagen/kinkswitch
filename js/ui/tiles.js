@@ -13,10 +13,8 @@ import { checkFav, setAway, skipSong, tick } from '../switcher.js';
 import { msg, setSw } from './status.js';
 import { mainArtist } from '../util.js';
 
-export function renderAuto() {
-  $('autoTxt').textContent = 'Auto ' + (S.auto ? 'aan' : 'uit');
-  $('autoBtn').classList.toggle('on', S.auto);
-}
+// De Auto-knop is weg (v1.5.0). Aan en uit zetten gaat via Instellingen; hier valt niets meer te tonen.
+export function renderAuto() {}
 
 export function setPP(playing) {
   $('playPause').innerHTML = playing
@@ -210,15 +208,6 @@ export function bindHome() {
   // Volgende: op Spotify het volgende nummer, op KINK alleen dit nummer overslaan
   $('next').onclick = nextTap;
 
-  $('autoBtn').onclick = () => {
-    S.auto = !S.auto;
-    ls('ks_auto', S.auto ? '1' : '0');
-    if (!S.auto) setAway(0);
-    renderAuto();
-    setSw('swAuto', S.auto);
-    tick();
-    msg(S.auto ? 'Automatisch wisselen staat aan' : 'Automatisch wisselen staat uit');
-  };
 
   radio.onplaying = () => {
     setMode('kink');

@@ -5,7 +5,8 @@ import { LOG } from '../log.js';
 import { bgOn } from '../ui/settings.js';
 import { renderFavBtns, showKink } from '../ui/tiles.js';
 import { fmt, hhmm } from '../util.js';
-import { AD_WINDOW_MIN, BREAK_MIN_MS, KINK_META_URL } from '../config.js';
+import { AD_WINDOW_MIN, BREAK_MIN_MS } from '../config.js';
+import { channel, metaUrl } from './channel.js';
 
 export function metaFresh(now) {
   return S.kinkNow && now - S.kinkNow.at < 60000;
@@ -32,9 +33,17 @@ function kinkItems(items) {
 }
 
 export async function pollMeta() {
+  // Zender zonder nummerinfo (KINK Distortion): niets ophalen, dus ook niet automatisch wisselen
+  if (!channel().info) {
+    S.kinkNow = null;
+    $('kinkArtist').textContent = channel().name;
+    $('kinkSong').textContent = 'Geen nummerinfo voor deze zender';
+    renderFavBtns();
+    return;
+  }
   if (document.visibilityState !== 'visible' && S.mode !== 'kink' && !bgOn()) return;
   try {
-    const r = await fetch(KINK_META_URL + '&numberToFetch=8&_=' + Date.now(), { cache: 'no-store' });
+    const r = await fetch(metaUrl() + '&numberToFetch=8&_=' + Date.now(), { cache: 'no-store' });
     const x = new DOMParser().parseFromString(await r.text(), 'text/xml');
     const items = [...x.querySelectorAll('nowplaying-info')]
       .map(el => {
@@ -80,9 +89,12 @@ export async function pollMeta() {
     )
       breakStart = prev.breakStart;
     // Log: één regel bij het begin van een blok, één bij het eind, en elk nieuw nummer. Losse reclames niet.
+    // Een blok waar de app lang tussenuit was (scherm uit, geen internet) telt niet meer mee in de log
+    if (S.blockAds && Date.now() - S.blockAds.seen > 10 * 60000) S.blockAds = null;
+    if (S.blockAds) S.blockAds.seen = Date.now();
     if (breakStart) {
       if (!S.blockAds || S.blockAds.start !== breakStart) {
-        S.blockAds = { start: breakStart, ads: new Set() };
+        S.blockAds = { start: breakStart, ads: new Set(), seen: Date.now() };
         const upto = items.filter(it => it.start >= breakStart);
         LOG('kink', 'info', 'Reclameblok sinds ' + hhmm(breakStart) + ' (' + kinkItems(upto.reverse()) + ')');
       }

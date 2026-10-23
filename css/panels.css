@@ -728,3 +728,18 @@ summary {
   background: var(--kink);
   color: var(--kink-ink);
 }
+/* Keuzelijst in de instellingen (zender) */
+.modalbox select {
+  min-height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #0b0d10;
+  color: var(--text);
+  font: inherit;
+  padding: 0 10px;
+}
+.set .selin {
+  width: auto;
+  min-width: 150px;
+  text-align: left;
+}

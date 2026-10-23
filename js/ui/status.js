@@ -18,6 +18,12 @@ export function msg(s, err) {
     LOG('ui', err ? 'err' : 'info', s);
 }
 
+// Balk onderin leegmaken, zodat er geen oude melding blijft staan
+export function clearMsg() {
+  $('status').textContent = '';
+  $('status').classList.remove('err');
+}
+
 export function setSw(id, on) {
   $(id).setAttribute('aria-checked', on ? 'true' : 'false');
 }

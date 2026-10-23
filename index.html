@@ -32,7 +32,7 @@
     <div class="tile"><button class="src kink active" id="kinkMode" aria-label="KINK live">
       <span class="tag" id="state">UIT</span>
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1a10 10 0 0 1 0-14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/><circle cx="12" cy="12" r="2"/></svg></span>
-      <span style="min-width:0"><span class="name">KINK</span><span class="np"><em>NU OP KINK</em><strong><span id="kinkArtist">Live radio</span><span class="gtag" id="kinkGenre"></span></strong><span id="kinkSong"></span></span></span>
+      <span style="min-width:0"><span class="name" id="kinkName">KINK</span><span class="np"><em>NU OP KINK</em><strong><span id="kinkArtist">Live radio</span><span class="gtag" id="kinkGenre"></span></strong><span id="kinkSong"></span></span></span>
     </button>
     <div class="acts"><button class="ibtn" id="kinkAdd" aria-label="Toevoegen aan KINK Catch" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h12M3 12h12M3 18h7"/><path d="M18 13v8M14 17h8"/></svg></button><button class="ibtn" id="kinkFav" aria-label="Favoriet" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.3-9.4C1.4 7.6 3.6 4.5 7 4.5c2.1 0 3.8 1.2 5 3 1.2-1.8 2.9-3 5-3 3.4 0 5.6 3.1 4.3 6.6-1.8 4.8-9.3 9.4-9.3 9.4z"/></svg></button></div></div>
     <div class="tile"><button class="src spot" id="spotifyMode" aria-label="Spotify">
@@ -46,7 +46,6 @@
   <section class="controls">
     <button class="ctl" id="playPause" aria-label="Afspelen of pauzeren"></button>
     <button class="ctl" id="next" aria-label="Volgende"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 5 5.5z"/><rect x="17.5" y="5" width="2.5" height="14" rx="1"/></svg><span>Volgende</span></button>
-    <button class="ctl" id="autoBtn" aria-label="Automatisch wisselen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg><span id="autoTxt">Auto</span></button>
     <button class="ctl" id="plBtn" aria-label="Playlist kiezen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h13M3 12h13M3 18h8"/><path d="M17 18v-6l4-1"/><circle cx="15" cy="18" r="2"/></svg><span>Playlist</span></button>
   </section>
 
@@ -80,8 +79,12 @@
       <div class="grp"><h4>Diagnose</h4>
         <div class="line"><div class="tx"><b>Diagnose en log</b><small>Alles wat er misging, om te delen met Claude.</small></div><button class="btn" id="openDbg">Open</button></div>
       </div>
+      <div class="grp"><h4>Zender</h4>
+        <div class="line"><div class="tx"><b>Welke KINK</b><small>KINK Distortion geeft geen nummerinfo door, dus daar wisselt de app niet automatisch.</small></div><select class="numin selin" id="channel" aria-label="Zender"><option value="kink">KINK</option><option value="dna">KINK DNA</option><option value="distortion">KINK Distortion</option></select></div>
+      </div>
       <div class="grp"><h4>Vertraging</h4>
         <div class="line"><div class="tx"><b>Wacht voordat de app KINK verlaat</b><small>In seconden, bij reclame, nieuws of Must skip. Zodat je het eind van een nummer niet mist. Terug naar KINK gaat altijd direct.</small></div><input class="numin" id="delay" type="number" min="0" max="60" inputmode="numeric"></div>
+        <div class="line"><div class="tx"><b>Zachte overgang</b><small>In seconden: KINK fadet weg en weer op bij een wissel. 0 is uit.</small></div><input class="numin" id="fade" type="number" min="0" max="3" step="0.5" inputmode="decimal"></div>
       </div>
     </div>
     <div class="pane" id="paneArt" hidden>

@@ -788,3 +788,13 @@
     box-shadow: 0 0 0 6px #ff5a4e44;
   }
 }
+/* Volgende is de grote knop: twee vakken breed (de Auto-knop is weg) */
+#next {
+  grid-column: span 2;
+}
+@media (orientation: landscape) and (min-width: 640px) {
+  #next {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
