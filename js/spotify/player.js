@@ -14,6 +14,7 @@ import { settings } from '../ui/settings.js';
 import { clearMsg, msg } from '../ui/status.js';
 import { say } from '../texts.js';
 import { fadeOutKink, fadeReset } from '../kink/fade.js';
+import { wantKink } from '../kink/watch.js';
 import {
   renderFavBtns,
   renderSpIssue,
@@ -211,6 +212,7 @@ export async function playList() {
       radio
         .play()
         .then(() => {
+          wantKink(true);
           setMode('kink');
           setPP(true);
         })

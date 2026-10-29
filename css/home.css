@@ -798,3 +798,11 @@
     order: 3;
   }
 }
+/* Jaartal onder de tijd in Gemist op KINK */
+.miss time .yr {
+  display: block;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--kink);
+}

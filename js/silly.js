@@ -13,6 +13,7 @@ import { settings } from './ui/settings.js';
 import { msg } from './ui/status.js';
 import { say } from './texts.js';
 import { fadeReset } from './kink/fade.js';
+import { wantKink } from './kink/watch.js';
 import { setMode, setPP } from './ui/tiles.js';
 import { buzz, sleep } from './util.js';
 
@@ -25,6 +26,7 @@ export async function silly() {
   S.sillyBusy = true;
   try {
     const dev = await deviceId();
+    wantKink(false);
     radio.pause();
     setAway(0);
     await wakeDevice(dev);
@@ -91,6 +93,7 @@ export async function silly() {
       radio
         .play()
         .then(() => {
+          wantKink(true);
           setMode('kink');
           setPP(true);
         })

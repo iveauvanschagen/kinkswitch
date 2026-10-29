@@ -84,6 +84,8 @@ export const S = {
   lastKeepRun: 0,
   // Pauze na wakker houden die nog moet aankomen
   keepPausePending: null,
+  // KINK hoort te spelen (zelf gekozen of automatisch terug). De bewaker verbindt dan opnieuw als de stream wegvalt.
+  kinkWanted: false,
 
   // KINK Catch en Gemist op KINK
   missItems: [],

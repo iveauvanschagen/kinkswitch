@@ -172,12 +172,24 @@ export function bindDiagnose() {
     setTimeout(() => ($('dbgMark').textContent = 'Er ging net iets mis'), 1500);
   };
 
+  // Notitie in een invulveld in de app. Een pop-up van de browser zet op Android het geluid stil.
   $('dbgNote').onclick = () => {
-    const t = prompt("Wat gebeurde er? (bijvoorbeeld: Don't be silly gedrukt, niets gehoord)");
+    const box = $('dbgNoteBox');
+    box.hidden = !box.hidden;
+    if (!box.hidden) $('dbgNoteTxt').focus();
+  };
+  const saveNote = () => {
+    const t = $('dbgNoteTxt').value.trim();
     if (t) {
       LOG('note', 'info', 'NOTITIE: ' + t);
       renderLog();
     }
+    $('dbgNoteTxt').value = '';
+    $('dbgNoteBox').hidden = true;
+  };
+  $('dbgNoteSave').onclick = saveNote;
+  $('dbgNoteTxt').onkeydown = e => {
+    if (e.key === 'Enter') saveNote();
   };
 
   $('dbgCopy').onclick = async () => {

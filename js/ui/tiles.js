@@ -5,6 +5,8 @@ import { catchSong, isCaught, loadMiss } from '../catch.js';
 import { $, radio } from '../dom.js';
 import { ICON_ADD, ICON_CHECK } from '../icons.js';
 import { kinkTap } from '../kink/radio.js';
+import { wantKink } from '../kink/watch.js';
+import { knownYear, yearFor } from '../kink/year.js';
 import { silly } from '../silly.js';
 import { goSpotify, next, pollSpotify, toggle } from '../spotify/player.js';
 import { fixSpotify } from '../spotify/reach.js';
@@ -115,6 +117,7 @@ export function showKink() {
     S.lastFavKey = key;
     checkFav(S.kinkNow.artist, key);
   }
+  showYear(S.kinkNow.artist, S.kinkNow.title);
   // Nieuw nummer op KINK terwijl je naar Spotify luistert: tegel licht even op
   if (S.lastKinkSong && key !== S.lastKinkSong && S.mode === 'spotify') {
     $('kinkMode').classList.add('fresh');
@@ -199,7 +202,7 @@ export function bindHome() {
 
   $('silly').onclick = silly;
 
-  $('playPause').onclick = () => (S.mode === 'spotify' ? toggle() : radio.paused ? kinkTap() : radio.pause());
+  $('playPause').onclick = () => (S.mode === 'spotify' ? toggle() : radio.paused ? kinkTap() : pauseKink());
 
   $('kinkMode').onclick = kinkTap;
 
@@ -230,7 +233,7 @@ export function bindHome() {
       artwork: [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }],
     });
     navigator.mediaSession.setActionHandler('play', kinkTap);
-    navigator.mediaSession.setActionHandler('pause', () => radio.pause());
+    navigator.mediaSession.setActionHandler('pause', pauseKink);
     navigator.mediaSession.setActionHandler('nexttrack', nextTap);
   }
 }
@@ -238,4 +241,24 @@ export function bindHome() {
 export function nextTap() {
   if (S.mode === 'spotify') return next().then(() => setTimeout(pollSpotify, 800));
   return skipSong();
+}
+
+// Zelf KINK pauzeren: de bewaker hoeft dan niet opnieuw te verbinden
+export function pauseKink() {
+  wantKink(false);
+  radio.pause();
+}
+
+// Jaartal als label naast de artiest op de KINK-tegel (via MusicBrainz, onthouden per nummer)
+function showYear(artist, title) {
+  const tag = $('kinkGenre');
+  const y = knownYear(artist, title);
+  if (y !== undefined) {
+    tag.textContent = y ? String(y) : '';
+    return;
+  }
+  tag.textContent = '';
+  yearFor(artist, title).then(v => {
+    if (v && S.kinkNow && S.kinkNow.artist === artist && S.kinkNow.title === title) tag.textContent = String(v);
+  });
 }

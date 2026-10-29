@@ -6,6 +6,7 @@ import { MAX_AWAY, SKIP_EARS, SKIP_PUNS } from './config.js';
 import { $, radio } from './dom.js';
 import { metaDue, metaFresh } from './kink/meta.js';
 import { startKink } from './kink/radio.js';
+import { watchKink } from './kink/watch.js';
 import { LOG } from './log.js';
 import { aborted } from './spotify/api.js';
 import { getToken, hasLogin } from './spotify/auth.js';
@@ -157,6 +158,7 @@ export function tick() {
     }
   }
   renderAd(now);
+  watchKink();
   retryKeepPause();
   keepAwakeSpotify();
 }

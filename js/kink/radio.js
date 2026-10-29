@@ -12,6 +12,7 @@ import { clearMsg, msg } from '../ui/status.js';
 import { say } from '../texts.js';
 import { applyChannel } from './channel.js';
 import { fadeInKink, fadeReset } from './fade.js';
+import { wantKink } from './watch.js';
 import { setMode, setPP } from '../ui/tiles.js';
 
 // Geeft true terug als KINK echt speelt
@@ -38,6 +39,7 @@ export async function startKink(fromAuto) {
     radio.load(); // altijd vers inhaken op de livestream, niet op een oude buffer
     LOG('kink', 'info', 'Stream laden');
     await radio.play();
+    wantKink(true);
     fadeInKink();
     setMode('kink');
     setPP(true);
@@ -71,7 +73,10 @@ export async function kinkTap() {
     // Lukte het niet, dan toch KINK, zoals gevraagd
     if (S.mode !== 'spotify' && radio.paused) {
       radio.load();
-      radio.play().catch(() => {});
+      radio
+        .play()
+        .then(() => wantKink(true))
+        .catch(() => {});
     }
     return;
   }

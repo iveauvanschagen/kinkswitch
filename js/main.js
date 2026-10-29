@@ -14,6 +14,7 @@ import { bindTour, firstTour } from './ui/tour.js';
 import { msg } from './ui/status.js';
 import { say } from './texts.js';
 import { applyChannel } from './kink/channel.js';
+import { bindWatch } from './kink/watch.js';
 import { bindHome, renderAuto, renderSpotIdle, setMode, setPP } from './ui/tiles.js';
 import { keepAwake } from './wakelock.js';
 
@@ -23,6 +24,7 @@ bindPicker();
 bindSettings();
 bindDiagnose();
 bindTour();
+bindWatch();
 
 // Terug in de app: scherm aan, Spotify checken en meteen opnieuw beslissen
 document.addEventListener('visibilitychange', () => {
@@ -92,6 +94,8 @@ if (['127.0.0.1', 'localhost'].includes(location.hostname)) {
     'texts',
     'kink/channel',
     'kink/fade',
+    'kink/watch',
+    'kink/year',
     'silly',
     'switcher',
     'wakelock',

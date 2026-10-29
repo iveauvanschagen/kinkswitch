@@ -1,6 +1,7 @@
 // Zachte overgang: KINK even laten wegfaden of opkomen in plaats van hard afkappen.
 import { radio } from '../dom.js';
 import { ls } from '../store.js';
+import { wantKink } from './watch.js';
 
 // Duur in seconden uit de instellingen (0 = uit). Standaard 1 seconde.
 export function fadeSec() {
@@ -36,6 +37,7 @@ export function fadeReset() {
 
 // KINK wegfaden en daarna pauzeren
 export async function fadeOutKink() {
+  wantKink(false);
   const ms = fadeSec() * 1000;
   const id = ++run;
   if (ms && !radio.paused && document.visibilityState === 'visible') await ramp(radio.volume, 0, ms, id);

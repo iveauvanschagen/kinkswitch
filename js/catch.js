@@ -2,6 +2,7 @@
 import { S } from './state.js';
 import { CATCH_NAME } from './config.js';
 import { metaUrl } from './kink/channel.js';
+import { knownYear, yearFor } from './kink/year.js';
 import { $ } from './dom.js';
 import { ICON_ADD, ICON_CHECK } from './icons.js';
 import { api } from './spotify/api.js';
@@ -164,6 +165,13 @@ export function renderMiss() {
       (done ? ICON_CHECK : ICON_ADD) +
       '</button>';
     row.querySelector('time').textContent = hhmm(it.start);
+    // Jaartal onder de tijd: bekend meteen, anders opzoeken (één per seconde, dus ze komen er één voor één bij)
+    const yr = document.createElement('i');
+    yr.className = 'yr';
+    row.querySelector('time').appendChild(yr);
+    const y = knownYear(it.artist, it.title);
+    if (y) yr.textContent = y;
+    else if (y === undefined) yearFor(it.artist, it.title).then(v => v && (yr.textContent = v));
     row.querySelector('b').textContent = it.artist;
     row.querySelector('small').textContent = it.title;
     const b = row.querySelector('button');
