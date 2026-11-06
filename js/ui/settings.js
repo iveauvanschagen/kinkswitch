@@ -14,6 +14,8 @@ import { norm } from '../util.js';
 import { keepAwake } from '../wakelock.js';
 import { CHANNELS, applyChannel, channel, channelKey } from '../kink/channel.js';
 import { fadeSec } from '../kink/fade.js';
+import { yearOn } from '../kink/year.js';
+import { showYear } from './tiles.js';
 import { radio } from '../dom.js';
 
 export function bgDefault() {
@@ -121,6 +123,7 @@ export function settings(tab) {
   setSw('swWake', ls('ks_wake') === '1');
   setSw('swBg', bgOn());
   setSw('swShuffle', ls('ks_shuffle') !== '0');
+  setSw('swYear', yearOn());
   setSw('swKeep', keepOn());
   $('delay').value = delayMs() / 1000;
   $('fade').value = fadeSec();
@@ -263,6 +266,14 @@ export function bindSettings() {
     ls('ks_bg', on ? '1' : '0');
     setSw('swBg', on);
     saved('op de achtergrond meekijken ' + (on ? 'aan' : 'uit'));
+  };
+
+  $('swYear').onclick = () => {
+    const on = !yearOn();
+    ls('ks_year', on ? '1' : '0');
+    setSw('swYear', on);
+    showYear(S.kinkNow?.isBreak ? '' : S.kinkNow?.artist, S.kinkNow?.title);
+    saved('jaartal ' + (on ? 'aan' : 'uit'));
   };
 
   $('swShuffle').onclick = () => {

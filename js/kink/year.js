@@ -41,6 +41,11 @@ function keyOf(artist, title) {
   return norm(mainArtist(artist)) + '|' + norm(cleanTitle(title));
 }
 
+// Instelling: jaartal tonen (standaard aan). Uit = ook niets opzoeken.
+export function yearOn() {
+  return ls('ks_year') !== '0';
+}
+
 // Bekend jaartal (getal), 0 = opgezocht maar niets gevonden, undefined = nog niet opgezocht
 export function knownYear(artist, title) {
   return load()[keyOf(artist, title)];
@@ -76,7 +81,7 @@ async function ask(artist, title) {
 
 // Jaartal opzoeken (of uit het geheugen halen). Geeft het jaar terug, of 0 als het niet gevonden is.
 export function yearFor(artist, title) {
-  if (!artist || !title) return Promise.resolve(0);
+  if (!artist || !title || !yearOn()) return Promise.resolve(0);
   const k = keyOf(artist, title),
     c = load();
   if (k in c) return Promise.resolve(c[k]);

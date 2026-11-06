@@ -6,7 +6,7 @@ import { $, radio } from '../dom.js';
 import { ICON_ADD, ICON_CHECK } from '../icons.js';
 import { kinkTap } from '../kink/radio.js';
 import { wantKink } from '../kink/watch.js';
-import { knownYear, yearFor } from '../kink/year.js';
+import { knownYear, yearFor, yearOn } from '../kink/year.js';
 import { silly } from '../silly.js';
 import { goSpotify, next, pollSpotify, toggle } from '../spotify/player.js';
 import { fixSpotify } from '../spotify/reach.js';
@@ -105,6 +105,7 @@ export function showKink() {
     $('kinkSong').textContent = '';
     renderFavBtns();
     $('kinkGenre').textContent = '';
+    $('kinkYear').textContent = '';
     $('kinkMode').classList.remove('fav');
     S.lastFavKey = '';
     return;
@@ -250,8 +251,12 @@ export function pauseKink() {
 }
 
 // Jaartal als label naast de artiest op de KINK-tegel (via MusicBrainz, onthouden per nummer)
-function showYear(artist, title) {
-  const tag = $('kinkGenre');
+export function showYear(artist, title) {
+  const tag = $('kinkYear');
+  if (!yearOn() || !artist || !title) {
+    tag.textContent = '';
+    return;
+  }
   const y = knownYear(artist, title);
   if (y !== undefined) {
     tag.textContent = y ? String(y) : '';

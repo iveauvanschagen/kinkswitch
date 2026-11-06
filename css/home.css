@@ -798,11 +798,46 @@
     order: 3;
   }
 }
-/* Jaartal onder de tijd in Gemist op KINK */
-.miss time .yr {
-  display: block;
-  font-style: normal;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--kink);
+/* Jaartal: klein label achter de titel, op de tegel en in Gemist op KINK */
+.songrow {
+  display: flex !important;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+.src .np .songrow {
+  margin-top: 4px;
+  opacity: 1;
+}
+.src .np .songrow #kinkSong {
+  margin: 0;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.yr {
+  flex: none;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1.5px solid currentColor;
+  opacity: 0.75 !important;
+  margin: 0 !important;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.yr:empty {
+  display: none !important;
+}
+.miss .songrow small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.miss .yr {
+  color: var(--muted);
+  font-size: 11px !important;
+  padding: 1px 6px;
 }
