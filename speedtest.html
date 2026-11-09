@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Snelheidstest</title>
+<style>
+:root{--bg:#0f1214;--panel:#1a1f23;--fg:#eef2f4;--muted:#8a979f;--accent:#ff5a1f;--ok:#3ccf7a;--warn:#ffb020;--bad:#ff4d5e;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,Roboto,sans-serif}
+body{padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 24px max(16px,env(safe-area-inset-left))}
+.speed{text-align:center;padding:16px 0 8px}
+.speed b{display:block;font-size:min(34vw,170px);line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.speed span{color:var(--muted);font-size:18px}
+.status{text-align:center;color:var(--muted);min-height:1.4em;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.grid div{background:var(--panel);border-radius:10px;padding:8px;text-align:center}
+.grid small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.grid strong{font-size:18px;font-variant-numeric:tabular-nums}
+.pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.pill{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--panel);color:var(--muted)}
+.pill.on{color:#06210f;background:var(--ok)}.pill.warn{color:#2a1a00;background:var(--warn)}.pill.off{color:#fff;background:var(--bad)}
+.btns{display:flex;gap:8px;margin-bottom:16px}
+button{flex:1;font:inherit;font-weight:700;font-size:17px;padding:16px;border:0;border-radius:12px;background:var(--panel);color:var(--fg)}
+button.primary{background:var(--accent);color:#fff}
+button:focus-visible{outline:3px solid var(--fg)}
+.hold{position:relative;overflow:hidden}
+.hold i{position:absolute;inset:0;background:rgba(255,255,255,.25);transform:scaleX(0);transform-origin:left}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 6px}
+.log{background:var(--panel);border-radius:10px;max-height:40vh;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace;padding:8px 10px}
+.log div{white-space:nowrap}.log .ev{color:var(--warn)}
+.small{display:flex;gap:8px;margin-top:10px}.small button{font-size:14px;padding:10px}
+</style>
+</head>
+<body>
+<div class="speed"><b id="spd">0</b><span>km/u</span></div>
+<div class="status" id="status">Klaar voor de start.</div>
+<div class="grid">
+  <div><small>Tijd</small><strong id="dur">0:00</strong></div>
+  <div><small>Afstand</small><strong id="dist">0,00</strong></div>
+  <div><small>Gem.</small><strong id="avg">0</strong></div>
+  <div><small>Max</small><strong id="max">0</strong></div>
+</div>
+<div class="pills">
+  <span class="pill" id="pGps">GPS</span>
+  <span class="pill" id="pAcc">Nauwkeurigheid</span>
+  <span class="pill" id="pWake">Scherm aan</span>
+  <span class="pill" id="pSrc">Bron</span>
+</div>
+<div class="btns">
+  <button class="primary" id="start">Start</button>
+  <button class="hold" id="stop" hidden><i id="holdBar"></i>Houd vast om te stoppen</button>
+</div>
+
+<h2>Log</h2>
+<div class="log" id="log"></div>
+<div class="small">
+  <button id="copy">Kopieer log</button>
+  <button id="csv">Download CSV</button>
+  <button id="clear">Wis</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY='kink-speedtest-v1';
+let st={running:false,t0:0,dist:0,max:0,fixes:[],events:[]};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s)st=s}catch(e){}
+let watchId=null,wake=null,last=null,lastRow=0,tick=null,lastFixAt=0;
+
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const fmtT=ms=>{const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const clock=t=>new Date(t).toLocaleTimeString('nl-NL');
+const nl=(n,d=0)=>n.toFixed(d).replace('.',',');
+function pill(id,txt,cls){const p=$(id);p.textContent=txt;p.className='pill '+(cls||'')}
+function ev(msg){st.events.push({t:Date.now(),msg});addLine(`${clock(Date.now())}  ${msg}`,true);save()}
+function addLine(txt,isEv){const d=document.createElement('div');d.textContent=txt;if(isEv)d.className='ev';$('log').prepend(d)}
+
+function hav(a,b){const R=6371000,r=x=>x*Math.PI/180,dLa=r(b.lat-a.lat),dLo=r(b.lon-a.lon);
+  const h=Math.sin(dLa/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+
+function onFix(p){
+  const c=p.coords,t=p.timestamp||Date.now();lastFixAt=Date.now();
+  const f={t,lat:c.latitude,lon:c.longitude,acc:Math.round(c.accuracy),gps:c.speed==null?null:+(c.speed*3.6).toFixed(1),calc:null};
+  if(last){const dt=(t-last.t)/1000,d=hav(last,f);
+    if(dt>0)f.calc=+((d/dt)*3.6).toFixed(1);
+    if(f.acc<=30&&last.acc<=30&&d<dt*25)st.dist+=d}
+  const kmh=f.gps!=null?f.gps:(f.calc??0);
+  if(f.acc<=30&&kmh<80)st.max=Math.max(st.max,kmh);
+  st.fixes.push(f);last=f;save();
+  $('spd').textContent=nl(kmh);
+  pill('pGps','GPS ok','on');
+  pill('pAcc','± '+f.acc+' m',f.acc<=15?'on':f.acc<=30?'warn':'off');
+  pill('pSrc',f.gps!=null?'Snelheid van telefoon':'Snelheid berekend',f.gps!=null?'on':'warn');
+  $('status').textContent=kmh<2?'Even pauze?':kmh<15?'Rustig aan.':kmh<25?'Lekker tempo!':'Wodan Boys modus.';
+  if(t-lastRow>=5000){lastRow=t;addLine(`${clock(t)}  ${nl(kmh,1).padStart(5)} km/u  gps ${f.gps??'-'}  calc ${f.calc??'-'}  ±${f.acc}m`)}
+  render()}
+
+function render(){
+  if(!st.running&&!st.fixes.length)return;
+  const end=st.running?Date.now():(st.tEnd||Date.now()),ms=end-st.t0;
+  $('dur').textContent=fmtT(ms);$('dist').textContent=nl(st.dist/1000,2);
+  $('avg').textContent=ms>0?nl(st.dist/(ms/1000)*3.6):'0';$('max').textContent=nl(st.max)}
+
+async function getWake(){
+  if(!('wakeLock' in navigator)){pill('pWake','Scherm aan: niet ondersteund','off');ev('Wake Lock niet ondersteund');return}
+  try{wake=await navigator.wakeLock.request('screen');pill('pWake','Scherm blijft aan','on');
+    wake.addEventListener('release',()=>{pill('pWake','Scherm aan: kwijt','off');if(st.running)ev('Scherm-aan losgelaten')})}
+  catch(e){pill('pWake','Scherm aan: geweigerd','off');ev('Wake Lock geweigerd: '+e.message)}}
+
+function startWatch(){
+  if(!navigator.geolocation){ev('Geen GPS in deze browser');return}
+  watchId=navigator.geolocation.watchPosition(onFix,e=>{pill('pGps','GPS fout','off');ev('GPS fout: '+e.message)},
+    {enableHighAccuracy:true,maximumAge:0,timeout:15000});
+  tick=setInterval(()=>{render();if(lastFixAt&&Date.now()-lastFixAt>10000)pill('pGps','Geen GPS >10 s','warn')},1000)}
+
+function start(){
+  st={running:true,t0:Date.now(),dist:0,max:0,fixes:[],events:[]};last=null;lastRow=0;$('log').innerHTML='';
+  ev('Gestart');getWake();startWatch();$('start').hidden=true;$('stop').hidden=false;$('status').textContent='Op zoek naar GPS...'}
+function stop(){
+  st.running=false;st.tEnd=Date.now();if(watchId!=null)navigator.geolocation.clearWatch(watchId);clearInterval(tick);
+  try{wake&&wake.release()}catch(e){};wake=null;ev('Gestopt');save();render();
+  $('start').hidden=false;$('stop').hidden=true;$('status').textContent='Klaar. Check de log hieronder.';
+  const gaps=gapsOver(5000);addLine(`Samenvatting: ${st.fixes.length} metingen, ${gaps.n} gaten >5 s (langste ${Math.round(gaps.max/1000)} s)`,true)}
+function gapsOver(lim){let n=0,max=0;for(let i=1;i<st.fixes.length;i++){const g=st.fixes[i].t-st.fixes[i-1].t;if(g>lim)n++;max=Math.max(max,g)}return{n,max}}
+
+document.addEventListener('visibilitychange',()=>{if(!st.running)return;
+  if(document.hidden)ev('App naar achtergrond / scherm uit');else{ev('App weer zichtbaar');if(!wake)getWake()}});
+
+// Stoppen alleen met vasthouden (tegen zak-tikken)
+let holdT=null;const bar=$('holdBar');
+const holdStart=e=>{e.preventDefault();bar.style.transition='transform 1.5s linear';bar.style.transform='scaleX(1)';holdT=setTimeout(stop,1500)};
+const holdEnd=()=>{clearTimeout(holdT);bar.style.transition='none';bar.style.transform='scaleX(0)'};
+$('stop').addEventListener('pointerdown',holdStart);['pointerup','pointerleave','pointercancel'].forEach(x=>$('stop').addEventListener(x,holdEnd));
+
+function toCsv(){const rows=['tijd;lat;lon;nauwkeurigheid_m;kmh_telefoon;kmh_berekend'];
+  st.fixes.forEach(f=>rows.push([new Date(f.t).toISOString(),f.lat,f.lon,f.acc,f.gps??'',f.calc??''].join(';')));
+  rows.push('');rows.push('tijd;event');st.events.forEach(e=>rows.push(new Date(e.t).toISOString()+';'+e.msg));return rows.join('\n')}
+$('start').onclick=start;
+$('csv').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([toCsv()],{type:'text/csv'}));a.download='snelheidstest.csv';a.click()};
+$('copy').onclick=async()=>{const g=gapsOver(5000),txt=`Metingen: ${st.fixes.length}, afstand ${nl(st.dist/1000,2)} km, max ${nl(st.max)} km/u, gaten >5 s: ${g.n}\n`+st.events.map(e=>clock(e.t)+' '+e.msg).join('\n');
+  try{await navigator.clipboard.writeText(txt+'\n\n'+toCsv());$('copy').textContent='Gekopieerd!'}catch(e){$('copy').textContent='Kopiëren mislukt'}};
+$('clear').onclick=()=>{if(st.running)return;st={running:false,t0:0,dist:0,max:0,fixes:[],events:[]};save();$('log').innerHTML='';location.reload()};
+
+// Herstel na herladen
+if(st.events.length){st.events.forEach(e=>addLine(`${clock(e.t)}  ${e.msg}`,true));render();
+  if(st.running){ev('Pagina herladen, ga verder');last=st.fixes.at(-1)||null;getWake();startWatch();$('start').hidden=true;$('stop').hidden=false}}
+</script>
+</body>
+</html>
