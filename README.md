@@ -58,6 +58,7 @@ Tip: the app can only control a Spotify player that is running. If a switch fail
 - **KINK channels.** Pick KINK, KINK DNA or KINK Distortion in settings (Zender). KINK Distortion shares no song info, so there the app does not switch automatically.
 - **Status line with attitude.** The line at the bottom rotates through short, cheeky messages ("1+1 gratis?? Nope, jij verdient muziek!").
 - **Skip one song.** Not feeling the song on KINK? Tap Volgende (or next on your steering wheel). The app plays Spotify and goes back to KINK as soon as KINK plays something else. On Spotify, Volgende simply plays the next song.
+- **Speed.** Optional: your speed in km/h in the banner, like Google Maps (Algemeen, Snelheid tonen). Uses GPS while the app is on screen. No signal, like in a tunnel? It shows "--" until GPS is back. Is location off on your phone? The app turns the setting off by itself and tells you why.
 - **Screen stays on.** Optional, so the app keeps watching while it sits in the car holder.
 - **Background watching.** On your computer the app keeps switching even when it's a tab in the background. On by default on computers, off on phones.
 - **Guided tour.** The first time you open the app, a short tour shows every button and feature. Close it any time, restart it from settings (Algemeen). The first time Spotify falls asleep, a tip explains how to wake it.

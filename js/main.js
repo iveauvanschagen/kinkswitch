@@ -17,6 +17,7 @@ import { applyChannel } from './kink/channel.js';
 import { bindWatch } from './kink/watch.js';
 import { bindHome, renderAuto, renderSpotIdle, setMode, setPP } from './ui/tiles.js';
 import { keepAwake } from './wakelock.js';
+import { startSpeed } from './speed.js';
 
 watchErrors();
 bindHome();
@@ -59,6 +60,7 @@ incoming();
 tick();
 setTimeout(() => checkSpotify(), 2000);
 keepAwake();
+startSpeed();
 renderSpotIdle();
 setInterval(pollSpotify, 10000);
 startClock();
@@ -99,6 +101,7 @@ if (['127.0.0.1', 'localhost'].includes(location.hostname)) {
     'silly',
     'switcher',
     'wakelock',
+    'speed',
     'kink/meta',
     'kink/radio',
     'spotify/auth',

@@ -12,6 +12,7 @@ import { msg, saved, setSw } from './status.js';
 import { renderAuto, renderFavBtns, showKink } from './tiles.js';
 import { norm } from '../util.js';
 import { keepAwake } from '../wakelock.js';
+import { renderNote, setSpeed, speedOn } from '../speed.js';
 import { CHANNELS, applyChannel, channel, channelKey } from '../kink/channel.js';
 import { fadeSec } from '../kink/fade.js';
 import { yearOn } from '../kink/year.js';
@@ -121,6 +122,8 @@ export function settings(tab) {
   if (typeof tab !== 'string') tab = 'Alg';
   setSw('swAuto', S.auto);
   setSw('swWake', ls('ks_wake') === '1');
+  setSw('swSpeed', speedOn());
+  renderNote();
   setSw('swBg', bgOn());
   setSw('swShuffle', ls('ks_shuffle') !== '0');
   setSw('swYear', yearOn());
@@ -254,11 +257,18 @@ export function bindSettings() {
     ls('ks_wake', on ? '1' : '0');
     setSw('swWake', on);
     if (on) keepAwake();
-    else if (S.wakeLock) {
+    else if (S.wakeLock && !speedOn()) {
       S.wakeLock.release().catch(() => {});
       S.wakeLock = null;
     }
     saved('scherm aan houden ' + (on ? 'aan' : 'uit'));
+  };
+
+  $('swSpeed').onclick = () => {
+    const on = !speedOn();
+    setSw('swSpeed', on);
+    setSpeed(on);
+    saved('snelheid ' + (on ? 'aan' : 'uit'));
   };
 
   $('swBg').onclick = () => {

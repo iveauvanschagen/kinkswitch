@@ -9,6 +9,8 @@ export const S = {
   busy: false,
   // Scherm aan houden
   wakeLock: null,
+  // Laatst gemeten snelheid in km/u (null = nog niets)
+  speedKmh: null,
 
   // Spotify-sleutel. De vernieuwingssleutel is maar één keer bruikbaar, dus er vernieuwt er maar één tegelijk.
   token: null,
