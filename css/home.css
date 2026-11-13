@@ -844,7 +844,9 @@
 
 /* Snelheid in de banner (instelling Snelheid tonen) */
 .banner.has-speed {
-  min-height: 88px;
+  /* Vaste hoogte: het venster verspringt niet, ook niet bij Zoekt GPS of lange tekst */
+  height: 88px;
+  min-height: 0;
   padding-top: 10px;
   padding-bottom: 10px;
   flex-wrap: nowrap;
@@ -858,8 +860,13 @@
   gap: 3px;
   padding-left: 16px;
   border-left: 1px solid var(--line);
-  min-width: 112px;
+  width: 118px;
   flex: none;
+}
+.banner.has-speed b {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .spdval {
   display: flex;
@@ -904,7 +911,7 @@
 }
 @media (max-width: 440px) {
   .spd {
-    min-width: 92px;
+    width: 98px;
     padding-left: 12px;
   }
   .spd .num {

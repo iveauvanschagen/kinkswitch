@@ -45,6 +45,8 @@ export function renderAd(now) {
     label = 'Automatisch wisselen wacht op KINK';
   }
   $('banner').className = 'banner ' + cls;
+  // Snelheid aan: vaste hoogte houden (anders verspringt de banner bij elke update)
+  $('banner').classList.toggle('has-speed', !$('speed').hidden);
   $('adTitle').textContent = title;
   $('adEyebrow').hidden = !skipping || !!S.skipInfo.song;
   $('nextLabel').textContent = label;

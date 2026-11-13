@@ -756,17 +756,3 @@ summary {
   flex: 1;
 }
 
-/* Uitleg als de app de snelheid zelf heeft uitgezet */
-.spnote {
-  margin-top: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: #2a2109;
-  border: 1px solid #5a4318;
-  color: #ffd789;
-  font-size: 12px;
-  line-height: 1.35;
-}
-.spnote[hidden] {
-  display: none;
-}

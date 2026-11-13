@@ -12,7 +12,7 @@ import { msg, saved, setSw } from './status.js';
 import { renderAuto, renderFavBtns, showKink } from './tiles.js';
 import { norm } from '../util.js';
 import { keepAwake } from '../wakelock.js';
-import { renderNote, setSpeed, speedOn } from '../speed.js';
+import { setSpeed, speedOn } from '../speed.js';
 import { CHANNELS, applyChannel, channel, channelKey } from '../kink/channel.js';
 import { fadeSec } from '../kink/fade.js';
 import { yearOn } from '../kink/year.js';
@@ -123,7 +123,6 @@ export function settings(tab) {
   setSw('swAuto', S.auto);
   setSw('swWake', ls('ks_wake') === '1');
   setSw('swSpeed', speedOn());
-  renderNote();
   setSw('swBg', bgOn());
   setSw('swShuffle', ls('ks_shuffle') !== '0');
   setSw('swYear', yearOn());

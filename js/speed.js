@@ -9,15 +9,19 @@ import { keepAwake } from './wakelock.js';
 
 // Zo lang zonder meting en we tonen "--" in plaats van een oud getal
 const STALE_MS = 5000;
-// Geen enkele meting en de telefoon meldt dat locatie niet beschikbaar is: dan staat locatie uit
-const NO_FIX_MS = 20000;
+// De telefoon meldt "locatie niet beschikbaar" en er komt zo lang niets binnen: locatie staat uit
+const UNAVAILABLE_MS = 15000;
+// Helemaal niets meer binnen (ook geen foutmelding): zo lang duurt bijna geen tunnel
+const SILENT_MS = 120000;
 
 let watchId = null;
 let timer = null;
 let last = null;
 let lastFixAt = 0;
 let startedAt = 0;
-let hadFix = false;
+let unavailableSince = 0;
+let lastErrCode = 0;
+let checking = false;
 
 export function speedOn() {
   return ls('ks_speed') === '1';
@@ -26,8 +30,6 @@ export function speedOn() {
 // Aan of uit vanuit de instellingen. Aanzetten vraagt zo nodig om toegang tot je locatie.
 export function setSpeed(on) {
   ls('ks_speed', on ? '1' : '0');
-  ls('ks_speedOff', null);
-  renderNote();
   if (on) {
     keepAwake();
     startSpeed();
@@ -40,7 +42,8 @@ export function startSpeed() {
   if (!('geolocation' in navigator)) return autoOff('Deze browser heeft geen GPS');
   last = null;
   lastFixAt = 0;
-  hadFix = false;
+  unavailableSince = 0;
+  lastErrCode = 0;
   startedAt = Date.now();
   watchId = navigator.geolocation.watchPosition(onFix, onErr, {
     enableHighAccuracy: true,
@@ -77,34 +80,43 @@ function onFix(p) {
     if (dt > 0.5) kmh = (dist(last, c) / dt) * 3.6;
   }
   last = { t, lat: c.latitude, lon: c.longitude, acc: c.accuracy };
+  if (!lastFixAt || Date.now() - lastFixAt > STALE_MS)
+    LOG('app', 'info', 'GPS gevonden, nauwkeurigheid ' + Math.round(c.accuracy) + ' m');
   lastFixAt = Date.now();
-  if (!hadFix) LOG('app', 'info', 'GPS gevonden, nauwkeurigheid ' + Math.round(c.accuracy) + ' m');
-  hadFix = true;
+  unavailableSince = 0;
+  lastErrCode = 0;
   // Onwaarschijnlijke uitschieters (slechte meting bij het opstarten) laten we liggen
   if (kmh !== null && kmh < 250) S.speedKmh = kmh;
   render();
 }
 
 function onErr(e) {
-  // 1 = geen toestemming. 2 = locatie niet beschikbaar (staat uit, of nog geen signaal). 3 = te lang geen meting.
+  // 1 = geen toestemming. 2 = locatie niet beschikbaar. 3 = te lang geen meting.
+  if (e.code !== lastErrCode) LOG('app', 'warn', `GPS-fout ${e.code}: ${e.message || 'geen omschrijving'}`);
+  lastErrCode = e.code;
   if (e.code === 1) return autoOff('Geen toegang tot je locatie');
-  if (e.code === 2 && !hadFix && Date.now() - startedAt > NO_FIX_MS) return autoOff('Locatie staat uit op je telefoon');
+  if (e.code === 2 && !unavailableSince) unavailableSince = Date.now();
   render();
 }
 
 function render() {
   if (!speedOn()) return;
-  const fresh = lastFixAt && Date.now() - lastFixAt < STALE_MS && S.speedKmh !== null;
+  const now = Date.now();
+  const fresh = lastFixAt && now - lastFixAt < STALE_MS && S.speedKmh !== null;
   const v = fresh ? Math.round(S.speedKmh) : null;
   $('spdNum').textContent = v === null ? '--' : String(v);
   $('spdNum').classList.toggle('off', v === null);
   $('spdGps').classList.toggle('warn', !fresh);
   $('spdGpsTxt').textContent = fresh ? 'GPS' : 'Zoekt GPS';
-  // Na een tijd zonder signaal: kijken of de telefoon locatie inmiddels helemaal heeft uitgezet
-  if (!hadFix && Date.now() - startedAt > NO_FIX_MS) checkDenied();
+  if (fresh) return;
+  // Geen GPS: is locatie uitgezet? Elke 5 seconden kijken of de toestemming nog geldt.
+  const quiet = now - Math.max(lastFixAt, startedAt);
+  if (Math.floor(quiet / 1000) % 5 === 0) checkDenied();
+  if (unavailableSince && now - unavailableSince > UNAVAILABLE_MS && now - lastFixAt > UNAVAILABLE_MS)
+    return autoOff('Locatie staat uit op je telefoon');
+  if (quiet > SILENT_MS) autoOff('Al 2 minuten geen GPS. Staat locatie uit');
 }
 
-let checking = false;
 async function checkDenied() {
   if (checking || !navigator.permissions) return;
   checking = true;
@@ -117,29 +129,16 @@ async function checkDenied() {
 
 // De app zet de snelheid zelf uit en vertelt waarom
 function autoOff(reason) {
+  if (!speedOn()) return;
   stopSpeed();
   ls('ks_speed', '0');
-  ls('ks_speedOff', JSON.stringify({ t: Date.now(), reason }));
   S.speedKmh = null;
   show();
   setSw('swSpeed', false);
-  renderNote();
   LOG('app', 'warn', 'Snelheid automatisch uit: ' + reason);
-  toast('Snelheid uitgezet', reason + '. Zet hem weer aan via het tandwiel.');
-  msg('Snelheid uitgezet: ' + reason.toLowerCase() + '.');
-}
-
-// Uitleg in de instellingen als de app de snelheid zelf heeft uitgezet
-export function renderNote() {
-  const box = $('speedNote');
-  let off = null;
-  try {
-    off = JSON.parse(ls('ks_speedOff') || 'null');
-  } catch (e) {}
-  box.hidden = !off || speedOn();
-  if (!off) return;
-  const time = new Date(off.t).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-  box.textContent = `Automatisch uitgezet om ${time}: ${off.reason.toLowerCase()}. Zet locatie aan op je telefoon en zet de schakelaar daarna weer aan.`;
+  const end = reason.endsWith('uit') ? '?' : '.';
+  toast('Snelheid uitgezet', reason + end + ' Zet hem weer aan via het tandwiel.');
+  msg('Snelheid uitgezet: ' + reason.toLowerCase() + end);
 }
 
 // Afstand in meters tussen twee punten
@@ -152,8 +151,35 @@ function dist(a, c) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-// Weg uit beeld: GPS uit (scheelt batterij, de telefoon geeft dan toch niets). Terug: weer aan.
+// Direct nagaan of locatie nog aan staat. Bijvoorbeeld na het snelmenu van Android: daar zet je
+// locatie uit, maar de app blijft gewoon in beeld en hoort er anders niets van.
+let probing = false;
+function probe(why) {
+  if (!speedOn() || probing || !('geolocation' in navigator)) return;
+  probing = true;
+  LOG('app', 'info', 'GPS-check: ' + why);
+  checkDenied();
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      probing = false;
+      onFix(p);
+    },
+    e => {
+      probing = false;
+      LOG('app', 'warn', `GPS-check fout ${e.code}: ${e.message || 'geen omschrijving'}`);
+      if (e.code === 1) autoOff('Geen toegang tot je locatie');
+      else if (e.code === 2) autoOff('Locatie staat uit op je telefoon');
+    },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+  );
+}
+
+// Weg uit beeld: GPS uit (scheelt batterij, de telefoon geeft dan toch niets). Terug: weer aan en checken.
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') startSpeed();
-  else stopSpeed();
+  if (document.visibilityState === 'visible') {
+    startSpeed();
+    probe('app weer in beeld');
+  } else stopSpeed();
 });
+// Terug uit het snelmenu of een melding: de app verloor even de focus
+window.addEventListener('focus', () => probe('app weer actief'));

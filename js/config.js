@@ -1,7 +1,7 @@
 // Vaste waarden en instellingen van de app op één plek.
 
 // Versie: staat in de diagnose en het log. Bij elke release omhoog, samen met CACHE in sw.js.
-export const APP_VERSION = 'v1.7.0';
+export const APP_VERSION = 'v1.7.1';
 
 // Draait de app op een telefoon (aanraakscherm) of op een computer?
 export const IS_PHONE = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
@@ -84,4 +84,5 @@ export const OLD_KEYS = [
   'ks_sillyUri',
   'ks_sillyName',
   'ks_techmsg',
+  'ks_speedOff',
 ];
